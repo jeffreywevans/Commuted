@@ -1,0 +1,18 @@
+{
+  "showLineNumber": true,
+  "alwaysUpdateLinks": true,
+  "useMarkdownLinks": false,
+  "pdfExportSettings": {
+    "pageSize": "Letter",
+    "landscape": false,
+    "margin": "0",
+    "downscalePercent": 100
+  },
+  "readableLineLength": true,
+  "propertiesInDocument": "visible",
+  "showInlineTitle": false,
+  "livePreview": true,
+  "defaultViewMode": "preview",
+  "strictLineBreaks": false,
+  "focusNewTab": false
+}

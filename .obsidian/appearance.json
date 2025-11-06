@@ -1,0 +1,14 @@
+{
+  "accentColor": "#0161fd",
+  "interfaceFontFamily": "Helvetica",
+  "textFontFamily": "Helvetica",
+  "monospaceFontFamily": "Helvetica",
+  "cssTheme": "Cupertino",
+  "nativeMenus": true,
+  "baseFontSize": 16,
+  "showViewHeader": true,
+  "showRibbon": true,
+  "enabledCssSnippets": [
+    "commuted_custom"
+  ]
+}

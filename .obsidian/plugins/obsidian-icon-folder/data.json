@@ -1,0 +1,52 @@
+{
+  "settings": {
+    "migrated": 6,
+    "iconPacksPath": ".obsidian/icons",
+    "fontSize": 16,
+    "emojiStyle": "native",
+    "iconColor": null,
+    "recentlyUsedIcons": [
+      "SiTheconversation",
+      "LiConstruction",
+      "LiBus",
+      "SiHbo",
+      "SiGooglecolab"
+    ],
+    "recentlyUsedIconsSize": 5,
+    "rules": [],
+    "extraMargin": {
+      "top": 0,
+      "right": 4,
+      "bottom": 0,
+      "left": 0
+    },
+    "iconInTabsEnabled": false,
+    "iconInTitleEnabled": false,
+    "iconInTitlePosition": "above",
+    "iconInFrontmatterEnabled": false,
+    "iconInFrontmatterFieldName": "icon",
+    "iconColorInFrontmatterFieldName": "iconColor",
+    "iconsBackgroundCheckEnabled": true,
+    "iconsInNotesEnabled": true,
+    "iconsInLinksEnabled": true,
+    "iconIdentifier": ":",
+    "lucideIconPackType": "custom",
+    "debugMode": false,
+    "useInternalPlugins": false
+  },
+  "6. Essays": "LiNotebook",
+  "1. Introduction": "LiInfo",
+  "11. Albums": "LiHeadphones",
+  "4. Starring Characters": "LiStar",
+  "3. Templates": "LiLayoutTemplate",
+  "15. Media": "SiGooglephotos",
+  "5. Supporting Cast": "SiImdb",
+  "7. Recovered Data": "SiBackblaze",
+  "8. Story Seeds": "SiKhanacademy",
+  "9. Commuted Band Structure": "SiBandlab",
+  "10. Writing Guide": "SiGooglecolab",
+  "12. Stories": "SiHbo",
+  "13. Tours": "LiBus",
+  "14. Invented Concepts": "LiConstruction",
+  "2. Themes": "SiTheconversation"
+}

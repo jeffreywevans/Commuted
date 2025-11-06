@@ -1,0 +1,26 @@
+{
+  "sort-frontmatter:sort": [
+    {
+      "modifiers": [],
+      "key": "F12"
+    }
+  ],
+  "workspace:close-others": [
+    {
+      "modifiers": [],
+      "key": "F11"
+    }
+  ],
+  "workspace:close-tab-group": [
+    {
+      "modifiers": [],
+      "key": "F10"
+    }
+  ],
+  "insert-template": [
+    {
+      "modifiers": [],
+      "key": "F8"
+    }
+  ]
+}

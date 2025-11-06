@@ -1,0 +1,18 @@
+/* Define the safety red once */
+:root { --commuted-red: #DC1E1E; }
+
+/* Reading view (a.k.a. markdown-rendered) */
+.markdown-rendered hr {
+  height: 2px;
+  border: 0;
+  background: var(--commuted-red);
+  margin: 1.5rem 0;
+}
+
+/* Live Preview (CodeMirror 6) */
+.markdown-source-view.mod-cm6 .cm-content hr {
+  height: 2px;
+  border: 0;
+  background: var(--commuted-red);
+  margin: 1.5rem 0;
+}
