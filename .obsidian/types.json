@@ -4,6 +4,13 @@
     "cssclasses": "multitext",
     "tags": "tags",
     "last_modified": "datetime",
-    "related_elements": "multitext"
+    "related_elements": "multitext",
+    "title": "text",
+    "date_of_birth": "date",
+    "sex": "text",
+    "spouse_partner": "text",
+    "criminal_investigations": "multitext",
+    "goals": "text",
+    "overrides": "text"
   }
 }

@@ -14,5 +14,6 @@
   "livePreview": true,
   "defaultViewMode": "preview",
   "strictLineBreaks": false,
-  "focusNewTab": false
+  "focusNewTab": false,
+  "promptDelete": false
 }

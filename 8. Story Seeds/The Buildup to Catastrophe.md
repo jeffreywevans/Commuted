@@ -4,7 +4,7 @@ ai_trust: none
 aliases:
 canon_status: draft
 description:
-last_modified: 2025-11-04T17:26:17-05:00
+last_modified: 2025-11-23T16:42:13-05:00
 notes: The build up to catastrophe.
 related_elements:
 setting_year: "1998"
@@ -24,7 +24,7 @@ obsolete    = Retconned, deleted, or replaced. Ignore for canon.
 dream        = Non-canon, hallucination, AU, joke, or "what if." AI should NOT trust.
 -->
 
-
+---
 ## **INT. BILL’S STUDIO – CINCINNATI – AUGUST 1997 – LATE AFTERNOON**
 
 The air smells of solder, stale Gatorade, and ozone from synth racks left humming too long. Golden light slants through dusty blinds. Everyone’s here, half-dead from rehearsal: Bill crouched by the gear rack, Jeff perched over his bass like a hawk dissecting prey, Jeremy Evans noodling aimlessly, Jim spinning a drumstick like a baton, Kathy slouched in her chair, arms crossed.
@@ -623,6 +623,7 @@ Children deserve better than this. This isn’t art, this isn’t liberation —
 Reporters scribble furiously.
 
 ---
+
 ## **INT. CAPITOL ROTUNDA – MOMENTS LATER**
 
 Newt, now gleeful at the chance to pounce like a Republican:
@@ -647,6 +648,7 @@ Hypocrisy? From the Speaker whose own caucus hides scandals of its own? Please. 
 This is about *music.* This is about a woman singing her truth. Newt Gingrich wouldn’t know art if it bit him on his fat ass. If Kathy Espich wants to piss in Bill Clinton’s Wheaties, I say let her. She’s got more guts than half the men in Washington combined.
 
 ---
+
 ## **INT. CLOSED-DOOR FUNDRAISER – MICHIGAN – HOT MIC MOMENT**
 
 **BOB DOLE** (caught leaning into a donor’s ear, gravel-voiced, profane):
@@ -2518,6 +2520,7 @@ The silence holds for a beat too long. Then Jim whistles low, Jeremy scratches a
 Kendall scribbles in her notebook: *Kathy tried to play the pigeonhole card. Jeff gutted her with logic, Gilley with mockery. For once, she had no comeback. For once, the fire sputtered. This is the axis Sarah Malcolm warned about: Jeff and Gilley together, steel and smirk, holding her in check.*
 
 ---
+
 ## **INT. COMMUTED TOUR BUS – LATE MORNING, I-90 EASTBOUND – OCTOBER 1998**
 
 The bus rocks steady down the interstate, but inside it feels like a coffin. Kathy hasn’t spoken since Jeff sliced her open with words an hour ago. She’s in the booth, sunglasses on, cigarette trembling just enough to betray the quake in her hand. The others are keeping their distance — Jeremy hiding in guitar strings, Jim humming nervously, Gilley pretending to nap but clearly listening.
