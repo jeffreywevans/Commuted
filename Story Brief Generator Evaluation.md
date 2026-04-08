@@ -34,9 +34,9 @@ The script is **well-structured and generally solid** for generating YAML-front-
    - Availability uses `selected_date.year` and ignores month/day granularity.
    - If future rules become date-specific (not year-wide), this will be too coarse.
 
-3. **Large in-file data tables reduce maintainability**
-   - Very large constant arrays are embedded directly in the script file.
-   - This makes review, diffing, and targeted updates harder than external data files would.
+3. **External data loading currently lacks schema-level validation**
+   - Tables were moved to JSON files, improving maintainability.
+   - However, malformed or missing fields in JSON could still fail at runtime without a dedicated schema validator.
 
 ## Recommendations
 
@@ -44,7 +44,8 @@ The script is **well-structured and generally solid** for generating YAML-front-
   - ✅ implemented: finite, numeric, non-negative, non-empty, and non-zero-total checks.
 - Add optional `--date` input for reproducible scenario testing and easier debugging of availability windows.
 - Normalize or validate `--filename` for cross-platform safety.
-- Consider extracting all large constant tables into external YAML/JSON files for maintainability.
+- ✅ implemented: large constant tables are now externalized into JSON files.
+- Add schema validation for loaded JSON data (required keys, types, and range checks).
 - Add a tiny test suite (or doctests) for:
   - weighted choice edge cases,
   - date range boundaries,
