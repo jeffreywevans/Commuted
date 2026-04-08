@@ -14,30 +14,32 @@ The script is **well-structured and generally solid** for generating YAML-front-
 - Secondary character is guaranteed to differ from protagonist.
 - Explicit failure paths for empty/invalid availability sets.
 
-## Issues Found
+## Resolved Since Initial Review
 
-1. **Potential markdown heading escape issue**
-   - Titles containing Markdown-special characters (for example `#`, backticks, or unmatched brackets) are inserted directly into `# {title}`.
-   - This is low risk with current title set, but can become a rendering issue if title templates expand.
+1. **Markdown heading escape issue (resolved)**
+   - The heading now escapes Markdown-significant characters before rendering.
+   - This remediates the prior risk of title text being interpreted as Markdown formatting.
 
-2. **Weak weighted-choice validation**
+## Issues Found (Current)
+
+1. **Weak weighted-choice validation**
    - `weighted_choice` checks list length parity, but not:
      - negative weights,
      - all-zero weights,
      - NaN / non-finite values.
    - This can silently produce odd behavior if weights are edited later.
 
-3. **File name derivation is only partially sanitized**
+2. **File name derivation is only partially sanitized**
    - `slugify` is applied when auto-generating names, which is good.
    - But with `--filename`, only basename extraction is used (`Path(args.filename).name`), and no further sanitation. Invalid filesystem characters are still possible depending on platform.
 
-4. **Boundary logic tied to year only**
+3. **Boundary logic tied to year only**
    - Availability uses `selected_date.year` and ignores month/day granularity.
    - If future rules become date-specific (not year-wide), this will be too coarse.
 
-5. **Input script in request appears duplicated**
-   - The provided text includes the entire script twice back-to-back.
-   - If that duplication exists in a real `.py` file, execution will fail due to duplicate top-level program text after `main()`.
+4. **Large in-file data tables reduce maintainability**
+   - Very large constant arrays are embedded directly in the script file.
+   - This makes review, diffing, and targeted updates harder than external data files would.
 
 ## Recommendations
 

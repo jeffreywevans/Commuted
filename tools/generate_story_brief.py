@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import math
 import random
 import re
 import secrets
@@ -13,20 +14,20 @@ from pathlib import Path
 import yaml
 
 TITLES = [
-    "A Comfortable Bed in {setting}",
+    "A Comfortable Bed in @setting",
     "A Night With Pleasing Bourbon",
-    "A Quiet Revolt in {time_period}",
+    "A Quiet Revolt in @time_period",
     "A Weather of Ash and Gold",
     "Allow Me to Retort!",
     "Bliss-Based Decision-Making",
     "Doubling Up on a Bad Idea",
-    "Escape from {setting}",
+    "Escape from @setting",
     "Fifty Percent of All People Are Below Average",
     "Gatsby Was a Gangster",
     "Gilley Grazes for Girls",
     "How Many Rubbers Did You Bring?",
     "I Am Right, You Know",
-    "I Liked You Better in {setting} Before You Got Dressed",
+    "I Liked You Better in @setting Before You Got Dressed",
     "I Need You to Know That You Are Stupid",
     "I Retain the Option",
     "If You Want a Friend",
@@ -34,9 +35,9 @@ TITLES = [
     "Let's Do Lunch",
     "Let's Piss Jeff Off!",
     "Let's Piss Kathy Off!",
-    "Letters from the Edge of {setting}",
+    "Letters from the Edge of @setting",
     "Local Radio Rocks",
-    "No One Leaves {setting} Unchanged",
+    "No One Leaves @setting Unchanged",
     "Pride, Excellence and a Fifty Dollar Bill",
     "Sampling the Local Nightlife",
     "Sober, Naked and Unafraid",
@@ -45,21 +46,21 @@ TITLES = [
     "The Easy Way, the Hard Way, and the Commuted Way",
     "The Iron Promise",
     "The Last Good Lie",
-    "The Last Lantern of {setting}",
+    "The Last Lantern of @setting",
     "The Performance Needs Work",
     "The Winter Beneath the Streetlights",
     "They Can Wait!",
     "Trouble Sleeping Alone",
     "What Next?",
     "What's One More Night With These Fools",
-    "When {protagonist} Broke the Map",
-    "Whiskey, Lust and {setting} Mix Fine",
+    "When @protagonist Broke the Map",
+    "Whiskey, Lust and @setting Mix Fine",
     "Who Thought This Was a Good Idea?",
-    "You Park Like You F*ck and Deserve the Ticket",
+    "You Park Like You Fuck and Deserve the Ticket",
     "You Running for Pope?",
     "You Suck and You Know It",
     "You Want Me to Autograph Your What?",
-    "{protagonist} at Play",
+    "@protagonist at Play",
 ]
 
 PROTAGONIST_AVAILABILITY = [
@@ -622,9 +623,16 @@ ORDERED_KEYS = [
     "word_count_target",
 ]
 
+TITLE_TOKEN_PATTERN = re.compile(r"@(?P<key>protagonist|setting|time_period)\b")
+
 
 def slugify(value: str) -> str:
     return re.sub(r"[^a-z0-9]+", "-", value.lower()).strip("-")
+
+
+def escape_markdown_heading_text(value: str) -> str:
+    """Escape Markdown-significant characters for safe heading rendering."""
+    return re.sub(r"([\\\\`*_{}\[\]()#+\-.!])", r"\\\1", value)
 
 
 def random_date_in_range(
@@ -661,10 +669,25 @@ def weighted_choice(
     weights: list[float],
 ) -> str:
     """Pick one option using relative weights."""
+    if not options:
+        raise ValueError("options must not be empty")
     if len(options) != len(weights):
         raise ValueError("options and weights must be the same length")
+    if not weights:
+        raise ValueError("weights must not be empty")
+
+    for index, weight in enumerate(weights):
+        if isinstance(weight, bool) or not isinstance(weight, (int, float)):
+            raise TypeError(f"weight at index {index} must be a real number")
+        if not math.isfinite(weight):
+            raise ValueError(f"weight at index {index} must be finite")
+        if weight < 0:
+            raise ValueError(f"weight at index {index} must be non-negative")
 
     total = sum(weights)
+    if total <= 0:
+        raise ValueError("at least one weight must be greater than zero")
+
     threshold = rng.random() * total
     cumulative = 0.0
 
@@ -674,6 +697,18 @@ def weighted_choice(
             return option
 
     return options[-1]
+
+
+def render_title(
+    template: str, *, protagonist: str, setting: str, time_period: str
+) -> str:
+    """Render @token placeholders in title templates."""
+    values = {
+        "protagonist": protagonist,
+        "setting": setting,
+        "time_period": time_period,
+    }
+    return TITLE_TOKEN_PATTERN.sub(lambda match: values[match.group("key")], template)
 
 
 def pick_story_fields(rng: random.Random | secrets.SystemRandom) -> dict[str, str | int]:
@@ -700,7 +735,8 @@ def pick_story_fields(rng: random.Random | secrets.SystemRandom) -> dict[str, st
     title_template = rng.choice(TITLES)
 
     return {
-        "title": title_template.format(
+        "title": render_title(
+            title_template,
             protagonist=protagonist,
             setting=setting,
             time_period=time_period,
@@ -736,7 +772,7 @@ def to_markdown(fields: dict[str, str | int]) -> str:
         "",
         WRITING_PREAMBLE,
         "",
-        f"# {fields['title']}",
+        f"# {escape_markdown_heading_text(str(fields['title']))}",
         "",
         "## Story Draft",
         "",
