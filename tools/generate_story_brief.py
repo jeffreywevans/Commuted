@@ -619,7 +619,7 @@ ORDERED_KEYS = [
     "inciting_pressure",
     "ending_type",
     "style_guidance",
-    "sexual_content_options",
+    "sexual_content_level",
     "word_count_target",
 ]
 
@@ -749,7 +749,7 @@ def pick_story_fields(rng: random.Random | secrets.SystemRandom) -> dict[str, st
         "inciting_pressure": rng.choice(INCITING_PRESSURES),
         "ending_type": rng.choice(ENDING_TYPES),
         "style_guidance": rng.choice(STYLE_GUIDANCE),
-        "sexual_content_options": weighted_choice(
+        "sexual_content_level": weighted_choice(
             rng, SEXUAL_CONTENT_OPTIONS, SEXUAL_CONTENT_WEIGHTS
         ),
         "word_count_target": rng.choice(WORD_COUNT_TARGETS),
