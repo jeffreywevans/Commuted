@@ -34,6 +34,10 @@ The script is **well-structured and production-usable** for generating YAML-fron
    - Runtime schema validation now checks required keys, list/string structure, availability row shapes, date ordering, weights, targets, and key integrity.
    - Malformed JSON payloads fail fast with actionable error messages.
 
+5. **Missing automated regression suite (resolved)**
+   - A pytest-based regression suite now covers schema validation, weighted-choice edge cases, deterministic generation invariants, markdown output structure, and CLI file-write behavior.
+   - This closes the largest remaining reliability gap for frequent data/code edits.
+
 ## Issues Found (Current)
 
 1. **File name derivation is only partially sanitized**
@@ -44,10 +48,6 @@ The script is **well-structured and production-usable** for generating YAML-fron
    - Availability uses `selected_date.year` and ignores month/day granularity.
    - If future rules become date-specific (not year-wide), this will be too coarse.
 
-3. **No automated regression suite yet**
-   - Manual smoke checks have been used effectively, but there is still no automated unit/integration test coverage in-repo.
-   - Given frequent content edits, lightweight automated checks would reduce accidental regressions.
-
 ## Recommendations
 
 - Add strict validation in `weighted_choice`:
@@ -56,12 +56,7 @@ The script is **well-structured and production-usable** for generating YAML-fron
 - Normalize or validate `--filename` for cross-platform safety.
 - ✅ implemented: large constant tables are now externalized into JSON files.
 - ✅ implemented: schema validation for loaded JSON data (required keys, types, ranges, and integrity checks).
-- Add a small automated test suite (or doctests) for:
-  - weighted choice edge cases,
-  - date range boundaries,
-  - protagonist/secondary distinctness,
-  - overwrite behavior,
-  - JSON schema/data integrity.
+- ✅ implemented: automated regression tests for weighted choice, schema/data integrity, deterministic generation invariants, markdown output structure, and CLI overwrite semantics.
 
 ## Verdict
 

@@ -1,5 +1,9 @@
 # Story Brief Generator: Automated Regression Suite Proposal
 
+## Status
+
+✅ Initial regression suite implemented in `tests/story_brief/` with `pytest`.
+
 ## What is a regression suite?
 
 A regression suite is a set of automated tests that re-check previously working behavior whenever code or data changes.
