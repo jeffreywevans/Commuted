@@ -326,8 +326,15 @@ def render_title(
     return TITLE_TOKEN_PATTERN.sub(lambda match: values[match.group("key")], template)
 
 
-def pick_story_fields(rng: random.Random | secrets.SystemRandom) -> dict[str, str | int]:
-    selected_date = random_date_in_range(rng, DATE_START, DATE_END)
+def pick_story_fields(
+    rng: random.Random | secrets.SystemRandom, selected_date: date | None = None
+) -> dict[str, str | int]:
+    if selected_date is None:
+        selected_date = random_date_in_range(rng, DATE_START, DATE_END)
+    elif not (DATE_START <= selected_date <= DATE_END):
+        raise ValueError(
+            f"--date must be between {DATE_START.isoformat()} and {DATE_END.isoformat()}"
+        )
     time_period = selected_date.isoformat()
 
     characters_for_date = available_characters(selected_date)
@@ -419,6 +426,10 @@ def main() -> None:
         "--seed", type=int, help="Optional random seed for reproducible output."
     )
     parser.add_argument(
+        "--date",
+        help="Optional explicit date in YYYY-MM-DD for reproducible scenario testing.",
+    )
+    parser.add_argument(
         "--force",
         action="store_true",
         help="Allow overwriting an existing output file.",
@@ -436,7 +447,14 @@ def main() -> None:
     else:
         rng = random.Random(args.seed)
 
-    fields = pick_story_fields(rng)
+    selected_date: date | None = None
+    if args.date:
+        try:
+            selected_date = date.fromisoformat(args.date)
+        except ValueError as exc:
+            raise SystemExit("--date must be in YYYY-MM-DD format") from exc
+
+    fields = pick_story_fields(rng, selected_date=selected_date)
     markdown = to_markdown(fields)
 
     if args.print_only:

@@ -1,4 +1,7 @@
 import random
+from datetime import date
+
+import pytest
 
 from tools.generate_story_brief import pick_story_fields
 
@@ -19,3 +22,13 @@ def test_secondary_character_differs_from_protagonist() -> None:
     for seed in range(50):
         fields = pick_story_fields(random.Random(seed))
         assert fields["secondary_character"] != fields["protagonist"]
+
+
+def test_explicit_date_overrides_random_date() -> None:
+    fields = pick_story_fields(random.Random(999), selected_date=date(2000, 1, 1))
+    assert fields["time_period"] == "2000-01-01"
+
+
+def test_explicit_date_out_of_range_fails() -> None:
+    with pytest.raises(ValueError, match="--date must be between"):
+        pick_story_fields(random.Random(1), selected_date=date(1900, 1, 1))

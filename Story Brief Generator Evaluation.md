@@ -52,7 +52,7 @@ The script is **well-structured and production-usable** for generating YAML-fron
 
 - Add strict validation in `weighted_choice`:
   - ✅ implemented: finite, numeric, non-negative, non-empty, and non-zero-total checks.
-- Add optional `--date` input for reproducible scenario testing and easier debugging of availability windows.
+- ✅ implemented: optional `--date` input for reproducible scenario testing and availability debugging.
 - ✅ implemented: explicit `--filename` sanitization for cross-platform safety.
 - ✅ implemented: large constant tables are now externalized into JSON files.
 - ✅ implemented: schema validation for loaded JSON data (required keys, types, ranges, and integrity checks).

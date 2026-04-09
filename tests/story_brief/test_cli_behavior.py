@@ -28,6 +28,12 @@ def test_print_only_writes_nothing(tmp_path: Path) -> None:
     assert list(tmp_path.iterdir()) == []
 
 
+def test_print_only_with_explicit_date_sets_time_period(tmp_path: Path) -> None:
+    result = run_cli("--seed", "42", "--date", "2000-01-01", "--print-only", cwd=tmp_path)
+    assert result.returncode == 0
+    assert "time_period: '2000-01-01'" in result.stdout
+
+
 def test_write_and_force_overwrite_behavior(tmp_path: Path) -> None:
     outdir = tmp_path / "out"
     filename = "brief.md"
@@ -58,3 +64,9 @@ def test_sanitize_filename_handles_invalid_chars_and_reserved_names() -> None:
     assert sanitize_filename("../bad:name?.md") == "bad-name-.md"
     assert sanitize_filename("CON") == "CON-file"
     assert sanitize_filename("   .md") == "story-brief.md"
+
+
+def test_cli_rejects_invalid_date_format(tmp_path: Path) -> None:
+    result = run_cli("--date", "01-01-2000", "--print-only", cwd=tmp_path)
+    assert result.returncode != 0
+    assert "--date must be in YYYY-MM-DD format" in (result.stdout + result.stderr)
