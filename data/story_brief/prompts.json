@@ -134,6 +134,7 @@
     "There's potentially a lot of money to be made, but only if the wrong person makes it first."
   ],
   "inciting_pressures": [
+<<<<<<< codex/generate-random-story-brief-as-markdown-fnafuj
     "a bootleg reveals the band at its best or worst",
     "a concert promoter seems pretty damn fair",
     "a court date",
@@ -150,6 +151,13 @@
     "a visa problem",
     "an ex publishes something inflammatory",
     "an old interview resurfaces at the worst time",
+=======
+    "a concert promoter seems pretty damn fair",
+    "A deranged fan attempts murder",
+    "A loved one or friend has been unfaithful",
+    "A loved one/friend dies and the protagonist is extremely upset",
+    "a process server serves legal papers",
+>>>>>>> main
     "Arrested by frame-up for weed possession",
     "Arrested falsely",
     "Arrested for minor infraction",
@@ -158,7 +166,10 @@
     "Become lost",
     "Bill boasts how weed can cure all ails",
     "Bill wants a new mic",
+<<<<<<< codex/generate-random-story-brief-as-markdown-fnafuj
     "broke the contract",
+=======
+>>>>>>> main
     "buys a fancy new car",
     "celebrates a successful write-up in a local alt-weekly",
     "cell phone service sucks",
@@ -177,10 +188,15 @@
     "Gilley gives a ridiculous, over the top interview",
     "Gilley has the most ridiculous outfit for clubbing",
     "Help a stranger with a problem",
+<<<<<<< codex/generate-random-story-brief-as-markdown-fnafuj
     "hit somebody",
     "Injury or sickness waylays a member of the band",
     "Install new technology",
     "insurance will not cover the damage",
+=======
+    "Injury or sickness waylays a member of the band",
+    "Install new technology",
+>>>>>>> main
     "Investigate local legend or historical site",
     "Jeff decides quite abrasively that the protagonist is wrong",
     "Jeremy and Jim argue about great drummers",
@@ -188,17 +204,24 @@
     "Kathy may have committed blasphemy again",
     "Kathy wants the guys to care more about fashion",
     "Kathy's volcanic temper explodes",
+<<<<<<< codex/generate-random-story-brief-as-markdown-fnafuj
     "lied and got caught",
     "Mechanical breakdown of their favorite kit",
     "Meet benevolent stranger",
     "Meet cute woman who is sexually adventurous towards the protagonist",
     "misplaced the master tapes",
+=======
+    "Mechanical breakdown of their favorite kit",
+    "Meet benevolent stranger",
+    "Meet cute woman who is sexually adventurous towards the protagonist",
+>>>>>>> main
     "Mistaken identity with another celeb",
     "Must find expert to fix serious problem",
     "Natural disaster impacts their location",
     "Object of a challenge",
     "object of desire",
     "object of ridicule",
+<<<<<<< codex/generate-random-story-brief-as-markdown-fnafuj
     "promised two incompatible things",
     "Prospective new sponsor seems to be an asshole",
     "rehab or jail as an ultimatum",
@@ -208,6 +231,11 @@
     "sent the email to the wrong person",
     "slept with the wrong groupie",
     "somebody has to go home now",
+=======
+    "Prospective new sponsor seems to be an asshole",
+    "Rescue a pet",
+    "Sarah has a great idea",
+>>>>>>> main
     "Start a new lyrics writing assignment",
     "Stumble on dangerous knowledge",
     "Terminated from job/assignment",
@@ -222,7 +250,10 @@
     "The protagonist gets a rave local media review.",
     "the protagonist has a runny nose and sniffles",
     "the protagonist is unable to climax",
+<<<<<<< codex/generate-random-story-brief-as-markdown-fnafuj
     "the protagonist obsesses over a new fling",
+=======
+>>>>>>> main
     "the protagonist was interrupted while having sex",
     "the protagonist's groupie is annoying",
     "Unexplained incident"
