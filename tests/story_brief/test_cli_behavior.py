@@ -4,6 +4,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+from tools.generate_story_brief import sanitize_filename
+
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 SCRIPT = REPO_ROOT / "tools" / "generate_story_brief.py"
@@ -50,3 +52,9 @@ def test_write_and_force_overwrite_behavior(tmp_path: Path) -> None:
         cwd=tmp_path,
     )
     assert third.returncode == 0
+
+
+def test_sanitize_filename_handles_invalid_chars_and_reserved_names() -> None:
+    assert sanitize_filename("../bad:name?.md") == "bad-name-.md"
+    assert sanitize_filename("CON") == "CON-file"
+    assert sanitize_filename("   .md") == "story-brief.md"

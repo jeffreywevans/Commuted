@@ -17,6 +17,14 @@ import yaml
 
 DATA_DIR = Path(__file__).resolve().parent.parent / "data" / "story_brief"
 TITLE_TOKEN_PATTERN = re.compile(r"@(?P<key>protagonist|setting|time_period)\b")
+WINDOWS_RESERVED_BASENAMES = {
+    "con",
+    "prn",
+    "aux",
+    "nul",
+    *(f"com{i}" for i in range(1, 10)),
+    *(f"lpt{i}" for i in range(1, 10)),
+}
 
 
 def _load_json(path: Path) -> dict[str, Any]:
@@ -209,6 +217,32 @@ WRITING_PREAMBLE = DATA["writing_preamble"]
 
 def slugify(value: str) -> str:
     return re.sub(r"[^a-z0-9]+", "-", value.lower()).strip("-")
+
+
+def sanitize_filename(filename: str) -> str:
+    """
+    Sanitize filename for cross-platform safety while preserving extension.
+
+    Removes control chars and characters invalid on Windows/macOS/Linux,
+    strips trailing dots/spaces, and avoids reserved Windows base names.
+    """
+    name = Path(filename).name
+    stem, suffix = Path(name).stem, Path(name).suffix
+
+    # Remove control chars and characters invalid on common filesystems.
+    safe_stem = re.sub(r'[\x00-\x1f<>:"/\\\\|?*]+', "-", stem).strip(" .")
+    safe_suffix = re.sub(r'[\x00-\x1f<>:"/\\\\|?*]+', "", suffix).strip(" .")
+
+    if not safe_stem:
+        safe_stem = "story-brief"
+
+    if safe_stem.casefold() in WINDOWS_RESERVED_BASENAMES:
+        safe_stem = f"{safe_stem}-file"
+
+    if safe_suffix and not safe_suffix.startswith("."):
+        safe_suffix = f".{safe_suffix}"
+
+    return f"{safe_stem}{safe_suffix}"
 
 
 def escape_markdown_heading_text(value: str) -> str:
@@ -413,7 +447,7 @@ def main() -> None:
     output_dir.mkdir(parents=True, exist_ok=True)
 
     if args.filename:
-        filename = Path(args.filename).name
+        filename = sanitize_filename(args.filename)
     else:
         today_str = datetime.now().strftime("%Y-%m-%d")
         filename = f"{today_str} {slugify(str(fields['title']))}.md"

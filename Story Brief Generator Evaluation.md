@@ -38,13 +38,13 @@ The script is **well-structured and production-usable** for generating YAML-fron
    - A pytest-based regression suite now covers schema validation, weighted-choice edge cases, deterministic generation invariants, markdown output structure, and CLI file-write behavior.
    - This closes the largest remaining reliability gap for frequent data/code edits.
 
+6. **Filename sanitization gap for `--filename` (resolved)**
+   - Explicit filenames are now sanitized for cross-platform safety (invalid character filtering, reserved-name handling, and fallback naming).
+   - This closes the prior risk of invalid filenames when users provide custom names.
+
 ## Issues Found (Current)
 
-1. **File name derivation is only partially sanitized**
-   - `slugify` is applied when auto-generating names, which is good.
-   - But with `--filename`, only basename extraction is used (`Path(args.filename).name`), and no further sanitation. Invalid filesystem characters are still possible depending on platform.
-
-2. **Boundary logic tied to year only**
+1. **Boundary logic tied to year only**
    - Availability uses `selected_date.year` and ignores month/day granularity.
    - If future rules become date-specific (not year-wide), this will be too coarse.
 
@@ -53,7 +53,7 @@ The script is **well-structured and production-usable** for generating YAML-fron
 - Add strict validation in `weighted_choice`:
   - ✅ implemented: finite, numeric, non-negative, non-empty, and non-zero-total checks.
 - Add optional `--date` input for reproducible scenario testing and easier debugging of availability windows.
-- Normalize or validate `--filename` for cross-platform safety.
+- ✅ implemented: explicit `--filename` sanitization for cross-platform safety.
 - ✅ implemented: large constant tables are now externalized into JSON files.
 - ✅ implemented: schema validation for loaded JSON data (required keys, types, ranges, and integrity checks).
 - ✅ implemented: automated regression tests for weighted choice, schema/data integrity, deterministic generation invariants, markdown output structure, and CLI overwrite semantics.
