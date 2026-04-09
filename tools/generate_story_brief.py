@@ -23,6 +23,140 @@ def _load_json(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+def _require_keys(section_name: str, payload: dict[str, Any], required: set[str]) -> None:
+    missing = sorted(required - payload.keys())
+    if missing:
+        raise ValueError(f"{section_name}: missing required keys: {', '.join(missing)}")
+
+
+def _validate_string_list(section_name: str, key: str, values: Any) -> None:
+    if not isinstance(values, list) or not values:
+        raise ValueError(f"{section_name}.{key} must be a non-empty list")
+    for idx, value in enumerate(values):
+        if not isinstance(value, str) or not value.strip():
+            raise ValueError(f"{section_name}.{key}[{idx}] must be a non-empty string")
+
+
+def _validate_availability_rows(section_name: str, key: str, rows: Any) -> None:
+    if not isinstance(rows, list) or not rows:
+        raise ValueError(f"{section_name}.{key} must be a non-empty list")
+    for idx, row in enumerate(rows):
+        if not isinstance(row, list) or len(row) != 3:
+            raise ValueError(f"{section_name}.{key}[{idx}] must be [name, start_year, end_year]")
+        name, start_year, end_year = row
+        if not isinstance(name, str) or not name.strip():
+            raise ValueError(f"{section_name}.{key}[{idx}][0] must be a non-empty string")
+        if not isinstance(start_year, int) or not isinstance(end_year, int):
+            raise ValueError(f"{section_name}.{key}[{idx}] years must be integers")
+        if start_year > end_year:
+            raise ValueError(
+                f"{section_name}.{key}[{idx}] start_year must be <= end_year"
+            )
+
+
+def validate_story_data(
+    titles: dict[str, Any],
+    entities: dict[str, Any],
+    prompts: dict[str, Any],
+    config: dict[str, Any],
+) -> None:
+    _require_keys("titles", titles, {"titles"})
+    _validate_string_list("titles", "titles", titles["titles"])
+
+    _require_keys(
+        "entities",
+        entities,
+        {"protagonist_availability", "character_availability", "setting_availability"},
+    )
+    _validate_availability_rows(
+        "entities", "protagonist_availability", entities["protagonist_availability"]
+    )
+    _validate_availability_rows(
+        "entities", "character_availability", entities["character_availability"]
+    )
+    _validate_availability_rows(
+        "entities", "setting_availability", entities["setting_availability"]
+    )
+
+    _require_keys(
+        "prompts",
+        prompts,
+        {"central_conflicts", "inciting_pressures", "ending_types", "style_guidance"},
+    )
+    _validate_string_list("prompts", "central_conflicts", prompts["central_conflicts"])
+    _validate_string_list("prompts", "inciting_pressures", prompts["inciting_pressures"])
+    _validate_string_list("prompts", "ending_types", prompts["ending_types"])
+    _validate_string_list("prompts", "style_guidance", prompts["style_guidance"])
+
+    _require_keys(
+        "config",
+        config,
+        {
+            "schema_version",
+            "date_start",
+            "date_end",
+            "sexual_content_options",
+            "sexual_content_weights",
+            "word_count_targets",
+            "ordered_keys",
+            "writing_preamble",
+        },
+    )
+    if not isinstance(config["schema_version"], int) or config["schema_version"] < 1:
+        raise ValueError("config.schema_version must be an integer >= 1")
+
+    try:
+        start = date.fromisoformat(str(config["date_start"]))
+        end = date.fromisoformat(str(config["date_end"]))
+    except ValueError as exc:
+        raise ValueError("config date_start/date_end must be ISO dates (YYYY-MM-DD)") from exc
+    if start > end:
+        raise ValueError("config.date_start must be <= config.date_end")
+
+    _validate_string_list(
+        "config", "sexual_content_options", config["sexual_content_options"]
+    )
+    weights = config["sexual_content_weights"]
+    if not isinstance(weights, list) or not weights:
+        raise ValueError("config.sexual_content_weights must be a non-empty list")
+    if len(weights) != len(config["sexual_content_options"]):
+        raise ValueError("config sexual_content_options/weights must be the same length")
+    for idx, value in enumerate(weights):
+        if isinstance(value, bool) or not isinstance(value, (int, float)):
+            raise ValueError(
+                f"config.sexual_content_weights[{idx}] must be a real number"
+            )
+        if not math.isfinite(value):
+            raise ValueError(
+                f"config.sexual_content_weights[{idx}] must be finite"
+            )
+        if value < 0:
+            raise ValueError(
+                f"config.sexual_content_weights[{idx}] must be non-negative"
+            )
+    if sum(weights) <= 0:
+        raise ValueError("config.sexual_content_weights must sum to > 0")
+
+    targets = config["word_count_targets"]
+    if not isinstance(targets, list) or not targets:
+        raise ValueError("config.word_count_targets must be a non-empty list")
+    for idx, value in enumerate(targets):
+        if not isinstance(value, int) or value <= 0:
+            raise ValueError(f"config.word_count_targets[{idx}] must be a positive integer")
+
+    ordered_keys = config["ordered_keys"]
+    if not isinstance(ordered_keys, list) or not ordered_keys:
+        raise ValueError("config.ordered_keys must be a non-empty list")
+    if len(set(ordered_keys)) != len(ordered_keys):
+        raise ValueError("config.ordered_keys must not contain duplicates")
+    for idx, key in enumerate(ordered_keys):
+        if not isinstance(key, str) or not key.strip():
+            raise ValueError(f"config.ordered_keys[{idx}] must be a non-empty string")
+
+    if not isinstance(config["writing_preamble"], str) or not config["writing_preamble"].strip():
+        raise ValueError("config.writing_preamble must be a non-empty string")
+
+
 def _tupleize_rows(rows: list[list[Any]]) -> list[tuple[str, int, int]]:
     return [(str(name), int(start), int(end)) for name, start, end in rows]
 
@@ -32,6 +166,7 @@ def load_story_data() -> dict[str, Any]:
     entities = _load_json(DATA_DIR / "entities.json")
     prompts = _load_json(DATA_DIR / "prompts.json")
     config = _load_json(DATA_DIR / "config.json")
+    validate_story_data(titles, entities, prompts, config)
 
     return {
         "titles": [str(v) for v in titles["titles"]],

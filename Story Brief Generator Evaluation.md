@@ -30,6 +30,10 @@ The script is **well-structured and production-usable** for generating YAML-fron
    - Large static pools are now externalized into JSON (`titles`, `entities`, `prompts`, `config`).
    - This substantially improves editability, reviewability, and merge hygiene.
 
+4. **External data schema validation gap (resolved)**
+   - Runtime schema validation now checks required keys, list/string structure, availability row shapes, date ordering, weights, targets, and key integrity.
+   - Malformed JSON payloads fail fast with actionable error messages.
+
 ## Issues Found (Current)
 
 1. **File name derivation is only partially sanitized**
@@ -40,11 +44,7 @@ The script is **well-structured and production-usable** for generating YAML-fron
    - Availability uses `selected_date.year` and ignores month/day granularity.
    - If future rules become date-specific (not year-wide), this will be too coarse.
 
-3. **External data loading currently lacks schema-level validation**
-   - Tables were moved to JSON files, improving maintainability.
-   - However, malformed or missing fields in JSON could still fail at runtime without a dedicated schema validator.
-
-4. **No automated regression suite yet**
+3. **No automated regression suite yet**
    - Manual smoke checks have been used effectively, but there is still no automated unit/integration test coverage in-repo.
    - Given frequent content edits, lightweight automated checks would reduce accidental regressions.
 
@@ -55,7 +55,7 @@ The script is **well-structured and production-usable** for generating YAML-fron
 - Add optional `--date` input for reproducible scenario testing and easier debugging of availability windows.
 - Normalize or validate `--filename` for cross-platform safety.
 - ✅ implemented: large constant tables are now externalized into JSON files.
-- Add schema validation for loaded JSON data (required keys, types, and range checks).
+- ✅ implemented: schema validation for loaded JSON data (required keys, types, ranges, and integrity checks).
 - Add a small automated test suite (or doctests) for:
   - weighted choice edge cases,
   - date range boundaries,
