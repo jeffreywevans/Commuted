@@ -88,6 +88,27 @@ That directly reduces:
    - existing file without `--force` fails.
    - existing file with `--force` overwrites.
 
+## Consolidation guidance
+
+Short answer: keep them **separate by behavior area** (current layout is good), but consolidate shared setup/helpers.
+
+### Keep separate
+- `test_schema_validation.py`
+- `test_weighted_choice.py`
+- `test_generation_determinism.py`
+- `test_markdown_output.py`
+- `test_cli_behavior.py`
+
+This separation keeps failures easy to diagnose and keeps files small enough to reason about.
+
+### Consolidate only shared plumbing
+- Common test data builders/fixtures in `tests/story_brief/_fixtures.py` (or `conftest.py`).
+- Reusable CLI invocation helpers in one place.
+- Shared assertion helpers for markdown/YAML snippets.
+
+### When to merge files
+Only merge if a file becomes trivially tiny (for example, 1–2 tests) or if two files are tightly coupled and always edited together.
+
 ## Minimal first milestone (high ROI)
 
 If you only do 5 tests first, do these:

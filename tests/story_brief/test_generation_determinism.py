@@ -3,7 +3,7 @@ from datetime import date
 
 import pytest
 
-from tools.generate_story_brief import pick_story_fields
+from tools.generate_story_brief import CHARACTER_AVAILABILITY, pick_story_fields
 
 
 def test_same_seed_is_deterministic() -> None:
@@ -32,3 +32,20 @@ def test_explicit_date_overrides_random_date() -> None:
 def test_explicit_date_out_of_range_fails() -> None:
     with pytest.raises(ValueError, match="--date must be between"):
         pick_story_fields(random.Random(1), selected_date=date(1900, 1, 1))
+
+
+def test_selected_characters_are_valid_for_time_period_year() -> None:
+    availability = {name: (start, end) for name, start, end in CHARACTER_AVAILABILITY}
+
+    for seed in range(200):
+        fields = pick_story_fields(random.Random(seed))
+        year = int(str(fields["time_period"])[:4])
+
+        protagonist = str(fields["protagonist"])
+        secondary = str(fields["secondary_character"])
+
+        p_start, p_end = availability[protagonist]
+        s_start, s_end = availability[secondary]
+
+        assert p_start <= year <= p_end
+        assert s_start <= year <= s_end
