@@ -1,0 +1,1246 @@
+{
+  "character_availability": [
+    [
+      "Avril Lavigne",
+      2024,
+      2032
+    ],
+    [
+      "Bill Davenport",
+      1989,
+      2032
+    ],
+    [
+      "Cremeans",
+      1989,
+      2032
+    ],
+    [
+      "Gilley",
+      1989,
+      2019
+    ],
+    [
+      "Jeff Evans",
+      1989,
+      2032
+    ],
+    [
+      "Jeremy Evans",
+      1989,
+      2032
+    ],
+    [
+      "Jim Brown",
+      1989,
+      2032
+    ],
+    [
+      "Kathy Espich",
+      1989,
+      2011
+    ],
+    [
+      "Kendall Weatherby",
+      1998,
+      2032
+    ],
+    [
+      "Madeline Quinlan",
+      2024,
+      2032
+    ],
+    [
+      "Sarah Malcolm",
+      1989,
+      2025
+    ]
+  ],
+  "setting_availability": [
+    [
+      "Madison Square Garden – New York, NY, USA",
+      1993,
+      2032
+    ],
+    [
+      "Barclays Center – Brooklyn, NY, USA",
+      2012,
+      2032
+    ],
+    [
+      "UBS Arena – Elmont, NY, USA",
+      2021,
+      2032
+    ],
+    [
+      "Prudential Center – Newark, NJ, USA",
+      2007,
+      2032
+    ],
+    [
+      "PNC Bank Arts Center – Holmdel, NJ, USA",
+      1993,
+      2032
+    ],
+    [
+      "Wells Fargo Center – Philadelphia, PA, USA",
+      1996,
+      2032
+    ],
+    [
+      "The Spectrum – Philadelphia, PA, USA",
+      1993,
+      2009
+    ],
+    [
+      "TD Garden – Boston, MA, USA",
+      1995,
+      2032
+    ],
+    [
+      "Xfinity Center – Mansfield, MA, USA",
+      1993,
+      2032
+    ],
+    [
+      "DCU Center – Worcester, MA, USA",
+      1993,
+      2032
+    ],
+    [
+      "Giant Center – Hershey, PA, USA",
+      2002,
+      2032
+    ],
+    [
+      "Mohegan Sun Arena – Uncasville, CT, USA",
+      2001,
+      2032
+    ],
+    [
+      "Capital One Arena – Washington, DC, USA",
+      1997,
+      2032
+    ],
+    [
+      "CFG Bank Arena – Baltimore, MD, USA",
+      1993,
+      2032
+    ],
+    [
+      "Hampton Coliseum – Hampton, VA, USA",
+      1993,
+      2032
+    ],
+    [
+      "Norfolk Scope – Norfolk, VA, USA",
+      1993,
+      2032
+    ],
+    [
+      "Merriweather Post Pavilion – Columbia, MD, USA",
+      1993,
+      2032
+    ],
+    [
+      "BankNH Pavilion – Gilford, NH, USA",
+      1996,
+      2032
+    ],
+    [
+      "Bryce Jordan Center – University Park, PA, USA",
+      1996,
+      2032
+    ],
+    [
+      "PPL Center – Allentown, PA, USA",
+      2014,
+      2032
+    ],
+    [
+      "PNC Music Pavilion – Charlotte, NC, USA",
+      1993,
+      2032
+    ],
+    [
+      "Coastal Credit Union Music Park – Raleigh, NC, USA",
+      1993,
+      2032
+    ],
+    [
+      "Lenovo Center – Raleigh, NC, USA",
+      1999,
+      2032
+    ],
+    [
+      "Greensboro Coliseum – Greensboro, NC, USA",
+      1993,
+      2032
+    ],
+    [
+      "Bojangles Coliseum – Charlotte, NC, USA",
+      1993,
+      2032
+    ],
+    [
+      "Colonial Life Arena – Columbia, SC, USA",
+      2002,
+      2032
+    ],
+    [
+      "Bon Secours Wellness Arena – Greenville, SC, USA",
+      1998,
+      2032
+    ],
+    [
+      "VyStar Veterans Memorial Arena – Jacksonville, FL, USA",
+      2003,
+      2032
+    ],
+    [
+      "Ameris Bank Amphitheatre – Alpharetta, GA, USA",
+      2008,
+      2032
+    ],
+    [
+      "State Farm Arena – Atlanta, GA, USA",
+      1999,
+      2032
+    ],
+    [
+      "Lakewood Amphitheatre – Atlanta, GA, USA",
+      1993,
+      2032
+    ],
+    [
+      "Legacy Arena – Birmingham, AL, USA",
+      1993,
+      2032
+    ],
+    [
+      "Oak Mountain Amphitheatre – Pelham, AL, USA",
+      1993,
+      2032
+    ],
+    [
+      "Mississippi Coast Coliseum – Biloxi, MS, USA",
+      1993,
+      2032
+    ],
+    [
+      "Smoothie King Center – New Orleans, LA, USA",
+      1999,
+      2032
+    ],
+    [
+      "FedExForum – Memphis, TN, USA",
+      2004,
+      2032
+    ],
+    [
+      "Bridgestone Arena – Nashville, TN, USA",
+      1996,
+      2032
+    ],
+    [
+      "Thompson–Boling Arena – Knoxville, TN, USA",
+      1993,
+      2032
+    ],
+    [
+      "Cajundome – Lafayette, LA, USA",
+      1993,
+      2032
+    ],
+    [
+      "BOK Center – Tulsa, OK, USA",
+      2008,
+      2032
+    ],
+    [
+      "United Center – Chicago, IL, USA",
+      1994,
+      2032
+    ],
+    [
+      "Allstate Arena – Rosemont, IL, USA",
+      1993,
+      2032
+    ],
+    [
+      "Fiserv Forum – Milwaukee, WI, USA",
+      2018,
+      2032
+    ],
+    [
+      "Xcel Energy Center – St. Paul, MN, USA",
+      2000,
+      2032
+    ],
+    [
+      "Target Center – Minneapolis, MN, USA",
+      1993,
+      2032
+    ],
+    [
+      "Pinnacle Bank Arena – Lincoln, NE, USA",
+      2013,
+      2032
+    ],
+    [
+      "T-Mobile Center – Kansas City, MO, USA",
+      2007,
+      2032
+    ],
+    [
+      "Hollywood Casino Amphitheatre – Maryland Heights, MO, USA",
+      1993,
+      2032
+    ],
+    [
+      "Enterprise Center – St. Louis, MO, USA",
+      1994,
+      2032
+    ],
+    [
+      "Gainbridge Fieldhouse – Indianapolis, IN, USA",
+      1999,
+      2032
+    ],
+    [
+      "Little Caesars Arena – Detroit, MI, USA",
+      2017,
+      2032
+    ],
+    [
+      "Pine Knob Music Theatre – Clarkston, MI, USA",
+      1993,
+      2032
+    ],
+    [
+      "Rocket Arena – Cleveland, OH, USA",
+      1994,
+      2032
+    ],
+    [
+      "Blossom Music Center – Cuyahoga Falls, OH, USA",
+      1993,
+      2032
+    ],
+    [
+      "Riverbend Music Center – Cincinnati, OH, USA",
+      1993,
+      2032
+    ],
+    [
+      "Heritage Bank Center – Cincinnati, OH, USA",
+      1993,
+      2032
+    ],
+    [
+      "Nutter Center – Dayton, OH, USA",
+      1993,
+      2032
+    ],
+    [
+      "KeyBank Center – Buffalo, NY, USA",
+      1996,
+      2032
+    ],
+    [
+      "Buffalo Memorial Auditorium – Buffalo, NY, USA",
+      1993,
+      1996
+    ],
+    [
+      "Richfield Coliseum – Richfield, OH, USA",
+      1993,
+      1994
+    ],
+    [
+      "Capital Centre – Landover, MD, USA",
+      1993,
+      2002
+    ],
+    [
+      "Reunion Arena – Dallas, TX, USA",
+      1993,
+      2008
+    ],
+    [
+      "The Omni – Atlanta, GA, USA",
+      1993,
+      1997
+    ],
+    [
+      "Maple Leaf Gardens – Toronto, ON, Canada",
+      1993,
+      1999
+    ],
+    [
+      "Montreal Forum – Montreal, QC, Canada",
+      1993,
+      1996
+    ],
+    [
+      "Colisée de Québec – Québec City, QC, Canada",
+      1993,
+      2015
+    ],
+    [
+      "Winnipeg Arena – Winnipeg, MB, Canada",
+      1993,
+      2004
+    ],
+    [
+      "Northlands Coliseum – Edmonton, AB, Canada",
+      1993,
+      2018
+    ],
+    [
+      "Budweiser Stage – Toronto, ON, Canada",
+      1995,
+      2027
+    ],
+    [
+      "Scotiabank Arena – Toronto, ON, Canada",
+      1999,
+      2032
+    ],
+    [
+      "Canadian Tire Centre – Ottawa, ON, Canada",
+      1996,
+      2032
+    ],
+    [
+      "Bell Centre – Montreal, QC, Canada",
+      1996,
+      2032
+    ],
+    [
+      "Centre Vidéotron – Québec City, QC, Canada",
+      2015,
+      2032
+    ],
+    [
+      "Budweiser Gardens – London, ON, Canada",
+      2002,
+      2032
+    ],
+    [
+      "Canada Life Centre – Winnipeg, MB, Canada",
+      2004,
+      2032
+    ],
+    [
+      "Rogers Arena – Vancouver, BC, Canada",
+      1995,
+      2032
+    ],
+    [
+      "Pacific Coliseum – Vancouver, BC, Canada",
+      1993,
+      2032
+    ],
+    [
+      "Scotiabank Saddledome – Calgary, AB, Canada",
+      1993,
+      2027
+    ],
+    [
+      "Rogers Place – Edmonton, AB, Canada",
+      2016,
+      2032
+    ],
+    [
+      "SaskTel Centre – Saskatoon, SK, Canada",
+      1993,
+      2032
+    ],
+    [
+      "Ball Arena – Denver, CO, USA",
+      1999,
+      2032
+    ],
+    [
+      "Fiddler’s Green Amphitheatre – Greenwood Village, CO, USA",
+      1993,
+      2032
+    ],
+    [
+      "Red Rocks Amphitheatre – Morrison, CO, USA",
+      1993,
+      2032
+    ],
+    [
+      "Delta Center – Salt Lake City, UT, USA",
+      1993,
+      2032
+    ],
+    [
+      "Utah First Credit Union Amphitheatre – West Valley City, UT, USA",
+      1993,
+      2032
+    ],
+    [
+      "Tacoma Dome – Tacoma, WA, USA",
+      1993,
+      2032
+    ],
+    [
+      "Climate Pledge Arena – Seattle, WA, USA",
+      1993,
+      2032
+    ],
+    [
+      "Moda Center – Portland, OR, USA",
+      1995,
+      2032
+    ],
+    [
+      "Oakland Arena – Oakland, CA, USA",
+      1993,
+      2032
+    ],
+    [
+      "Chase Center – San Francisco, CA, USA",
+      2019,
+      2032
+    ],
+    [
+      "Shoreline Amphitheatre – Mountain View, CA, USA",
+      1993,
+      2032
+    ],
+    [
+      "Golden 1 Center – Sacramento, CA, USA",
+      2016,
+      2032
+    ],
+    [
+      "Cow Palace – Daly City, CA, USA",
+      1993,
+      2032
+    ],
+    [
+      "Kia Forum – Inglewood, CA, USA",
+      1993,
+      2032
+    ],
+    [
+      "Hollywood Bowl – Los Angeles, CA, USA",
+      1993,
+      2032
+    ],
+    [
+      "Pechanga Arena – San Diego, CA, USA",
+      1993,
+      2032
+    ],
+    [
+      "North Island Credit Union Amphitheatre – Chula Vista, CA, USA",
+      1998,
+      2032
+    ],
+    [
+      "PHX Arena – Phoenix, AZ, USA",
+      1993,
+      2032
+    ],
+    [
+      "Desert Diamond Arena – Glendale, AZ, USA",
+      2003,
+      2032
+    ],
+    [
+      "T-Mobile Arena – Las Vegas, NV, USA",
+      2016,
+      2032
+    ],
+    [
+      "Rose Bowl – Pasadena, CA, USA",
+      1995,
+      2032
+    ],
+    [
+      "Los Angeles Memorial Coliseum – Los Angeles, CA, USA",
+      1995,
+      2032
+    ],
+    [
+      "Dodger Stadium – Los Angeles, CA, USA",
+      1995,
+      2032
+    ],
+    [
+      "Oakland Coliseum – Oakland, CA, USA",
+      1995,
+      2032
+    ],
+    [
+      "Oracle Park – San Francisco, CA, USA",
+      2000,
+      2032
+    ],
+    [
+      "Levi’s Stadium – Santa Clara, CA, USA",
+      2014,
+      2032
+    ],
+    [
+      "SoFi Stadium – Inglewood, CA, USA",
+      2020,
+      2032
+    ],
+    [
+      "San Diego Stadium – San Diego, CA, USA",
+      1995,
+      2020
+    ],
+    [
+      "Stanford Stadium – Stanford, CA, USA",
+      1995,
+      2032
+    ],
+    [
+      "California Memorial Stadium – Berkeley, CA, USA",
+      1995,
+      2032
+    ],
+    [
+      "Allegiant Stadium – Las Vegas, NV, USA",
+      2020,
+      2032
+    ],
+    [
+      "Sam Boyd Stadium – Whitney, NV, USA",
+      1995,
+      2020
+    ],
+    [
+      "State Farm Stadium – Glendale, AZ, USA",
+      2006,
+      2032
+    ],
+    [
+      "Sun Devil Stadium – Tempe, AZ, USA",
+      1995,
+      2032
+    ],
+    [
+      "Empower Field at Mile High – Denver, CO, USA",
+      2001,
+      2032
+    ],
+    [
+      "Folsom Field – Boulder, CO, USA",
+      1995,
+      2032
+    ],
+    [
+      "Lumen Field – Seattle, WA, USA",
+      2002,
+      2032
+    ],
+    [
+      "Husky Stadium – Seattle, WA, USA",
+      1995,
+      2032
+    ],
+    [
+      "Seattle Kingdome – Seattle, WA, USA",
+      1995,
+      2000
+    ],
+    [
+      "BC Place – Vancouver, BC, Canada",
+      1995,
+      2032
+    ],
+    [
+      "Rogers Centre – Toronto, ON, Canada",
+      1995,
+      2032
+    ],
+    [
+      "Olympic Stadium – Montreal, QC, Canada",
+      1995,
+      2032
+    ],
+    [
+      "Commonwealth Stadium – Edmonton, AB, Canada",
+      1995,
+      2032
+    ],
+    [
+      "Exhibition Stadium – Toronto, ON, Canada",
+      1995,
+      1996
+    ],
+    [
+      "MetLife Stadium – East Rutherford, NJ, USA",
+      2010,
+      2032
+    ],
+    [
+      "Giants Stadium – East Rutherford, NJ, USA",
+      1995,
+      2010
+    ],
+    [
+      "Yankee Stadium – Bronx, NY, USA",
+      2009,
+      2032
+    ],
+    [
+      "Shea Stadium – Queens, NY, USA",
+      1995,
+      2008
+    ],
+    [
+      "Fenway Park – Boston, MA, USA",
+      1995,
+      2032
+    ],
+    [
+      "RFK Stadium – Washington, DC, USA",
+      1995,
+      2019
+    ],
+    [
+      "Soldier Field – Chicago, IL, USA",
+      1995,
+      2032
+    ],
+    [
+      "Wrigley Field – Chicago, IL, USA",
+      1995,
+      2032
+    ],
+    [
+      "Cleveland Municipal Stadium – Cleveland, OH, USA",
+      1995,
+      1995
+    ],
+    [
+      "Three Rivers Stadium – Pittsburgh, PA, USA",
+      1995,
+      2000
+    ],
+    [
+      "Ford Field – Detroit, MI, USA",
+      2002,
+      2032
+    ],
+    [
+      "Pontiac Silverdome – Pontiac, MI, USA",
+      1995,
+      2013
+    ],
+    [
+      "Hubert H. Humphrey Metrodome – Minneapolis, MN, USA",
+      1995,
+      2013
+    ],
+    [
+      "U.S. Bank Stadium – Minneapolis, MN, USA",
+      2016,
+      2032
+    ],
+    [
+      "Veterans Stadium – Philadelphia, PA, USA",
+      1995,
+      2003
+    ],
+    [
+      "Cotton Bowl – Dallas, TX, USA",
+      1995,
+      2032
+    ],
+    [
+      "AT&T Stadium – Arlington, TX, USA",
+      2009,
+      2032
+    ],
+    [
+      "NRG Stadium – Houston, TX, USA",
+      2002,
+      2032
+    ],
+    [
+      "Astrodome – Houston, TX, USA",
+      1995,
+      2008
+    ],
+    [
+      "Alamodome – San Antonio, TX, USA",
+      1995,
+      2032
+    ],
+    [
+      "Superdome – New Orleans, LA, USA",
+      1995,
+      2032
+    ],
+    [
+      "Camping World Stadium – Orlando, FL, USA",
+      1995,
+      2032
+    ],
+    [
+      "Hard Rock Stadium – Miami Gardens, FL, USA",
+      1995,
+      2032
+    ],
+    [
+      "Orange Bowl – Miami, FL, USA",
+      1995,
+      2008
+    ],
+    [
+      "Mercedes-Benz Stadium – Atlanta, GA, USA",
+      2017,
+      2032
+    ],
+    [
+      "New York, NY, USA",
+      1992,
+      2032
+    ],
+    [
+      "Los Angeles, CA, USA",
+      1992,
+      2032
+    ],
+    [
+      "Chicago, IL, USA",
+      1992,
+      2032
+    ],
+    [
+      "Dallas, TX, USA",
+      1992,
+      2032
+    ],
+    [
+      "Houston, TX, USA",
+      1992,
+      2032
+    ],
+    [
+      "Atlanta, GA, USA",
+      1992,
+      2032
+    ],
+    [
+      "Washington, DC, USA",
+      1992,
+      2032
+    ],
+    [
+      "Miami, FL, USA",
+      1992,
+      2032
+    ],
+    [
+      "Philadelphia, PA, USA",
+      1992,
+      2032
+    ],
+    [
+      "Phoenix, AZ, USA",
+      1992,
+      2032
+    ],
+    [
+      "Boston, MA, USA",
+      1992,
+      2032
+    ],
+    [
+      "Riverside, CA, USA",
+      1992,
+      2032
+    ],
+    [
+      "San Francisco, CA, USA",
+      1992,
+      2032
+    ],
+    [
+      "Detroit, MI, USA",
+      1992,
+      2032
+    ],
+    [
+      "Seattle, WA, USA",
+      1992,
+      2032
+    ],
+    [
+      "Minneapolis, MN, USA",
+      1992,
+      2032
+    ],
+    [
+      "Tampa, FL, USA",
+      1992,
+      2032
+    ],
+    [
+      "San Diego, CA, USA",
+      1992,
+      2032
+    ],
+    [
+      "Denver, CO, USA",
+      1992,
+      2032
+    ],
+    [
+      "Orlando, FL, USA",
+      1992,
+      2032
+    ],
+    [
+      "Charlotte, NC, USA",
+      1992,
+      2032
+    ],
+    [
+      "Baltimore, MD, USA",
+      1992,
+      2032
+    ],
+    [
+      "St. Louis, MO, USA",
+      1992,
+      2032
+    ],
+    [
+      "San Antonio, TX, USA",
+      1992,
+      2032
+    ],
+    [
+      "Austin, TX, USA",
+      1992,
+      2032
+    ],
+    [
+      "Portland, OR, USA",
+      1992,
+      2032
+    ],
+    [
+      "Sacramento, CA, USA",
+      1992,
+      2032
+    ],
+    [
+      "Pittsburgh, PA, USA",
+      1992,
+      2032
+    ],
+    [
+      "Las Vegas, NV, USA",
+      1992,
+      2032
+    ],
+    [
+      "Springfield, OH, USA",
+      1992,
+      2032
+    ],
+    [
+      "Dayton, OH, USA",
+      1992,
+      2032
+    ],
+    [
+      "Cincinnati, OH, USA",
+      1992,
+      2032
+    ],
+    [
+      "Vandalia, OH, USA",
+      1992,
+      2032
+    ],
+    [
+      "Over-the-Rhine, OH, USA",
+      1999,
+      2032
+    ],
+    [
+      "Kansas City, MO, USA",
+      1992,
+      2032
+    ],
+    [
+      "Columbus, OH, USA",
+      1992,
+      2032
+    ],
+    [
+      "Indianapolis, IN, USA",
+      1992,
+      2032
+    ],
+    [
+      "Nashville, TN, USA",
+      1992,
+      2032
+    ],
+    [
+      "Cleveland, OH, USA",
+      1992,
+      2032
+    ],
+    [
+      "San Jose, CA, USA",
+      1992,
+      2032
+    ],
+    [
+      "Virginia Beach, VA, USA",
+      1992,
+      2032
+    ],
+    [
+      "Jacksonville, FL, USA",
+      1992,
+      2032
+    ],
+    [
+      "Providence, RI, USA",
+      1992,
+      2032
+    ],
+    [
+      "Raleigh, NC, USA",
+      1992,
+      2032
+    ],
+    [
+      "Milwaukee, WI, USA",
+      1992,
+      2032
+    ],
+    [
+      "Oklahoma City, OK, USA",
+      1992,
+      2032
+    ],
+    [
+      "Louisville, KY, USA",
+      1992,
+      2032
+    ],
+    [
+      "Richmond, VA, USA",
+      1992,
+      2032
+    ],
+    [
+      "Memphis, TN, USA",
+      1992,
+      2032
+    ],
+    [
+      "Salt Lake City, UT, USA",
+      1992,
+      2032
+    ],
+    [
+      "Fresno, CA, USA",
+      1992,
+      2032
+    ],
+    [
+      "Birmingham, AL, USA",
+      1992,
+      2032
+    ],
+    [
+      "Grand Rapids, MI, USA",
+      1992,
+      2032
+    ],
+    [
+      "Hartford, CT, USA",
+      1992,
+      2032
+    ],
+    [
+      "Buffalo, NY, USA",
+      1992,
+      2032
+    ],
+    [
+      "Tucson, AZ, USA",
+      1992,
+      2032
+    ],
+    [
+      "Tulsa, OK, USA",
+      1992,
+      2032
+    ],
+    [
+      "Rochester, NY, USA",
+      1992,
+      2032
+    ],
+    [
+      "Ann Arbor, MI, USA",
+      1989,
+      1992
+    ],
+    [
+      "Athens, OH, USA",
+      1989,
+      1992
+    ],
+    [
+      "Bellefontaine, OH, USA",
+      1989,
+      1992
+    ],
+    [
+      "Celina, OH, USA",
+      1989,
+      1992
+    ],
+    [
+      "Chillicothe, OH, USA",
+      1989,
+      1992
+    ],
+    [
+      "Fairfield, OH, USA",
+      1989,
+      1992
+    ],
+    [
+      "Findlay, OH, USA",
+      1989,
+      1992
+    ],
+    [
+      "Florence, KY, USA",
+      1989,
+      1992
+    ],
+    [
+      "Hamilton, OH, USA",
+      1989,
+      1992
+    ],
+    [
+      "Kent, OH, USA",
+      1989,
+      1992
+    ],
+    [
+      "Lima, OH, USA",
+      1989,
+      1992
+    ],
+    [
+      "Mason, OH, USA",
+      1989,
+      1992
+    ],
+    [
+      "Marysville, OH, USA",
+      1989,
+      1992
+    ],
+    [
+      "Middletown, OH, USA",
+      1989,
+      1992
+    ],
+    [
+      "Montgomery, OH, USA",
+      1989,
+      1992
+    ],
+    [
+      "New Carlisle, OH, USA",
+      1989,
+      1992
+    ],
+    [
+      "Piqua, OH, USA",
+      1989,
+      1992
+    ],
+    [
+      "Port Clinton, OH, USA",
+      1989,
+      1992
+    ],
+    [
+      "Powell, OH, USA",
+      1989,
+      1992
+    ],
+    [
+      "Richmond, IN, USA",
+      1989,
+      1992
+    ],
+    [
+      "Sandusky, OH, USA",
+      1989,
+      1992
+    ],
+    [
+      "Sidney, OH, USA",
+      1989,
+      1992
+    ],
+    [
+      "Tipp City, OH, USA",
+      1989,
+      1992
+    ],
+    [
+      "Toledo, OH, USA",
+      1989,
+      1992
+    ],
+    [
+      "Troy, OH, USA",
+      1989,
+      1992
+    ],
+    [
+      "Wapakoneta, OH, USA",
+      1989,
+      1992
+    ],
+    [
+      "Washington Court House, OH, USA",
+      1989,
+      1992
+    ],
+    [
+      "Wheeling, WV, USA",
+      1989,
+      1992
+    ],
+    [
+      "Wooster, OH, USA",
+      1989,
+      1992
+    ],
+    [
+      "Zanesville, OH, USA",
+      1989,
+      1992
+    ]
+  ]
+}
