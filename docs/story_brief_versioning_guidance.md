@@ -5,6 +5,11 @@
 - **Per-file version numbers:** usually overkill for this project.
 - **Structured version tracking:** yes, good idea.
 
+## Current implementation
+
+- `schema_version` is present in `data/story_brief/config.json`.
+- `dataset_version` is now present in `data/story_brief/config.json` and validated at load time.
+
 ## Why per-file versions are usually too much
 
 Git already tracks each file revision and history.

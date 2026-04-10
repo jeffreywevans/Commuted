@@ -22,6 +22,7 @@ def test_schema_validation_accepts_current_data() -> None:
     ("mutator", "expected_msg"),
     [
         (lambda t, e, p, c: c.pop("ordered_keys"), "missing required keys"),
+        (lambda t, e, p, c: c.update({"dataset_version": ""}), "dataset_version"),
         (lambda t, e, p, c: c.update({"date_start": "not-a-date"}), "ISO dates"),
         (
             lambda t, e, p, c: c.update({"sexual_content_weights": [0, 0, 0, 0, 0]}),

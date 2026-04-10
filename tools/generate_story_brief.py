@@ -101,6 +101,7 @@ def validate_story_data(
         config,
         {
             "schema_version",
+            "dataset_version",
             "date_start",
             "date_end",
             "sexual_content_options",
@@ -112,6 +113,8 @@ def validate_story_data(
     )
     if not isinstance(config["schema_version"], int) or config["schema_version"] < 1:
         raise ValueError("config.schema_version must be an integer >= 1")
+    if not isinstance(config["dataset_version"], str) or not config["dataset_version"].strip():
+        raise ValueError("config.dataset_version must be a non-empty string")
 
     try:
         start = date.fromisoformat(str(config["date_start"]))
@@ -192,6 +195,7 @@ def load_story_data() -> dict[str, Any]:
         "word_count_targets": [int(v) for v in config["word_count_targets"]],
         "ordered_keys": [str(v) for v in config["ordered_keys"]],
         "writing_preamble": str(config["writing_preamble"]),
+        "dataset_version": str(config["dataset_version"]),
     }
 
 
@@ -213,6 +217,7 @@ SEXUAL_CONTENT_WEIGHTS = DATA["sexual_content_weights"]
 WORD_COUNT_TARGETS = DATA["word_count_targets"]
 ORDERED_KEYS = DATA["ordered_keys"]
 WRITING_PREAMBLE = DATA["writing_preamble"]
+DATASET_VERSION = DATA["dataset_version"]
 
 
 def slugify(value: str) -> str:
