@@ -291,10 +291,10 @@ def weighted_choice(
     """Pick one option using relative weights."""
     if not options:
         raise ValueError("options must not be empty")
-    if len(options) != len(weights):
-        raise ValueError("options and weights must be the same length")
     if not weights:
         raise ValueError("weights must not be empty")
+    if len(options) != len(weights):
+        raise ValueError("options and weights must be the same length")
 
     for index, weight in enumerate(weights):
         if isinstance(weight, bool) or not isinstance(weight, (int, float)):
