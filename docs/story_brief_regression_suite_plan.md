@@ -127,6 +127,7 @@ These give strong protection for very little effort.
 3. Add deterministic generation tests.
 4. Add CLI file-behavior tests with temporary directories.
 5. Wire into CI so every PR runs tests automatically.
+6. Add a Python-version matrix in CI (`3.11`, `3.12`, `3.x`) for compatibility coverage.
 
 ## Definition of done
 
