@@ -247,7 +247,7 @@ def sanitize_filename(filename: str) -> str:
 
 def escape_markdown_heading_text(value: str) -> str:
     """Escape Markdown-significant characters for safe heading rendering."""
-    return re.sub(r"([\\\\`*_{}\[\]()#+\-.!])", r"\\\1", value)
+    return re.sub(r"([\\`*_{}\[\]()#+\-.!])", r"\\\1", value)
 
 
 def random_date_in_range(

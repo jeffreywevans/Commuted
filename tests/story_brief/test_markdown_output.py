@@ -42,6 +42,25 @@ def test_markdown_heading_escapes_special_chars() -> None:
     assert "# You Park Like You F\\*ck and Deserve the Ticket" in text
 
 
+def test_markdown_heading_escapes_single_backslash() -> None:
+    fields = {
+        "title": r"Backslash \\ Test",
+        "protagonist": "A",
+        "secondary_character": "B",
+        "time_period": "2000-01-01",
+        "setting": "X",
+        "central_conflict": "conflict",
+        "inciting_pressure": "pressure",
+        "ending_type": "ending",
+        "style_guidance": "style",
+        "sexual_content_level": "none",
+        "word_count_target": 1500,
+    }
+
+    text = to_markdown(fields)
+    assert r"# Backslash \\\\ Test" in text
+
+
 def test_yaml_keys_appear_in_configured_order() -> None:
     fields = {
         "title": "Title",
