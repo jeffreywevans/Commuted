@@ -33,6 +33,12 @@ def test_schema_validation_accepts_current_data() -> None:
             "must not contain duplicates",
         ),
         (
+            lambda t, e, p, c: c.update(
+                {"ordered_keys": ["titel" if k == "title" else k for k in c["ordered_keys"]]}
+            ),
+            "ordered_keys mismatch",
+        ),
+        (
             lambda t, e, p, c: e["setting_availability"].append(["Bad Row", 2020]),
             r"must be \[name, start_year, end_year\]",
         ),

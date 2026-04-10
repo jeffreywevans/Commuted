@@ -17,6 +17,19 @@ import yaml
 
 DATA_DIR = Path(__file__).resolve().parent.parent / "data" / "story_brief"
 TITLE_TOKEN_PATTERN = re.compile(r"@(?P<key>protagonist|setting|time_period)\b")
+EXPECTED_GENERATED_FIELD_KEYS = {
+    "title",
+    "protagonist",
+    "secondary_character",
+    "time_period",
+    "setting",
+    "central_conflict",
+    "inciting_pressure",
+    "ending_type",
+    "style_guidance",
+    "sexual_content_level",
+    "word_count_target",
+}
 WINDOWS_RESERVED_BASENAMES = {
     "con",
     "prn",
@@ -160,6 +173,16 @@ def validate_story_data(
     for idx, key in enumerate(ordered_keys):
         if not isinstance(key, str) or not key.strip():
             raise ValueError(f"config.ordered_keys[{idx}] must be a non-empty string")
+    ordered_key_set = set(ordered_keys)
+    missing = sorted(EXPECTED_GENERATED_FIELD_KEYS - ordered_key_set)
+    extra = sorted(ordered_key_set - EXPECTED_GENERATED_FIELD_KEYS)
+    if missing or extra:
+        problems: list[str] = []
+        if missing:
+            problems.append(f"missing expected keys: {', '.join(missing)}")
+        if extra:
+            problems.append(f"unexpected keys: {', '.join(extra)}")
+        raise ValueError(f"config.ordered_keys mismatch: {'; '.join(problems)}")
 
     if not isinstance(config["writing_preamble"], str) or not config["writing_preamble"].strip():
         raise ValueError("config.writing_preamble must be a non-empty string")
@@ -311,7 +334,7 @@ def weighted_choice(
 
     for option, weight in zip(options, weights):
         cumulative += weight
-        if threshold <= cumulative:
+        if threshold < cumulative:
             return option
 
     return options[-1]
