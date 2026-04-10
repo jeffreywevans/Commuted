@@ -334,7 +334,7 @@ def weighted_choice(
 
     for option, weight in zip(options, weights):
         cumulative += weight
-        if threshold <= cumulative:
+        if threshold < cumulative:
             return option
 
     return options[-1]

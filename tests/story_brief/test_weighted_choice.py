@@ -32,3 +32,12 @@ def test_weighted_choice_invalid_inputs(options, weights, expected_exc) -> None:
     rng = random.Random(1)
     with pytest.raises(expected_exc):
         weighted_choice(rng, options, weights)
+
+
+def test_weighted_choice_does_not_select_zero_weight_at_random_zero() -> None:
+    class ZeroRng:
+        def random(self) -> float:
+            return 0.0
+
+    choice = weighted_choice(ZeroRng(), ["disabled", "enabled"], [0.0, 1.0])
+    assert choice == "enabled"
