@@ -11,6 +11,7 @@ import random
 import re
 import secrets
 from datetime import date, datetime, timedelta
+from functools import lru_cache
 from importlib.resources import files
 from pathlib import Path
 from typing import Any
@@ -244,27 +245,37 @@ def load_story_data() -> dict[str, Any]:
     }
 
 
-DATA = load_story_data()
+@lru_cache(maxsize=1)
+def get_data() -> dict[str, Any]:
+    """Load and cache story-brief data on first use."""
+    return load_story_data()
 
-# Compatibility aliases retained during migration from in-file tables.
-TITLES = DATA["titles"]
-# Legacy alias retained: protagonists and secondary characters are now drawn
-# from the same character_availability pool.
-PROTAGONIST_AVAILABILITY = DATA["character_availability"]
-CHARACTER_AVAILABILITY = DATA["character_availability"]
-SETTING_AVAILABILITY = DATA["setting_availability"]
-CENTRAL_CONFLICTS = DATA["central_conflicts"]
-INCITING_PRESSURES = DATA["inciting_pressures"]
-ENDING_TYPES = DATA["ending_types"]
-STYLE_GUIDANCE = DATA["style_guidance"]
-DATE_START = DATA["date_start"]
-DATE_END = DATA["date_end"]
-SEXUAL_CONTENT_OPTIONS = DATA["sexual_content_options"]
-SEXUAL_CONTENT_WEIGHTS = DATA["sexual_content_weights"]
-WORD_COUNT_TARGETS = DATA["word_count_targets"]
-ORDERED_KEYS = DATA["ordered_keys"]
-WRITING_PREAMBLE = DATA["writing_preamble"]
-DATASET_VERSION = DATA["dataset_version"]
+
+_COMPAT_ALIASES: dict[str, str] = {
+    "TITLES": "titles",
+    "PROTAGONIST_AVAILABILITY": "character_availability",
+    "CHARACTER_AVAILABILITY": "character_availability",
+    "SETTING_AVAILABILITY": "setting_availability",
+    "CENTRAL_CONFLICTS": "central_conflicts",
+    "INCITING_PRESSURES": "inciting_pressures",
+    "ENDING_TYPES": "ending_types",
+    "STYLE_GUIDANCE": "style_guidance",
+    "DATE_START": "date_start",
+    "DATE_END": "date_end",
+    "SEXUAL_CONTENT_OPTIONS": "sexual_content_options",
+    "SEXUAL_CONTENT_WEIGHTS": "sexual_content_weights",
+    "WORD_COUNT_TARGETS": "word_count_targets",
+    "ORDERED_KEYS": "ordered_keys",
+    "WRITING_PREAMBLE": "writing_preamble",
+    "DATASET_VERSION": "dataset_version",
+}
+
+
+def __getattr__(name: str) -> Any:
+    """Compatibility layer for legacy module-level constants."""
+    if name in _COMPAT_ALIASES:
+        return get_data()[_COMPAT_ALIASES[name]]
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
 def slugify(value: str) -> str:
@@ -315,7 +326,7 @@ def available_characters(selected_date: date) -> list[str]:
     year = selected_date.year
     return [
         name
-        for name, start_year, end_year in CHARACTER_AVAILABILITY
+        for name, start_year, end_year in get_data()["character_availability"]
         if start_year <= year <= end_year
     ]
 
@@ -336,7 +347,7 @@ def available_settings(selected_date: date) -> list[str]:
     year = selected_date.year
     return [
         setting
-        for setting, start_year, end_year in SETTING_AVAILABILITY
+        for setting, start_year, end_year in get_data()["setting_availability"]
         if start_year <= year <= end_year
     ]
 
@@ -392,11 +403,12 @@ def render_title(
 def pick_story_fields(
     rng: random.Random | secrets.SystemRandom, selected_date: date | None = None
 ) -> dict[str, str | int]:
+    data = get_data()
     if selected_date is None:
-        selected_date = random_date_in_range(rng, DATE_START, DATE_END)
-    elif not (DATE_START <= selected_date <= DATE_END):
+        selected_date = random_date_in_range(rng, data["date_start"], data["date_end"])
+    elif not (data["date_start"] <= selected_date <= data["date_end"]):
         raise ValueError(
-            f"--date must be between {DATE_START.isoformat()} and {DATE_END.isoformat()}"
+            f"--date must be between {data['date_start'].isoformat()} and {data['date_end'].isoformat()}"
         )
     time_period = selected_date.isoformat()
 
@@ -423,7 +435,7 @@ def pick_story_fields(
         )
     secondary_character = rng.choice(eligible_secondary)
     setting = rng.choice(settings_for_date)
-    title_template = rng.choice(TITLES)
+    title_template = rng.choice(data["titles"])
 
     return {
         "title": render_title(
@@ -436,19 +448,19 @@ def pick_story_fields(
         "secondary_character": secondary_character,
         "time_period": time_period,
         "setting": setting,
-        "central_conflict": rng.choice(CENTRAL_CONFLICTS),
-        "inciting_pressure": rng.choice(INCITING_PRESSURES),
-        "ending_type": rng.choice(ENDING_TYPES),
-        "style_guidance": rng.choice(STYLE_GUIDANCE),
+        "central_conflict": rng.choice(data["central_conflicts"]),
+        "inciting_pressure": rng.choice(data["inciting_pressures"]),
+        "ending_type": rng.choice(data["ending_types"]),
+        "style_guidance": rng.choice(data["style_guidance"]),
         "sexual_content_level": weighted_choice(
-            rng, SEXUAL_CONTENT_OPTIONS, SEXUAL_CONTENT_WEIGHTS
+            rng, data["sexual_content_options"], data["sexual_content_weights"]
         ),
-        "word_count_target": rng.choice(WORD_COUNT_TARGETS),
+        "word_count_target": rng.choice(data["word_count_targets"]),
     }
 
 
 def to_markdown(fields: dict[str, str | int]) -> str:
-    ordered_fields = {key: fields[key] for key in ORDERED_KEYS}
+    ordered_fields = {key: fields[key] for key in get_data()["ordered_keys"]}
     yaml_text = yaml.safe_dump(
         ordered_fields,
         sort_keys=False,
@@ -461,7 +473,7 @@ def to_markdown(fields: dict[str, str | int]) -> str:
         yaml_text,
         "---",
         "",
-        WRITING_PREAMBLE,
+        get_data()["writing_preamble"],
         "",
         f"# {escape_markdown_heading_text(str(fields['title']))}",
         "",

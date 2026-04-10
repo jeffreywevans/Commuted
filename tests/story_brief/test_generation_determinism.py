@@ -52,10 +52,11 @@ def test_selected_characters_are_valid_for_time_period_year() -> None:
 
 
 def test_duplicate_character_rows_require_two_distinct_names(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr(
-        "tools.generate_story_brief.CHARACTER_AVAILABILITY",
-        [("Only Name", 2000, 2000), ("Only Name", 2000, 2000)],
-    )
+    from tools import generate_story_brief as story_brief
+
+    data = dict(story_brief.get_data())
+    data["character_availability"] = [("Only Name", 2000, 2000), ("Only Name", 2000, 2000)]
+    monkeypatch.setattr(story_brief, "get_data", lambda: data)
 
     with pytest.raises(ValueError, match="two distinct available characters"):
         pick_story_fields(random.Random(7), selected_date=date(2000, 1, 1))
