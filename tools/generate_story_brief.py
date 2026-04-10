@@ -419,7 +419,7 @@ def main() -> None:
     parser.add_argument(
         "-o",
         "--output-dir",
-        default="8. Story Seeds",
+        default="output/story-seeds",
         help="Directory where the markdown file will be written.",
     )
     parser.add_argument(

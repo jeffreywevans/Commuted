@@ -60,6 +60,13 @@ def test_write_and_force_overwrite_behavior(tmp_path: Path) -> None:
     assert third.returncode == 0
 
 
+def test_default_output_dir_is_relative(tmp_path: Path) -> None:
+    filename = "relative-default.md"
+    result = run_cli("--seed", "42", "--filename", filename, "--force", cwd=tmp_path)
+    assert result.returncode == 0
+    assert (tmp_path / "output" / "story-seeds" / filename).exists()
+
+
 def test_sanitize_filename_handles_invalid_chars_and_reserved_names() -> None:
     assert sanitize_filename("../bad:name?.md") == "bad-name-.md"
     assert sanitize_filename("CON") == "CON-file"
