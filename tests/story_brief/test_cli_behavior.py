@@ -77,3 +77,11 @@ def test_cli_rejects_invalid_date_format(tmp_path: Path) -> None:
     result = run_cli("--date", "01-01-2000", "--print-only", cwd=tmp_path)
     assert result.returncode != 0
     assert "--date must be in YYYY-MM-DD format" in (result.stdout + result.stderr)
+
+
+def test_cli_rejects_out_of_range_date_without_traceback(tmp_path: Path) -> None:
+    result = run_cli("--date", "1900-01-01", "--print-only", cwd=tmp_path)
+    assert result.returncode != 0
+    combined = result.stdout + result.stderr
+    assert "--date must be between" in combined
+    assert "Traceback" not in combined

@@ -320,6 +320,17 @@ def available_characters(selected_date: date) -> list[str]:
     ]
 
 
+def unique_preserving_order(values: list[str]) -> list[str]:
+    """Return unique items in first-seen order."""
+    seen: set[str] = set()
+    unique: list[str] = []
+    for value in values:
+        if value not in seen:
+            seen.add(value)
+            unique.append(value)
+    return unique
+
+
 def available_settings(selected_date: date) -> list[str]:
     """Return settings available for the selected date's year."""
     year = selected_date.year
@@ -389,10 +400,11 @@ def pick_story_fields(
         )
     time_period = selected_date.isoformat()
 
-    characters_for_date = available_characters(selected_date)
+    characters_for_date = unique_preserving_order(available_characters(selected_date))
     if len(characters_for_date) < 2:
         raise ValueError(
-            f"Need at least two available characters for year {selected_date.year}."
+            "Need at least two distinct available characters for year "
+            f"{selected_date.year}."
         )
 
     settings_for_date = available_settings(selected_date)
@@ -404,6 +416,11 @@ def pick_story_fields(
 
     protagonist = rng.choice(characters_for_date)
     eligible_secondary = [name for name in characters_for_date if name != protagonist]
+    if not eligible_secondary:
+        raise ValueError(
+            "Need at least two distinct available characters for year "
+            f"{selected_date.year}."
+        )
     secondary_character = rng.choice(eligible_secondary)
     setting = rng.choice(settings_for_date)
     title_template = rng.choice(TITLES)
@@ -506,7 +523,10 @@ def main() -> None:
         except ValueError as exc:
             raise SystemExit("--date must be in YYYY-MM-DD format") from exc
 
-    fields = pick_story_fields(rng, selected_date=selected_date)
+    try:
+        fields = pick_story_fields(rng, selected_date=selected_date)
+    except ValueError as exc:
+        raise SystemExit(str(exc)) from exc
     markdown = to_markdown(fields)
 
     if args.print_only:
