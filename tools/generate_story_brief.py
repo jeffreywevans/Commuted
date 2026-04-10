@@ -6,16 +6,17 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import os
 import random
 import re
 import secrets
 from datetime import date, datetime, timedelta
+from importlib.resources import files
 from pathlib import Path
 from typing import Any
 
 import yaml
 
-DATA_DIR = Path(__file__).resolve().parent.parent / "data" / "story_brief"
 TITLE_TOKEN_PATTERN = re.compile(r"@(?P<key>protagonist|setting|time_period)\b")
 EXPECTED_GENERATED_FIELD_KEYS = {
     "title",
@@ -40,8 +41,28 @@ WINDOWS_RESERVED_BASENAMES = {
 }
 
 
-def _load_json(path: Path) -> dict[str, Any]:
+def _load_json(path: Any) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+def _data_file(filename: str) -> Any:
+    """
+    Resolve a story-brief data file.
+
+    Resolution order:
+      1) Explicit directory override via COMMUTED_STORY_BRIEF_DATA_DIR.
+      2) Installed package resources under data.story_brief.
+      3) Repo-relative fallback for source checkout execution.
+    """
+    override_raw = os.environ.get("COMMUTED_STORY_BRIEF_DATA_DIR")
+    if override_raw:
+        override = Path(override_raw).expanduser()
+        return override / filename
+
+    try:
+        return files("data.story_brief").joinpath(filename)
+    except (ModuleNotFoundError, FileNotFoundError):
+        return Path(__file__).resolve().parent.parent / "data" / "story_brief" / filename
 
 
 def _require_keys(section_name: str, payload: dict[str, Any], required: set[str]) -> None:
@@ -193,10 +214,10 @@ def _tupleize_rows(rows: list[list[Any]]) -> list[tuple[str, int, int]]:
 
 
 def load_story_data() -> dict[str, Any]:
-    titles = _load_json(DATA_DIR / "titles.json")
-    entities = _load_json(DATA_DIR / "entities.json")
-    prompts = _load_json(DATA_DIR / "prompts.json")
-    config = _load_json(DATA_DIR / "config.json")
+    titles = _load_json(_data_file("titles.json"))
+    entities = _load_json(_data_file("entities.json"))
+    prompts = _load_json(_data_file("prompts.json"))
+    config = _load_json(_data_file("config.json"))
     validate_story_data(titles, entities, prompts, config)
 
     return {

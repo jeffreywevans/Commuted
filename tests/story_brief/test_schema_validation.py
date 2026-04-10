@@ -2,14 +2,14 @@ from copy import deepcopy
 
 import pytest
 
-from tools.generate_story_brief import DATA_DIR, _load_json, validate_story_data
+from tools.generate_story_brief import _data_file, _load_json, validate_story_data
 
 
 def load_all():
-    titles = _load_json(DATA_DIR / "titles.json")
-    entities = _load_json(DATA_DIR / "entities.json")
-    prompts = _load_json(DATA_DIR / "prompts.json")
-    config = _load_json(DATA_DIR / "config.json")
+    titles = _load_json(_data_file("titles.json"))
+    entities = _load_json(_data_file("entities.json"))
+    prompts = _load_json(_data_file("prompts.json"))
+    config = _load_json(_data_file("config.json"))
     return titles, entities, prompts, config
 
 

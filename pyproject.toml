@@ -17,3 +17,9 @@ dev = ["pytest>=8.0"]
 
 [project.scripts]
 story-brief = "tools.generate_story_brief:main"
+
+[tool.setuptools.packages.find]
+include = ["tools*", "data*"]
+
+[tool.setuptools.package-data]
+"data.story_brief" = ["*.json"]
