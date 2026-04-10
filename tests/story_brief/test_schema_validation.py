@@ -46,6 +46,10 @@ def test_schema_validation_accepts_current_data() -> None:
             lambda t, e, p, c: e["character_availability"].append(["Bool Year", True, 2000]),
             "years must be integers",
         ),
+        (
+            lambda t, e, p, c: c.update({"word_count_targets": [True, 1200]}),
+            "must be a positive integer",
+        ),
     ],
 )
 def test_schema_validation_rejects_bad_data(mutator, expected_msg: str) -> None:

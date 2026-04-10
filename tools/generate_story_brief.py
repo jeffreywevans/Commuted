@@ -188,7 +188,7 @@ def validate_story_data(
     if not isinstance(targets, list) or not targets:
         raise ValueError("config.word_count_targets must be a non-empty list")
     for idx, value in enumerate(targets):
-        if not isinstance(value, int) or value <= 0:
+        if isinstance(value, bool) or not isinstance(value, int) or value <= 0:
             raise ValueError(f"config.word_count_targets[{idx}] must be a positive integer")
 
     ordered_keys = config["ordered_keys"]
