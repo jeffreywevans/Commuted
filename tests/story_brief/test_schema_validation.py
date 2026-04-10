@@ -42,6 +42,10 @@ def test_schema_validation_accepts_current_data() -> None:
             lambda t, e, p, c: e["setting_availability"].append(["Bad Row", 2020]),
             r"must be \[name, start_year, end_year\]",
         ),
+        (
+            lambda t, e, p, c: e["character_availability"].append(["Bool Year", True, 2000]),
+            "years must be integers",
+        ),
     ],
 )
 def test_schema_validation_rejects_bad_data(mutator, expected_msg: str) -> None:

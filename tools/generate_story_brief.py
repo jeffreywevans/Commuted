@@ -88,7 +88,12 @@ def _validate_availability_rows(section_name: str, key: str, rows: Any) -> None:
         name, start_year, end_year = row
         if not isinstance(name, str) or not name.strip():
             raise ValueError(f"{section_name}.{key}[{idx}][0] must be a non-empty string")
-        if not isinstance(start_year, int) or not isinstance(end_year, int):
+        if (
+            isinstance(start_year, bool)
+            or isinstance(end_year, bool)
+            or not isinstance(start_year, int)
+            or not isinstance(end_year, int)
+        ):
             raise ValueError(f"{section_name}.{key}[{idx}] years must be integers")
         if start_year > end_year:
             raise ValueError(
