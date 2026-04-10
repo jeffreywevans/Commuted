@@ -74,10 +74,7 @@ def validate_story_data(
     _require_keys(
         "entities",
         entities,
-        {"protagonist_availability", "character_availability", "setting_availability"},
-    )
-    _validate_availability_rows(
-        "entities", "protagonist_availability", entities["protagonist_availability"]
+        {"character_availability", "setting_availability"},
     )
     _validate_availability_rows(
         "entities", "character_availability", entities["character_availability"]
@@ -181,7 +178,6 @@ def load_story_data() -> dict[str, Any]:
 
     return {
         "titles": [str(v) for v in titles["titles"]],
-        "protagonist_availability": _tupleize_rows(entities["protagonist_availability"]),
         "character_availability": _tupleize_rows(entities["character_availability"]),
         "setting_availability": _tupleize_rows(entities["setting_availability"]),
         "central_conflicts": [str(v) for v in prompts["central_conflicts"]],
@@ -203,7 +199,9 @@ DATA = load_story_data()
 
 # Compatibility aliases retained during migration from in-file tables.
 TITLES = DATA["titles"]
-PROTAGONIST_AVAILABILITY = DATA["protagonist_availability"]
+# Legacy alias retained: protagonists and secondary characters are now drawn
+# from the same character_availability pool.
+PROTAGONIST_AVAILABILITY = DATA["character_availability"]
 CHARACTER_AVAILABILITY = DATA["character_availability"]
 SETTING_AVAILABILITY = DATA["setting_availability"]
 CENTRAL_CONFLICTS = DATA["central_conflicts"]
