@@ -437,7 +437,9 @@ def pick_story_fields(
         selected_date = random_date_in_range(rng, data["date_start"], data["date_end"])
     elif not (data["date_start"] <= selected_date <= data["date_end"]):
         raise ValueError(
-            f"--date must be between {data['date_start'].isoformat()} and {data['date_end'].isoformat()}"
+            f"Date {selected_date.isoformat()} is outside available range "
+            f"({data['date_start'].isoformat()} to {data['date_end'].isoformat()}). "
+            "Try a date within the Commuted archive timeline."
         )
     time_period = selected_date.isoformat()
 
