@@ -34,10 +34,10 @@ def test_weighted_choice_invalid_inputs(options, weights, expected_exc) -> None:
         weighted_choice(rng, options, weights)
 
 
-def test_weighted_choice_does_not_select_zero_weight_at_random_zero() -> None:
-    class ZeroRng:
-        def random(self) -> float:
-            return 0.0
+def test_weighted_choice_never_selects_zero_weight_option() -> None:
+    rng = random.Random(42)
+    options = ["disabled", "enabled"]
+    weights = [0.0, 1.0]
 
-    choice = weighted_choice(ZeroRng(), ["disabled", "enabled"], [0.0, 1.0])
-    assert choice == "enabled"
+    for _ in range(100):
+        assert weighted_choice(rng, options, weights) == "enabled"
