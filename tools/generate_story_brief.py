@@ -415,13 +415,7 @@ def available_characters(selected_date: date) -> list[str]:
 
 def unique_preserving_order(values: list[str]) -> list[str]:
     """Return unique items in first-seen order."""
-    seen: set[str] = set()
-    unique: list[str] = []
-    for value in values:
-        if value not in seen:
-            seen.add(value)
-            unique.append(value)
-    return unique
+    return list(dict.fromkeys(values))
 
 
 def available_settings(selected_date: date) -> list[str]:
