@@ -1,33 +1,16 @@
-["build-system"]
+[build-system]
 requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
-updates:
-  - package-ecosystem: "pip"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "06:00"
-      timezone: "Etc/UTC"
-    open-pull-requests-limit: 5
-    labels:
-      - "dependencies"
-      - "python"
-    commit-message:
-      prefix: "deps"
-    groups:
-      runtime-pyyaml:
-        patterns:
-          - "PyYAML"
-      build-setuptools:
-        patterns:
-          - "setuptools"
-      dev-pytest:
-        patterns:
-          - "pytest"
+[project]
+name = "commuted"
+version = "0.1.0"
+description = "Commuted story brief generator"
+readme = "readme.md"
+requires-python = ">=3.10"
+dependencies = []
 
-[project."optional-dependencies"]
+[project.optional-dependencies]
 dev = ["pytest>=8.0"]
 
 [project.scripts]
@@ -36,5 +19,5 @@ story-brief = "tools.generate_story_brief:main"
 [tool.setuptools.packages.find]
 include = ["tools*", "data*"]
 
-[tool.setuptools."package-data"]
+[tool.setuptools.package-data]
 "data.story_brief" = ["*.json"]
