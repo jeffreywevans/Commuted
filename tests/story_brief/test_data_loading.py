@@ -1,0 +1,93 @@
+from __future__ import annotations
+
+import json
+from pathlib import Path
+
+import pytest
+
+from tools import generate_story_brief as story_brief
+
+
+def _write_payload(path: Path, payload: object) -> None:
+    path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+def _write_minimal_dataset(data_dir: Path) -> None:
+    _write_payload(data_dir / "titles.json", {"titles": ["A Night in @setting"]})
+    _write_payload(
+        data_dir / "entities.json",
+        {
+            "character_availability": [
+                ["Alex", "2000-01-01", "2005-12-31"],
+                ["Jordan", "2000-01-01", "2005-12-31"],
+            ],
+            "setting_availability": [["Seattle", "2000-01-01", "2005-12-31"]],
+        },
+    )
+    _write_payload(
+        data_dir / "prompts.json",
+        {
+            "central_conflicts": ["Conflict"],
+            "inciting_pressures": ["Pressure"],
+            "ending_types": ["Open"],
+            "style_guidance": ["Tight"],
+            "weather": ["good"],
+        },
+    )
+    _write_payload(
+        data_dir / "config.json",
+        {
+            "schema_version": 1,
+            "dataset_version": "test",
+            "date_start": "2000-01-01",
+            "date_end": "2005-12-31",
+            "sexual_content_options": ["none"],
+            "sexual_content_weights": [1],
+            "word_count_targets": [1200],
+            "ordered_keys": [
+                "title",
+                "protagonist",
+                "secondary_character",
+                "time_period",
+                "setting",
+                "weather",
+                "central_conflict",
+                "inciting_pressure",
+                "ending_type",
+                "style_guidance",
+                "sexual_content_level",
+                "word_count_target",
+            ],
+            "writing_preamble": "Write.",
+        },
+    )
+
+
+def test_env_override_loads_dataset_from_custom_directory(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    data_dir = tmp_path / "override-data"
+    data_dir.mkdir()
+    _write_minimal_dataset(data_dir)
+
+    monkeypatch.setenv("COMMUTED_STORY_BRIEF_DATA_DIR", str(data_dir))
+    story_brief.get_data.cache_clear()
+    loaded = story_brief.load_story_data()
+
+    assert loaded["dataset_version"] == "test"
+    assert loaded["titles"] == ["A Night in @setting"]
+
+
+def test_env_override_rejects_unresolved_title_token(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    data_dir = tmp_path / "override-data"
+    data_dir.mkdir()
+    _write_minimal_dataset(data_dir)
+    _write_payload(data_dir / "titles.json", {"titles": ["Oops @protagnoist"]})
+
+    monkeypatch.setenv("COMMUTED_STORY_BRIEF_DATA_DIR", str(data_dir))
+    story_brief.get_data.cache_clear()
+
+    with pytest.raises(ValueError, match="unsupported token"):
+        story_brief.load_story_data()
