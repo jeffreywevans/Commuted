@@ -30,7 +30,7 @@ def test_explicit_date_overrides_random_date() -> None:
 
 
 def test_explicit_date_out_of_range_fails() -> None:
-    with pytest.raises(ValueError, match="--date must be between"):
+    with pytest.raises(ValueError, match="outside available range"):
         pick_story_fields(random.Random(1), selected_date=date(1900, 1, 1))
 
 
