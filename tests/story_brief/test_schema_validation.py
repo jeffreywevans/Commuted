@@ -71,7 +71,7 @@ def test_schema_validation_accepts_current_data() -> None:
                     + [e["character_availability"][0]]
                 }
             ),
-            "entities.character_availability contains duplicate value",
+            "overlapping availability windows",
         ),
         (
             lambda t, e, p, c: t.update({"titles": ["A Tale of @protagnoist"]}),
@@ -90,3 +90,15 @@ def test_schema_validation_rejects_bad_data(mutator, expected_msg: str) -> None:
 
     with pytest.raises(ValueError, match=expected_msg):
         validate_story_data(titles, entities, prompts, config)
+
+
+def test_schema_validation_allows_disjoint_availability_windows_for_same_name() -> None:
+    titles, entities, prompts, config = load_all()
+    entities = deepcopy(entities)
+    entities["character_availability"] = [
+        ["Alex", "2000-01-01", "2000-01-31"],
+        ["Alex", "2000-03-01", "2000-03-31"],
+        ["Jordan", "2000-01-01", "2000-12-31"],
+    ]
+
+    validate_story_data(titles, entities, prompts, config)

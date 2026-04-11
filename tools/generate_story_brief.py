@@ -142,8 +142,28 @@ def _validate_availability_rows(section_name: str, key: str, rows: Any) -> None:
                 f"{section_name}.{key}[{idx}] start must be <= end"
             )
 
-    names = [str(row[0]) for row in rows]
-    _validate_no_duplicate_strings(section_name, key, names)
+    _validate_availability_name_windows(section_name, key, rows)
+
+
+def _validate_availability_name_windows(section_name: str, key: str, rows: list[list[Any]]) -> None:
+    windows_by_name: dict[str, list[tuple[date, date, int]]] = {}
+    for idx, row in enumerate(rows):
+        name, start_boundary, end_boundary = row
+        name_norm = str(name).strip().casefold()
+        start = _parse_availability_boundary(start_boundary)
+        end = _parse_availability_boundary(end_boundary)
+        windows_by_name.setdefault(name_norm, []).append((start, end, idx))
+
+    for name_windows in windows_by_name.values():
+        name_windows.sort(key=lambda item: item[0])
+        for prev, curr in zip(name_windows, name_windows[1:]):
+            prev_start, prev_end, prev_idx = prev
+            curr_start, _, curr_idx = curr
+            if curr_start <= prev_end:
+                raise ValueError(
+                    f"{section_name}.{key} has overlapping availability windows "
+                    f"for the same name at indices {prev_idx} and {curr_idx}"
+                )
 
 
 def validate_story_data(
