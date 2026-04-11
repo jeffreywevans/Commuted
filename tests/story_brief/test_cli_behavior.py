@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -65,6 +66,16 @@ def test_default_output_dir_is_relative(tmp_path: Path) -> None:
     result = run_cli("--seed", "42", "--filename", filename, "--force", cwd=tmp_path)
     assert result.returncode == 0
     assert (tmp_path / "output" / "story-seeds" / filename).exists()
+
+
+def test_default_filename_is_auto_generated_when_omitted(tmp_path: Path) -> None:
+    outdir = tmp_path / "out"
+    result = run_cli("--seed", "42", "-o", str(outdir), "--force", cwd=tmp_path)
+    assert result.returncode == 0
+
+    files = list(outdir.glob("*.md"))
+    assert len(files) == 1
+    assert re.match(r"^\d{4}-\d{2}-\d{2} [a-z0-9-]+\.md$", files[0].name)
 
 
 def test_sanitize_filename_handles_invalid_chars_and_reserved_names() -> None:

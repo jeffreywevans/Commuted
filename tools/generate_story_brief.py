@@ -19,6 +19,7 @@ from typing import Any
 import yaml
 
 TITLE_TOKEN_PATTERN = re.compile(r"@(?P<key>protagonist|setting|time_period)\b")
+ANY_TITLE_TOKEN_PATTERN = re.compile(r"@(?P<key>[A-Za-z_]\w*)\b")
 EXPECTED_GENERATED_FIELD_KEYS = {
     "title",
     "protagonist",
@@ -86,6 +87,29 @@ def _validate_string_list(section_name: str, key: str, values: Any) -> None:
             raise ValueError(f"{section_name}.{key}[{idx}] must be a non-empty string")
 
 
+def _validate_no_duplicate_strings(section_name: str, key: str, values: list[str]) -> None:
+    seen: dict[str, int] = {}
+    for idx, value in enumerate(values):
+        normalized = value.strip().casefold()
+        if normalized in seen:
+            first_idx = seen[normalized]
+            raise ValueError(
+                f"{section_name}.{key} contains duplicate value at index {idx} "
+                f"(first seen at index {first_idx})"
+            )
+        seen[normalized] = idx
+
+
+def _validate_title_tokens(values: list[str]) -> None:
+    allowed = {"protagonist", "setting", "time_period"}
+    for idx, value in enumerate(values):
+        for token in ANY_TITLE_TOKEN_PATTERN.findall(value):
+            if token not in allowed:
+                raise ValueError(
+                    f"titles.titles[{idx}] contains unsupported token '@{token}'"
+                )
+
+
 def _parse_availability_boundary(value: Any) -> date:
     if isinstance(value, bool):
         raise ValueError("boundary values must not be booleans")
@@ -118,6 +142,9 @@ def _validate_availability_rows(section_name: str, key: str, rows: Any) -> None:
                 f"{section_name}.{key}[{idx}] start must be <= end"
             )
 
+    names = [str(row[0]) for row in rows]
+    _validate_no_duplicate_strings(section_name, key, names)
+
 
 def validate_story_data(
     titles: dict[str, Any],
@@ -127,6 +154,8 @@ def validate_story_data(
 ) -> None:
     _require_keys("titles", titles, {"titles"})
     _validate_string_list("titles", "titles", titles["titles"])
+    _validate_no_duplicate_strings("titles", "titles", titles["titles"])
+    _validate_title_tokens(titles["titles"])
 
     _require_keys(
         "entities",
@@ -152,10 +181,15 @@ def validate_story_data(
         },
     )
     _validate_string_list("prompts", "central_conflicts", prompts["central_conflicts"])
+    _validate_no_duplicate_strings("prompts", "central_conflicts", prompts["central_conflicts"])
     _validate_string_list("prompts", "inciting_pressures", prompts["inciting_pressures"])
+    _validate_no_duplicate_strings("prompts", "inciting_pressures", prompts["inciting_pressures"])
     _validate_string_list("prompts", "ending_types", prompts["ending_types"])
+    _validate_no_duplicate_strings("prompts", "ending_types", prompts["ending_types"])
     _validate_string_list("prompts", "style_guidance", prompts["style_guidance"])
+    _validate_no_duplicate_strings("prompts", "style_guidance", prompts["style_guidance"])
     _validate_string_list("prompts", "weather", prompts["weather"])
+    _validate_no_duplicate_strings("prompts", "weather", prompts["weather"])
 
     _require_keys(
         "config",

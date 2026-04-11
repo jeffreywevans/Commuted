@@ -1,4 +1,4 @@
-from tools.generate_story_brief import ORDERED_KEYS, to_markdown
+from tools.generate_story_brief import ORDERED_KEYS, render_title, to_markdown
 
 
 def test_markdown_front_matter_delimiters_present() -> None:
@@ -86,3 +86,13 @@ def test_yaml_keys_appear_in_configured_order() -> None:
     positions = [yaml_block.find(f"{key}:") for key in ORDERED_KEYS]
     assert all(pos >= 0 for pos in positions)
     assert positions == sorted(positions)
+
+
+def test_render_title_substitutes_all_supported_tokens() -> None:
+    title = render_title(
+        "From @setting with @protagonist (@time_period)",
+        protagonist="Kathy",
+        setting="Portland",
+        time_period="2001-03-01",
+    )
+    assert title == "From Portland with Kathy (2001-03-01)"
