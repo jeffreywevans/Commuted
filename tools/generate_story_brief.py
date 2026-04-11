@@ -25,6 +25,7 @@ EXPECTED_GENERATED_FIELD_KEYS = {
     "secondary_character",
     "time_period",
     "setting",
+    "weather",
     "central_conflict",
     "inciting_pressure",
     "ending_type",
@@ -51,9 +52,14 @@ def _data_file(filename: str) -> Any:
     Resolve a story-brief data file.
 
     Resolution order:
-      1) Explicit directory override via COMMUTED_STORY_BRIEF_DATA_DIR.
-      2) Installed package resources under data.story_brief.
-      3) Repo-relative fallback for source checkout execution.
+      1) COMMUTED_STORY_BRIEF_DATA_DIR env var (custom/system deployments).
+      2) Installed package resources under data.story_brief (packaged installs).
+      3) Repo-relative fallback for source checkout execution (local development).
+
+    Why this chain exists:
+      - Allows testing against alternate datasets without code changes.
+      - Supports container/ops setups that mount data at runtime.
+      - Keeps editable local data working during development.
     """
     override_raw = os.environ.get("COMMUTED_STORY_BRIEF_DATA_DIR")
     if override_raw:
@@ -80,6 +86,19 @@ def _validate_string_list(section_name: str, key: str, values: Any) -> None:
             raise ValueError(f"{section_name}.{key}[{idx}] must be a non-empty string")
 
 
+def _parse_availability_boundary(value: Any) -> date:
+    if isinstance(value, bool):
+        raise ValueError("boundary values must not be booleans")
+    if isinstance(value, int):
+        return date(value, 1, 1)
+    if isinstance(value, str):
+        try:
+            return date.fromisoformat(value)
+        except ValueError as exc:
+            raise ValueError("boundary string values must be ISO dates (YYYY-MM-DD)") from exc
+    raise ValueError("boundary values must be an integer year or ISO date string")
+
+
 def _validate_availability_rows(section_name: str, key: str, rows: Any) -> None:
     if not isinstance(rows, list) or not rows:
         raise ValueError(f"{section_name}.{key} must be a non-empty list")
@@ -89,16 +108,14 @@ def _validate_availability_rows(section_name: str, key: str, rows: Any) -> None:
         name, start_year, end_year = row
         if not isinstance(name, str) or not name.strip():
             raise ValueError(f"{section_name}.{key}[{idx}][0] must be a non-empty string")
-        if (
-            isinstance(start_year, bool)
-            or isinstance(end_year, bool)
-            or not isinstance(start_year, int)
-            or not isinstance(end_year, int)
-        ):
-            raise ValueError(f"{section_name}.{key}[{idx}] years must be integers")
-        if start_year > end_year:
+        try:
+            start = _parse_availability_boundary(start_year)
+            end = _parse_availability_boundary(end_year)
+        except ValueError as exc:
+            raise ValueError(f"{section_name}.{key}[{idx}] {exc}") from exc
+        if start > end:
             raise ValueError(
-                f"{section_name}.{key}[{idx}] start_year must be <= end_year"
+                f"{section_name}.{key}[{idx}] start must be <= end"
             )
 
 
@@ -126,12 +143,19 @@ def validate_story_data(
     _require_keys(
         "prompts",
         prompts,
-        {"central_conflicts", "inciting_pressures", "ending_types", "style_guidance"},
+        {
+            "central_conflicts",
+            "inciting_pressures",
+            "ending_types",
+            "style_guidance",
+            "weather",
+        },
     )
     _validate_string_list("prompts", "central_conflicts", prompts["central_conflicts"])
     _validate_string_list("prompts", "inciting_pressures", prompts["inciting_pressures"])
     _validate_string_list("prompts", "ending_types", prompts["ending_types"])
     _validate_string_list("prompts", "style_guidance", prompts["style_guidance"])
+    _validate_string_list("prompts", "weather", prompts["weather"])
 
     _require_keys(
         "config",
@@ -215,8 +239,18 @@ def validate_story_data(
         raise ValueError("config.writing_preamble must be a non-empty string")
 
 
-def _tupleize_rows(rows: list[list[Any]]) -> list[tuple[str, int, int]]:
-    return [(str(name), int(start), int(end)) for name, start, end in rows]
+def _tupleize_character_rows(rows: list[list[Any]]) -> list[tuple[str, date, date]]:
+    return [
+        (str(name), _parse_availability_boundary(start), _parse_availability_boundary(end))
+        for name, start, end in rows
+    ]
+
+
+def _tupleize_setting_rows(rows: list[list[Any]]) -> list[tuple[str, date, date]]:
+    return [
+        (str(name), _parse_availability_boundary(start), _parse_availability_boundary(end))
+        for name, start, end in rows
+    ]
 
 
 def load_story_data() -> dict[str, Any]:
@@ -228,12 +262,13 @@ def load_story_data() -> dict[str, Any]:
 
     return {
         "titles": [str(v) for v in titles["titles"]],
-        "character_availability": _tupleize_rows(entities["character_availability"]),
-        "setting_availability": _tupleize_rows(entities["setting_availability"]),
+        "character_availability": _tupleize_character_rows(entities["character_availability"]),
+        "setting_availability": _tupleize_setting_rows(entities["setting_availability"]),
         "central_conflicts": [str(v) for v in prompts["central_conflicts"]],
         "inciting_pressures": [str(v) for v in prompts["inciting_pressures"]],
         "ending_types": [str(v) for v in prompts["ending_types"]],
         "style_guidance": [str(v) for v in prompts["style_guidance"]],
+        "weather": [str(v) for v in prompts["weather"]],
         "date_start": date.fromisoformat(str(config["date_start"])),
         "date_end": date.fromisoformat(str(config["date_end"])),
         "sexual_content_options": [str(v) for v in config["sexual_content_options"]],
@@ -260,6 +295,7 @@ _COMPAT_ALIASES: dict[str, str] = {
     "INCITING_PRESSURES": "inciting_pressures",
     "ENDING_TYPES": "ending_types",
     "STYLE_GUIDANCE": "style_guidance",
+    "WEATHER": "weather",
     "DATE_START": "date_start",
     "DATE_END": "date_end",
     "SEXUAL_CONTENT_OPTIONS": "sexual_content_options",
@@ -322,12 +358,11 @@ def random_date_in_range(
 
 
 def available_characters(selected_date: date) -> list[str]:
-    """Return characters available for the selected date's year."""
-    year = selected_date.year
+    """Return characters available for the selected date."""
     return [
         name
-        for name, start_year, end_year in get_data()["character_availability"]
-        if start_year <= year <= end_year
+        for name, start_date, end_date in get_data()["character_availability"]
+        if start_date <= selected_date <= end_date
     ]
 
 
@@ -343,12 +378,11 @@ def unique_preserving_order(values: list[str]) -> list[str]:
 
 
 def available_settings(selected_date: date) -> list[str]:
-    """Return settings available for the selected date's year."""
-    year = selected_date.year
+    """Return settings available for the selected date."""
     return [
         setting
-        for setting, start_year, end_year in get_data()["setting_availability"]
-        if start_year <= year <= end_year
+        for setting, start_date, end_date in get_data()["setting_availability"]
+        if start_date <= selected_date <= end_date
     ]
 
 
@@ -408,7 +442,9 @@ def pick_story_fields(
         selected_date = random_date_in_range(rng, data["date_start"], data["date_end"])
     elif not (data["date_start"] <= selected_date <= data["date_end"]):
         raise ValueError(
-            f"--date must be between {data['date_start'].isoformat()} and {data['date_end'].isoformat()}"
+            f"Date {selected_date.isoformat()} is outside available range "
+            f"({data['date_start'].isoformat()} to {data['date_end'].isoformat()}). "
+            "Try a date within the Commuted archive timeline."
         )
     time_period = selected_date.isoformat()
 
@@ -448,6 +484,7 @@ def pick_story_fields(
         "secondary_character": secondary_character,
         "time_period": time_period,
         "setting": setting,
+        "weather": rng.choice(data["weather"]),
         "central_conflict": rng.choice(data["central_conflicts"]),
         "inciting_pressure": rng.choice(data["inciting_pressures"]),
         "ending_type": rng.choice(data["ending_types"]),
