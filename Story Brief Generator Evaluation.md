@@ -44,15 +44,7 @@ The script is **well-structured and production-usable** for generating YAML-fron
 
 ## Issues Found (Current)
 
-1. **Boundary logic tied to year only**
-   - Availability uses `selected_date.year` and ignores month/day granularity.
-   - If future rules become date-specific (not year-wide), this will be too coarse.
-
-2. **Import-time data loading/validation side effects**
-   - `load_story_data()` executes at module import and raises immediately on data errors.
-   - This is fine for CLI-first usage, but makes library-style consumption and isolated unit tests less flexible than lazy loading would.
-
-3. **CI currently tracks only latest Python 3**
+1. **CI currently tracks only latest Python 3**
    - The workflow now uses `3.x`, which is useful for staying current.
    - However, testing only latest can miss regressions on still-supported earlier Python versions.
 
@@ -65,7 +57,8 @@ The script is **well-structured and production-usable** for generating YAML-fron
 - ✅ implemented: large constant tables are now externalized into JSON files.
 - ✅ implemented: schema validation for loaded JSON data (required keys, types, ranges, and integrity checks).
 - ✅ implemented: automated regression tests for weighted choice, schema/data integrity, deterministic generation invariants, markdown output structure, and CLI overwrite semantics.
-- Consider lazy-loading data behind an explicit `get_data()` path to reduce import-time side effects.
+- ✅ implemented: availability filtering now uses full date boundaries (`start_date <= selected_date <= end_date`) rather than year-only checks.
+- ✅ implemented: data loading is lazy and cached through `get_data()` with `@lru_cache(maxsize=1)`, removing import-time loading side effects.
 - Consider CI matrix testing (e.g., `3.11`, `3.12`, `3.x`) to balance stability + forward-compatibility.
 
 ## Verdict

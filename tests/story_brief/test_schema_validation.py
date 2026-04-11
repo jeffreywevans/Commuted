@@ -51,6 +51,29 @@ def test_schema_validation_accepts_current_data() -> None:
             lambda t, e, p, c: c.update({"word_count_targets": [True, 1200]}),
             "must be a positive integer",
         ),
+        (
+            lambda t, e, p, c: t.update({"titles": t["titles"] + [t["titles"][0]]}),
+            "titles.titles contains duplicate value",
+        ),
+        (
+            lambda t, e, p, c: p.update(
+                {"weather": p["weather"] + [p["weather"][0]]}
+            ),
+            "prompts.weather contains duplicate value",
+        ),
+        (
+            lambda t, e, p, c: e.update(
+                {
+                    "character_availability": e["character_availability"]
+                    + [e["character_availability"][0]]
+                }
+            ),
+            "entities.character_availability contains duplicate value",
+        ),
+        (
+            lambda t, e, p, c: t.update({"titles": ["A Tale of @protagnoist"]}),
+            "unsupported token",
+        ),
     ],
 )
 def test_schema_validation_rejects_bad_data(mutator, expected_msg: str) -> None:
