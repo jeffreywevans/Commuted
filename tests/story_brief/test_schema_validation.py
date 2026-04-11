@@ -1,15 +1,18 @@
 from copy import deepcopy
+import json
+from pathlib import Path
 
 import pytest
 
-from tools.generate_story_brief import _data_file, _load_json, validate_story_data
+from tools.generate_story_brief import validate_story_data
 
 
 def load_all():
-    titles = _load_json(_data_file("titles.json"))
-    entities = _load_json(_data_file("entities.json"))
-    prompts = _load_json(_data_file("prompts.json"))
-    config = _load_json(_data_file("config.json"))
+    data_dir = Path(__file__).resolve().parents[2] / "data" / "story_brief"
+    titles = json.loads((data_dir / "titles.json").read_text(encoding="utf-8"))
+    entities = json.loads((data_dir / "entities.json").read_text(encoding="utf-8"))
+    prompts = json.loads((data_dir / "prompts.json").read_text(encoding="utf-8"))
+    config = json.loads((data_dir / "config.json").read_text(encoding="utf-8"))
     return titles, entities, prompts, config
 
 
@@ -51,6 +54,29 @@ def test_schema_validation_accepts_current_data() -> None:
             lambda t, e, p, c: c.update({"word_count_targets": [True, 1200]}),
             "must be a positive integer",
         ),
+        (
+            lambda t, e, p, c: t.update({"titles": t["titles"] + [t["titles"][0]]}),
+            "titles.titles contains duplicate value",
+        ),
+        (
+            lambda t, e, p, c: p.update(
+                {"weather": p["weather"] + [p["weather"][0]]}
+            ),
+            "prompts.weather contains duplicate value",
+        ),
+        (
+            lambda t, e, p, c: e.update(
+                {
+                    "character_availability": e["character_availability"]
+                    + [e["character_availability"][0]]
+                }
+            ),
+            "overlapping availability windows",
+        ),
+        (
+            lambda t, e, p, c: t.update({"titles": ["A Tale of @protagnoist"]}),
+            "unsupported token",
+        ),
     ],
 )
 def test_schema_validation_rejects_bad_data(mutator, expected_msg: str) -> None:
@@ -64,3 +90,15 @@ def test_schema_validation_rejects_bad_data(mutator, expected_msg: str) -> None:
 
     with pytest.raises(ValueError, match=expected_msg):
         validate_story_data(titles, entities, prompts, config)
+
+
+def test_schema_validation_allows_disjoint_availability_windows_for_same_name() -> None:
+    titles, entities, prompts, config = load_all()
+    entities = deepcopy(entities)
+    entities["character_availability"] = [
+        ["Alex", "2000-01-01", "2000-01-31"],
+        ["Alex", "2000-03-01", "2000-03-31"],
+        ["Jordan", "2000-01-01", "2000-12-31"],
+    ]
+
+    validate_story_data(titles, entities, prompts, config)
