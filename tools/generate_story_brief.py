@@ -166,6 +166,15 @@ def _validate_availability_name_windows(section_name: str, key: str, rows: list[
                 )
 
 
+def _has_date_overlap(rows: list[list[Any]], range_start: date, range_end: date) -> bool:
+    for _, start_boundary, end_boundary in rows:
+        start = _parse_availability_boundary(start_boundary)
+        end = _parse_availability_boundary(end_boundary)
+        if start <= range_end and end >= range_start:
+            return True
+    return False
+
+
 def validate_story_data(
     titles: dict[str, Any],
     entities: dict[str, Any],
@@ -238,6 +247,15 @@ def validate_story_data(
         raise ValueError("config date_start/date_end must be ISO dates (YYYY-MM-DD)") from exc
     if start > end:
         raise ValueError("config.date_start must be <= config.date_end")
+
+    if not _has_date_overlap(entities["character_availability"], start, end):
+        raise ValueError(
+            "config date range has no overlap with entities.character_availability"
+        )
+    if not _has_date_overlap(entities["setting_availability"], start, end):
+        raise ValueError(
+            "config date range has no overlap with entities.setting_availability"
+        )
 
     _validate_string_list(
         "config", "sexual_content_options", config["sexual_content_options"]
