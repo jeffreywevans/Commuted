@@ -1,4 +1,6 @@
-version: 2
+["build-system"]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
 
 updates:
   - package-ecosystem: "pip"
@@ -25,16 +27,14 @@ updates:
         patterns:
           - "pytest"
 
-  - package-ecosystem: "github-actions"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "06:15"
-      timezone: "Etc/UTC"
-    open-pull-requests-limit: 3
-    labels:
-      - "dependencies"
-      - "github-actions"
-    commit-message:
-      prefix: "ci"
+[project."optional-dependencies"]
+dev = ["pytest>=8.0"]
+
+[project.scripts]
+story-brief = "tools.generate_story_brief:main"
+
+[tool.setuptools.packages.find]
+include = ["tools*", "data*"]
+
+[tool.setuptools."package-data"]
+"data.story_brief" = ["*.json"]
