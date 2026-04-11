@@ -12,7 +12,7 @@
 
 Welcome. You’ve found the vault.
 
-This is the official documentation archive of **Commuted**, the band that never stopped surviving. This project blends **fiction and fact**, **real people and invented moments**, and is filtered through a style best described as **sacred realism with a taste for sweat and feedback**.
+This is the official documentation archive of **Commuted**, the band that never stopped surviving. This project blends **fiction and fact, real people and invented moments**, and is filtered through a style best described as **sacred realism with a taste for sweat and feedback**.
 
 The world exists from **1989 to 2032**, with jumps, skips, collapses, and comebacks in between. Avril Lavigne is real. So is Lyme disease. So is the time Kathy threw a hi-hat at Jeremy Evans and called him a “studio fascist.” Most of the rest is yours to decide.
 
