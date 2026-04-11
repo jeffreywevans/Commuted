@@ -3,7 +3,7 @@ from datetime import date
 
 import pytest
 
-from tools.generate_story_brief import CHARACTER_AVAILABILITY, pick_story_fields
+from tools.generate_story_brief import get_data, pick_story_fields
 
 
 def test_same_seed_is_deterministic() -> None:
@@ -35,7 +35,10 @@ def test_explicit_date_out_of_range_fails() -> None:
 
 
 def test_selected_characters_are_valid_for_time_period_year() -> None:
-    availability = {name: (start, end) for name, start, end in CHARACTER_AVAILABILITY}
+    availability = {
+        name: (start, end)
+        for name, start, end in get_data()["character_availability"]
+    }
 
     for seed in range(200):
         fields = pick_story_fields(random.Random(seed))
