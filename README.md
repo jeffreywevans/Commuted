@@ -43,3 +43,19 @@ This project is alive. It is not just an archive. It is a breathing, snarling, f
 
 Treat it accordingly.
 
+---
+
+## ⚙️ Story brief generator configuration
+
+The story brief generator (`tools/generate_story_brief.py`) supports one environment override:
+
+- `COMMUTED_STORY_BRIEF_DATA_DIR`  
+  Optional path to a directory containing `titles.json`, `entities.json`, `prompts.json`, and `config.json`.
+
+### Data file resolution order
+
+When generating a brief, data files are resolved in this order:
+
+1. `COMMUTED_STORY_BRIEF_DATA_DIR` (best for custom/system deployments and mounted volumes).
+2. Installed package resources under `data.story_brief` (best for packaged installs).
+3. Repository-relative `data/story_brief` path (best for local development/source checkouts).

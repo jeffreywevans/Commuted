@@ -52,9 +52,14 @@ def _data_file(filename: str) -> Any:
     Resolve a story-brief data file.
 
     Resolution order:
-      1) Explicit directory override via COMMUTED_STORY_BRIEF_DATA_DIR.
-      2) Installed package resources under data.story_brief.
-      3) Repo-relative fallback for source checkout execution.
+      1) COMMUTED_STORY_BRIEF_DATA_DIR env var (custom/system deployments).
+      2) Installed package resources under data.story_brief (packaged installs).
+      3) Repo-relative fallback for source checkout execution (local development).
+
+    Why this chain exists:
+      - Allows testing against alternate datasets without code changes.
+      - Supports container/ops setups that mount data at runtime.
+      - Keeps editable local data working during development.
     """
     override_raw = os.environ.get("COMMUTED_STORY_BRIEF_DATA_DIR")
     if override_raw:
