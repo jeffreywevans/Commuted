@@ -38,6 +38,7 @@ def test_schema_validation_accepts_current_data() -> None:
             ),
             "ordered_keys mismatch",
         ),
+        (lambda t, e, p, c: p.pop("weather"), "missing required keys"),
         (
             lambda t, e, p, c: e["setting_availability"].append(["Bad Row", 2020]),
             r"must be \[name, start_year, end_year\]",

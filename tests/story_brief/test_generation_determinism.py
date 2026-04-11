@@ -60,3 +60,16 @@ def test_duplicate_character_rows_require_two_distinct_names(monkeypatch: pytest
 
     with pytest.raises(ValueError, match="two distinct available characters"):
         pick_story_fields(random.Random(7), selected_date=date(2000, 1, 1))
+
+
+def test_weather_value_is_from_allowed_pool() -> None:
+    allowed = {
+        "great",
+        "good",
+        "typical",
+        "lousy",
+        "the sky is trying to kill everyone",
+    }
+    for seed in range(25):
+        fields = pick_story_fields(random.Random(seed))
+        assert fields["weather"] in allowed

@@ -25,6 +25,7 @@ EXPECTED_GENERATED_FIELD_KEYS = {
     "secondary_character",
     "time_period",
     "setting",
+    "weather",
     "central_conflict",
     "inciting_pressure",
     "ending_type",
@@ -126,12 +127,19 @@ def validate_story_data(
     _require_keys(
         "prompts",
         prompts,
-        {"central_conflicts", "inciting_pressures", "ending_types", "style_guidance"},
+        {
+            "central_conflicts",
+            "inciting_pressures",
+            "ending_types",
+            "style_guidance",
+            "weather",
+        },
     )
     _validate_string_list("prompts", "central_conflicts", prompts["central_conflicts"])
     _validate_string_list("prompts", "inciting_pressures", prompts["inciting_pressures"])
     _validate_string_list("prompts", "ending_types", prompts["ending_types"])
     _validate_string_list("prompts", "style_guidance", prompts["style_guidance"])
+    _validate_string_list("prompts", "weather", prompts["weather"])
 
     _require_keys(
         "config",
@@ -234,6 +242,7 @@ def load_story_data() -> dict[str, Any]:
         "inciting_pressures": [str(v) for v in prompts["inciting_pressures"]],
         "ending_types": [str(v) for v in prompts["ending_types"]],
         "style_guidance": [str(v) for v in prompts["style_guidance"]],
+        "weather": [str(v) for v in prompts["weather"]],
         "date_start": date.fromisoformat(str(config["date_start"])),
         "date_end": date.fromisoformat(str(config["date_end"])),
         "sexual_content_options": [str(v) for v in config["sexual_content_options"]],
@@ -260,6 +269,7 @@ _COMPAT_ALIASES: dict[str, str] = {
     "INCITING_PRESSURES": "inciting_pressures",
     "ENDING_TYPES": "ending_types",
     "STYLE_GUIDANCE": "style_guidance",
+    "WEATHER": "weather",
     "DATE_START": "date_start",
     "DATE_END": "date_end",
     "SEXUAL_CONTENT_OPTIONS": "sexual_content_options",
@@ -448,6 +458,7 @@ def pick_story_fields(
         "secondary_character": secondary_character,
         "time_period": time_period,
         "setting": setting,
+        "weather": rng.choice(data["weather"]),
         "central_conflict": rng.choice(data["central_conflicts"]),
         "inciting_pressure": rng.choice(data["inciting_pressures"]),
         "ending_type": rng.choice(data["ending_types"]),
