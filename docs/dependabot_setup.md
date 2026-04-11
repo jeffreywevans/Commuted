@@ -2,13 +2,16 @@
 
 This repository is a good fit for two Dependabot ecosystems:
 
-1. **`pip`** for Python dependencies defined in `requirements.txt` and `requirements-dev.txt`.
+1. **`pip`** for Python dependencies defined in `pyproject.toml`, `requirements.txt`, and `requirements-dev.txt`.
 2. **`github-actions`** for GitHub Actions workflow dependencies (for example, `actions/checkout` and `actions/setup-python`).
 
 ## Proposed defaults
 
 - **Weekly updates** on Monday mornings (UTC) to avoid excessive PR churn.
-- **Grouped pip updates** to reduce PR noise while still separating runtime and development dependencies.
+- **Focused pip groups** for this repo's current dependencies:
+  - `runtime-pyyaml`
+  - `build-setuptools`
+  - `dev-pytest`
 - **Labels** so dependency PRs are easy to filter and triage.
 - **PR limits** to avoid backlog growth during busy weeks.
 

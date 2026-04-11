@@ -14,12 +14,13 @@ updates:
     commit-message:
       prefix: "deps"
     groups:
-      runtime-dependencies:
+      runtime-pyyaml:
         patterns:
-          - "*"
-        exclude-patterns:
-          - "pytest"
-      dev-dependencies:
+          - "PyYAML"
+      build-setuptools:
+        patterns:
+          - "setuptools"
+      dev-pytest:
         patterns:
           - "pytest"
 
