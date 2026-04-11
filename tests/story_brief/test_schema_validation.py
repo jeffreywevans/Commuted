@@ -45,7 +45,7 @@ def test_schema_validation_accepts_current_data() -> None:
         ),
         (
             lambda t, e, p, c: e["character_availability"].append(["Bool Year", True, 2000]),
-            "years must be integers",
+            "boundary values must not be booleans",
         ),
         (
             lambda t, e, p, c: c.update({"word_count_targets": [True, 1200]}),

@@ -81,6 +81,19 @@ def _validate_string_list(section_name: str, key: str, values: Any) -> None:
             raise ValueError(f"{section_name}.{key}[{idx}] must be a non-empty string")
 
 
+def _parse_availability_boundary(value: Any) -> date:
+    if isinstance(value, bool):
+        raise ValueError("boundary values must not be booleans")
+    if isinstance(value, int):
+        return date(value, 1, 1)
+    if isinstance(value, str):
+        try:
+            return date.fromisoformat(value)
+        except ValueError as exc:
+            raise ValueError("boundary string values must be ISO dates (YYYY-MM-DD)") from exc
+    raise ValueError("boundary values must be an integer year or ISO date string")
+
+
 def _validate_availability_rows(section_name: str, key: str, rows: Any) -> None:
     if not isinstance(rows, list) or not rows:
         raise ValueError(f"{section_name}.{key} must be a non-empty list")
@@ -90,16 +103,14 @@ def _validate_availability_rows(section_name: str, key: str, rows: Any) -> None:
         name, start_year, end_year = row
         if not isinstance(name, str) or not name.strip():
             raise ValueError(f"{section_name}.{key}[{idx}][0] must be a non-empty string")
-        if (
-            isinstance(start_year, bool)
-            or isinstance(end_year, bool)
-            or not isinstance(start_year, int)
-            or not isinstance(end_year, int)
-        ):
-            raise ValueError(f"{section_name}.{key}[{idx}] years must be integers")
-        if start_year > end_year:
+        try:
+            start = _parse_availability_boundary(start_year)
+            end = _parse_availability_boundary(end_year)
+        except ValueError as exc:
+            raise ValueError(f"{section_name}.{key}[{idx}] {exc}") from exc
+        if start > end:
             raise ValueError(
-                f"{section_name}.{key}[{idx}] start_year must be <= end_year"
+                f"{section_name}.{key}[{idx}] start must be <= end"
             )
 
 
@@ -223,8 +234,18 @@ def validate_story_data(
         raise ValueError("config.writing_preamble must be a non-empty string")
 
 
-def _tupleize_rows(rows: list[list[Any]]) -> list[tuple[str, int, int]]:
-    return [(str(name), int(start), int(end)) for name, start, end in rows]
+def _tupleize_character_rows(rows: list[list[Any]]) -> list[tuple[str, date, date]]:
+    return [
+        (str(name), _parse_availability_boundary(start), _parse_availability_boundary(end))
+        for name, start, end in rows
+    ]
+
+
+def _tupleize_setting_rows(rows: list[list[Any]]) -> list[tuple[str, date, date]]:
+    return [
+        (str(name), _parse_availability_boundary(start), _parse_availability_boundary(end))
+        for name, start, end in rows
+    ]
 
 
 def load_story_data() -> dict[str, Any]:
@@ -236,8 +257,8 @@ def load_story_data() -> dict[str, Any]:
 
     return {
         "titles": [str(v) for v in titles["titles"]],
-        "character_availability": _tupleize_rows(entities["character_availability"]),
-        "setting_availability": _tupleize_rows(entities["setting_availability"]),
+        "character_availability": _tupleize_character_rows(entities["character_availability"]),
+        "setting_availability": _tupleize_setting_rows(entities["setting_availability"]),
         "central_conflicts": [str(v) for v in prompts["central_conflicts"]],
         "inciting_pressures": [str(v) for v in prompts["inciting_pressures"]],
         "ending_types": [str(v) for v in prompts["ending_types"]],
@@ -332,12 +353,11 @@ def random_date_in_range(
 
 
 def available_characters(selected_date: date) -> list[str]:
-    """Return characters available for the selected date's year."""
-    year = selected_date.year
+    """Return characters available for the selected date."""
     return [
         name
-        for name, start_year, end_year in get_data()["character_availability"]
-        if start_year <= year <= end_year
+        for name, start_date, end_date in get_data()["character_availability"]
+        if start_date <= selected_date <= end_date
     ]
 
 
@@ -353,12 +373,11 @@ def unique_preserving_order(values: list[str]) -> list[str]:
 
 
 def available_settings(selected_date: date) -> list[str]:
-    """Return settings available for the selected date's year."""
-    year = selected_date.year
+    """Return settings available for the selected date."""
     return [
         setting
-        for setting, start_year, end_year in get_data()["setting_availability"]
-        if start_year <= year <= end_year
+        for setting, start_date, end_date in get_data()["setting_availability"]
+        if start_date <= selected_date <= end_date
     ]
 
 
