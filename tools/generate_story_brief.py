@@ -293,14 +293,7 @@ def validate_story_data(
         raise ValueError("config.writing_preamble must be a non-empty string")
 
 
-def _tupleize_character_rows(rows: list[list[Any]]) -> list[tuple[str, date, date]]:
-    return [
-        (str(name), _parse_availability_boundary(start), _parse_availability_boundary(end))
-        for name, start, end in rows
-    ]
-
-
-def _tupleize_setting_rows(rows: list[list[Any]]) -> list[tuple[str, date, date]]:
+def _tupleize_availability_rows(rows: list[list[Any]]) -> list[tuple[str, date, date]]:
     return [
         (str(name), _parse_availability_boundary(start), _parse_availability_boundary(end))
         for name, start, end in rows
@@ -316,8 +309,8 @@ def load_story_data() -> dict[str, Any]:
 
     return {
         "titles": [str(v) for v in titles["titles"]],
-        "character_availability": _tupleize_character_rows(entities["character_availability"]),
-        "setting_availability": _tupleize_setting_rows(entities["setting_availability"]),
+        "character_availability": _tupleize_availability_rows(entities["character_availability"]),
+        "setting_availability": _tupleize_availability_rows(entities["setting_availability"]),
         "central_conflicts": [str(v) for v in prompts["central_conflicts"]],
         "inciting_pressures": [str(v) for v in prompts["inciting_pressures"]],
         "ending_types": [str(v) for v in prompts["ending_types"]],
