@@ -678,7 +678,10 @@ def main() -> None:
         rng = random.Random(args.seed)
 
     if args.validate_strict:
-        validate_story_data_strict(get_data())
+        try:
+            validate_story_data_strict(get_data())
+        except ValueError as exc:
+            raise SystemExit(str(exc)) from exc
 
     selected_date: date | None = None
     if args.date:

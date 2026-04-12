@@ -101,4 +101,6 @@ def test_cli_rejects_out_of_range_date_without_traceback(tmp_path: Path) -> None
 def test_cli_validate_strict_flag_reports_dataset_gap(tmp_path: Path) -> None:
     result = run_cli("--seed", "42", "--validate-strict", "--print-only", cwd=tmp_path)
     assert result.returncode != 0
-    assert "fewer than two distinct available characters" in (result.stdout + result.stderr)
+    combined = result.stdout + result.stderr
+    assert "fewer than two distinct available characters" in combined
+    assert "Traceback" not in combined
