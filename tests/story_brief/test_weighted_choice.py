@@ -2,7 +2,7 @@ import random
 
 import pytest
 
-from tools.generate_story_brief import weighted_choice
+from tools.generate_story_brief import symmetric_peak_weights, weighted_choice
 
 
 def test_weighted_choice_returns_option_from_domain() -> None:
@@ -41,3 +41,16 @@ def test_weighted_choice_never_selects_zero_weight_option() -> None:
 
     for _ in range(100):
         assert weighted_choice(rng, options, weights) == "enabled"
+
+
+def test_symmetric_peak_weights_shape_for_odd_length() -> None:
+    assert symmetric_peak_weights(5) == [1, 2, 3, 2, 1]
+
+
+def test_symmetric_peak_weights_shape_for_even_length() -> None:
+    assert symmetric_peak_weights(4) == [1, 2, 2, 1]
+
+
+def test_symmetric_peak_weights_rejects_non_positive_lengths() -> None:
+    with pytest.raises(ValueError, match="greater than zero"):
+        symmetric_peak_weights(0)
