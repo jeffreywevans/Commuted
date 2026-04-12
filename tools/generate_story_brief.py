@@ -123,9 +123,12 @@ def _parse_availability_boundary(value: Any) -> date:
     raise ValueError("boundary values must be an integer year or ISO date string")
 
 
-def _validate_availability_rows(section_name: str, key: str, rows: Any) -> None:
+def _validate_availability_rows(
+    section_name: str, key: str, rows: Any
+) -> list[tuple[str, date, date]]:
     if not isinstance(rows, list) or not rows:
         raise ValueError(f"{section_name}.{key} must be a non-empty list")
+    parsed_rows: list[tuple[str, date, date]] = []
     for idx, row in enumerate(rows):
         if not isinstance(row, list) or len(row) != 3:
             raise ValueError(f"{section_name}.{key}[{idx}] must be [name, start_year, end_year]")
@@ -141,8 +144,10 @@ def _validate_availability_rows(section_name: str, key: str, rows: Any) -> None:
             raise ValueError(
                 f"{section_name}.{key}[{idx}] start must be <= end"
             )
+        parsed_rows.append((name, start, end))
 
     _validate_availability_name_windows(section_name, key, rows)
+    return parsed_rows
 
 
 def _validate_availability_name_windows(section_name: str, key: str, rows: list[list[Any]]) -> None:
@@ -166,10 +171,10 @@ def _validate_availability_name_windows(section_name: str, key: str, rows: list[
                 )
 
 
-def _has_date_overlap(rows: list[list[Any]], range_start: date, range_end: date) -> bool:
-    for _, start_boundary, end_boundary in rows:
-        start = _parse_availability_boundary(start_boundary)
-        end = _parse_availability_boundary(end_boundary)
+def _has_date_overlap(
+    rows: list[tuple[str, date, date]], range_start: date, range_end: date
+) -> bool:
+    for _, start, end in rows:
         if start <= range_end and end >= range_start:
             return True
     return False
@@ -191,10 +196,10 @@ def validate_story_data(
         entities,
         {"character_availability", "setting_availability"},
     )
-    _validate_availability_rows(
+    character_rows = _validate_availability_rows(
         "entities", "character_availability", entities["character_availability"]
     )
-    _validate_availability_rows(
+    setting_rows = _validate_availability_rows(
         "entities", "setting_availability", entities["setting_availability"]
     )
 
@@ -248,11 +253,11 @@ def validate_story_data(
     if start > end:
         raise ValueError("config.date_start must be <= config.date_end")
 
-    if not _has_date_overlap(entities["character_availability"], start, end):
+    if not _has_date_overlap(character_rows, start, end):
         raise ValueError(
             "config date range has no overlap with entities.character_availability"
         )
-    if not _has_date_overlap(entities["setting_availability"], start, end):
+    if not _has_date_overlap(setting_rows, start, end):
         raise ValueError(
             "config date range has no overlap with entities.setting_availability"
         )
