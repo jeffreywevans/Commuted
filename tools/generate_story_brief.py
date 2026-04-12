@@ -495,11 +495,20 @@ def render_title(
 
 def validate_story_data_strict(data: dict[str, Any]) -> None:
     """Validate per-date generation preconditions across the configured date range."""
-    selected_date = data["date_start"]
-    end_date = data["date_end"]
+    range_start = data["date_start"]
+    range_end = data["date_end"]
     one_day = timedelta(days=1)
 
-    while selected_date <= end_date:
+    checkpoints: set[date] = {range_start, range_end}
+    for _, row_start, row_end in data["character_availability"] + data["setting_availability"]:
+        clipped_start = max(range_start, row_start)
+        clipped_end = min(range_end, row_end)
+        if clipped_start <= clipped_end:
+            checkpoints.add(clipped_start)
+            if clipped_end + one_day <= range_end:
+                checkpoints.add(clipped_end + one_day)
+
+    for selected_date in sorted(checkpoints):
         characters = list(
             dict.fromkeys(
                 name
@@ -535,7 +544,6 @@ def validate_story_data_strict(data: dict[str, Any]) -> None:
                 "Strict validation failed: rendered title is empty on "
                 f"{selected_date.isoformat()}."
             )
-        selected_date += one_day
 
 
 def pick_story_fields(
