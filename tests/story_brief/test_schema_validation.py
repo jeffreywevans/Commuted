@@ -164,3 +164,21 @@ def test_strict_validation_rejects_dates_with_no_settings() -> None:
 
     with pytest.raises(ValueError, match="no available settings"):
         validate_story_data_strict(data)
+
+
+def test_strict_validation_handles_max_date_boundary_without_overflow() -> None:
+    max_day = load_story_data()["date_end"].replace(year=9999, month=12, day=31)
+    data = {
+        "date_start": max_day,
+        "date_end": max_day,
+        "character_availability": [
+            ("Alex", max_day, max_day),
+            ("Jordan", max_day, max_day),
+        ],
+        "setting_availability": [
+            ("Seattle", max_day, max_day),
+        ],
+        "titles": ["A Night in @setting"],
+    }
+
+    validate_story_data_strict(data)
