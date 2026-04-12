@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from tools.generate_story_brief import validate_story_data
+from tools.generate_story_brief import load_story_data, validate_story_data, validate_story_data_strict
 
 
 def load_all():
@@ -77,6 +77,18 @@ def test_schema_validation_accepts_current_data() -> None:
             lambda t, e, p, c: t.update({"titles": ["A Tale of @protagnoist"]}),
             "unsupported token",
         ),
+        (
+            lambda t, e, p, c: c.update(
+                {"date_start": "1900-01-01", "date_end": "1900-12-31"}
+            ),
+            "no overlap with entities.character_availability",
+        ),
+        (
+            lambda t, e, p, c: e.update(
+                {"setting_availability": [["Far Future", "2100-01-01", "2100-12-31"]]}
+            ),
+            "no overlap with entities.setting_availability",
+        ),
     ],
 )
 def test_schema_validation_rejects_bad_data(mutator, expected_msg: str) -> None:
@@ -102,3 +114,53 @@ def test_schema_validation_allows_disjoint_availability_windows_for_same_name() 
     ]
 
     validate_story_data(titles, entities, prompts, config)
+
+
+def test_strict_validation_accepts_well_formed_small_range() -> None:
+    data = load_story_data()
+    start = data["date_start"]
+    data["date_end"] = start
+    data["character_availability"] = [
+        ("Alex", start, start),
+        ("Jordan", start, start),
+    ]
+    data["setting_availability"] = [
+        ("Seattle", start, start),
+    ]
+    data["titles"] = ["A Night in @setting with @protagonist"]
+
+    validate_story_data_strict(data)
+
+
+def test_strict_validation_detects_current_dataset_gap() -> None:
+    # TODO(data-health): Update canonical dataset windows so strict validation
+    # can pass across the full configured range.
+    data = load_story_data()
+
+    with pytest.raises(ValueError, match="fewer than two distinct available characters"):
+        validate_story_data_strict(data)
+
+
+def test_strict_validation_rejects_dates_with_fewer_than_two_distinct_characters() -> None:
+    data = load_story_data()
+    data["date_start"] = data["date_end"] = data["date_start"]
+    data["character_availability"] = [
+        ("Only One", data["date_start"], data["date_end"]),
+        ("Only One", data["date_start"], data["date_end"]),
+    ]
+
+    with pytest.raises(ValueError, match="fewer than two distinct available characters"):
+        validate_story_data_strict(data)
+
+
+def test_strict_validation_rejects_dates_with_no_settings() -> None:
+    data = load_story_data()
+    data["date_start"] = data["date_end"] = data["date_start"]
+    data["setting_availability"] = []
+    data["character_availability"] = [
+        ("Alex", data["date_start"], data["date_end"]),
+        ("Jordan", data["date_start"], data["date_end"]),
+    ]
+
+    with pytest.raises(ValueError, match="no available settings"):
+        validate_story_data_strict(data)
