@@ -42,6 +42,8 @@ PROMPT_LIST_KEYS = (
     "weather",
 )
 ENTITY_AVAILABILITY_KEYS = ("character_availability", "setting_availability")
+CHARACTER_AVAILABILITY_KEY = ENTITY_AVAILABILITY_KEYS[0]
+SETTING_AVAILABILITY_KEY = ENTITY_AVAILABILITY_KEYS[1]
 WINDOWS_RESERVED_BASENAMES = {
     "con",
     "prn",
@@ -216,10 +218,10 @@ def _validate_entities(
     _require_keys("entities", entities, set(ENTITY_AVAILABILITY_KEYS))
     character_key, setting_key = ENTITY_AVAILABILITY_KEYS
     character_rows = _validate_availability_rows(
-        "entities", character_key, entities[character_key]
+        "entities", CHARACTER_AVAILABILITY_KEY, entities[CHARACTER_AVAILABILITY_KEY]
     )
     setting_rows = _validate_availability_rows(
-        "entities", setting_key, entities[setting_key]
+        "entities", SETTING_AVAILABILITY_KEY, entities[SETTING_AVAILABILITY_KEY]
     )
     return character_rows, setting_rows
 
