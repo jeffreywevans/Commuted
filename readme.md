@@ -59,3 +59,15 @@ When generating a brief, data files are resolved in this order:
 1. `COMMUTED_STORY_BRIEF_DATA_DIR` (best for custom/system deployments and mounted volumes).
 2. Installed package resources under `data.story_brief` (best for packaged installs).
 3. Repository-relative `data/story_brief` path (best for local development/source checkouts).
+
+### Strict validation mode
+
+For deeper dataset-health checks, run the generator with:
+
+- `--validate-strict`
+
+This performs per-date preflight checks across the configured date range to ensure each date has:
+- at least one available setting, and
+- at least two distinct available characters.
+
+If strict validation fails, the generator exits early with a targeted error message.
