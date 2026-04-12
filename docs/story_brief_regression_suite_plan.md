@@ -2,7 +2,9 @@
 
 ## Status
 
-✅ Initial regression suite implemented in `tests/story_brief/` with `pytest`.
+✅ Initial regression suite implemented in `tests/story_brief/` with `pytest`.  
+✅ Coverage now includes direct availability-boundary tests and config/date overlap validation failures.  
+🔄 Next phase: strict dataset-health coverage (date coverage + generation preconditions), not just schema shape.
 
 ## What is a regression suite?
 
@@ -122,12 +124,13 @@ These give strong protection for very little effort.
 
 ## Suggested rollout plan
 
-1. Add `pytest` to dev dependencies.
-2. Add baseline tests for schema + weighted choice.
-3. Add deterministic generation tests.
-4. Add CLI file-behavior tests with temporary directories.
-5. Wire into CI so every PR runs tests automatically.
-6. Add a Python-version matrix in CI (`3.11`, `3.12`, `3.x`) for compatibility coverage.
+1. Keep `pytest -q` as a required gate for all story-brief data/code changes.
+2. Add strict data-health tests to verify:
+   - every selectable date has at least one setting,
+   - every selectable date has at least two distinct characters.
+3. Add diagnostics tests for dead windows/unreachable records in availability data.
+4. Wire/confirm CI on every PR with a Python matrix (`3.11`, `3.12`, `3.x`) for compatibility coverage.
+5. Add lightweight snapshot/regression checks for representative `--seed` + `--date` combinations.
 
 ## Definition of done
 
