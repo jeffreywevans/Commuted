@@ -54,7 +54,9 @@ def test_selected_characters_are_valid_for_time_period_year() -> None:
         assert s_start <= selected <= s_end
 
 
-def test_duplicate_character_rows_require_two_distinct_names(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_duplicate_character_rows_require_two_distinct_names(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     from tools import generate_story_brief as story_brief
 
     data = dict(story_brief.get_data())
