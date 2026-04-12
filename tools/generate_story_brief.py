@@ -166,6 +166,15 @@ def _validate_availability_name_windows(section_name: str, key: str, rows: list[
                 )
 
 
+def _has_date_overlap(rows: list[list[Any]], range_start: date, range_end: date) -> bool:
+    for _, start_boundary, end_boundary in rows:
+        start = _parse_availability_boundary(start_boundary)
+        end = _parse_availability_boundary(end_boundary)
+        if start <= range_end and end >= range_start:
+            return True
+    return False
+
+
 def validate_story_data(
     titles: dict[str, Any],
     entities: dict[str, Any],
@@ -239,6 +248,15 @@ def validate_story_data(
     if start > end:
         raise ValueError("config.date_start must be <= config.date_end")
 
+    if not _has_date_overlap(entities["character_availability"], start, end):
+        raise ValueError(
+            "config date range has no overlap with entities.character_availability"
+        )
+    if not _has_date_overlap(entities["setting_availability"], start, end):
+        raise ValueError(
+            "config date range has no overlap with entities.setting_availability"
+        )
+
     _validate_string_list(
         "config", "sexual_content_options", config["sexual_content_options"]
     )
@@ -293,14 +311,7 @@ def validate_story_data(
         raise ValueError("config.writing_preamble must be a non-empty string")
 
 
-def _tupleize_character_rows(rows: list[list[Any]]) -> list[tuple[str, date, date]]:
-    return [
-        (str(name), _parse_availability_boundary(start), _parse_availability_boundary(end))
-        for name, start, end in rows
-    ]
-
-
-def _tupleize_setting_rows(rows: list[list[Any]]) -> list[tuple[str, date, date]]:
+def _tupleize_availability_rows(rows: list[list[Any]]) -> list[tuple[str, date, date]]:
     return [
         (str(name), _parse_availability_boundary(start), _parse_availability_boundary(end))
         for name, start, end in rows
@@ -316,8 +327,8 @@ def load_story_data() -> dict[str, Any]:
 
     return {
         "titles": [str(v) for v in titles["titles"]],
-        "character_availability": _tupleize_character_rows(entities["character_availability"]),
-        "setting_availability": _tupleize_setting_rows(entities["setting_availability"]),
+        "character_availability": _tupleize_availability_rows(entities["character_availability"]),
+        "setting_availability": _tupleize_availability_rows(entities["setting_availability"]),
         "central_conflicts": [str(v) for v in prompts["central_conflicts"]],
         "inciting_pressures": [str(v) for v in prompts["inciting_pressures"]],
         "ending_types": [str(v) for v in prompts["ending_types"]],
@@ -422,13 +433,7 @@ def available_characters(selected_date: date) -> list[str]:
 
 def unique_preserving_order(values: list[str]) -> list[str]:
     """Return unique items in first-seen order."""
-    seen: set[str] = set()
-    unique: list[str] = []
-    for value in values:
-        if value not in seen:
-            seen.add(value)
-            unique.append(value)
-    return unique
+    return list(dict.fromkeys(values))
 
 
 def available_settings(selected_date: date) -> list[str]:

@@ -77,6 +77,18 @@ def test_schema_validation_accepts_current_data() -> None:
             lambda t, e, p, c: t.update({"titles": ["A Tale of @protagnoist"]}),
             "unsupported token",
         ),
+        (
+            lambda t, e, p, c: c.update(
+                {"date_start": "1900-01-01", "date_end": "1900-12-31"}
+            ),
+            "no overlap with entities.character_availability",
+        ),
+        (
+            lambda t, e, p, c: e.update(
+                {"setting_availability": [["Far Future", "2100-01-01", "2100-12-31"]]}
+            ),
+            "no overlap with entities.setting_availability",
+        ),
     ],
 )
 def test_schema_validation_rejects_bad_data(mutator, expected_msg: str) -> None:
