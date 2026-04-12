@@ -44,7 +44,7 @@ def test_schema_validation_accepts_current_data() -> None:
         (lambda t, e, p, c: p.pop("weather"), "missing required keys"),
         (
             lambda t, e, p, c: e["setting_availability"].append(["Bad Row", 2020]),
-            r"must be \[name, start_year, end_year\]",
+            r"must be \[name, start, end\]",
         ),
         (
             lambda t, e, p, c: e["character_availability"].append(["Bool Year", True, 2000]),
