@@ -71,3 +71,13 @@ This performs per-date preflight checks across the configured date range to ensu
 - at least two distinct available characters.
 
 If strict validation fails, the generator exits early with a targeted error message.
+
+### Linting with Ruff
+
+Install development dependencies:
+
+- `pip install -r requirements-dev.txt`
+
+Run lint checks:
+
+- `ruff check .`

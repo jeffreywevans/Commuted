@@ -1,10 +1,14 @@
-from copy import deepcopy
 import json
+from copy import deepcopy
 from pathlib import Path
 
 import pytest
 
-from tools.generate_story_brief import load_story_data, validate_story_data, validate_story_data_strict
+from tools.generate_story_brief import (
+    load_story_data,
+    validate_story_data,
+    validate_story_data_strict,
+)
 
 
 def load_all():
