@@ -41,9 +41,12 @@ PROMPT_LIST_KEYS = (
     "style_guidance",
     "weather",
 )
-ENTITY_AVAILABILITY_KEYS = ("character_availability", "setting_availability")
-CHARACTER_AVAILABILITY_KEY = ENTITY_AVAILABILITY_KEYS[0]
-SETTING_AVAILABILITY_KEY = ENTITY_AVAILABILITY_KEYS[1]
+CHARACTER_AVAILABILITY_KEY = "character_availability"
+SETTING_AVAILABILITY_KEY = "setting_availability"
+ENTITY_AVAILABILITY_KEYS = (
+    CHARACTER_AVAILABILITY_KEY,
+    SETTING_AVAILABILITY_KEY,
+)
 WINDOWS_RESERVED_BASENAMES = {
     "con",
     "prn",
@@ -398,9 +401,9 @@ def get_data() -> dict[str, Any]:
 
 _COMPAT_ALIASES: dict[str, str] = {
     "TITLES": "titles",
-    "PROTAGONIST_AVAILABILITY": "character_availability",
-    "CHARACTER_AVAILABILITY": "character_availability",
-    "SETTING_AVAILABILITY": "setting_availability",
+    "PROTAGONIST_AVAILABILITY": CHARACTER_AVAILABILITY_KEY,
+    "CHARACTER_AVAILABILITY": CHARACTER_AVAILABILITY_KEY,
+    "SETTING_AVAILABILITY": SETTING_AVAILABILITY_KEY,
     "CENTRAL_CONFLICTS": "central_conflicts",
     "INCITING_PRESSURES": "inciting_pressures",
     "ENDING_TYPES": "ending_types",
