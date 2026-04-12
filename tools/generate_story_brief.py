@@ -188,6 +188,114 @@ def _has_date_overlap(
     return False
 
 
+def _validate_prompt_lists(prompts: dict[str, Any]) -> None:
+    prompt_keys = (
+        "central_conflicts",
+        "inciting_pressures",
+        "ending_types",
+        "style_guidance",
+        "weather",
+    )
+    for key in prompt_keys:
+        _validate_string_list("prompts", key, prompts[key])
+        _validate_no_duplicate_strings("prompts", key, prompts[key])
+
+
+def _validate_config_versions(config: dict[str, Any]) -> None:
+    if not isinstance(config["schema_version"], int) or config["schema_version"] < 1:
+        raise ValueError("config.schema_version must be an integer >= 1")
+    if not isinstance(config["dataset_version"], str) or not config["dataset_version"].strip():
+        raise ValueError("config.dataset_version must be a non-empty string")
+
+
+def _parse_and_validate_config_dates(config: dict[str, Any]) -> tuple[date, date]:
+    try:
+        start = date.fromisoformat(str(config["date_start"]))
+        end = date.fromisoformat(str(config["date_end"]))
+    except ValueError as exc:
+        raise ValueError("config date_start/date_end must be ISO dates (YYYY-MM-DD)") from exc
+    if start > end:
+        raise ValueError("config.date_start must be <= config.date_end")
+    return start, end
+
+
+def _validate_config_date_overlap(
+    character_rows: list[tuple[str, date, date]],
+    setting_rows: list[tuple[str, date, date]],
+    start: date,
+    end: date,
+) -> None:
+    if not _has_date_overlap(character_rows, start, end):
+        raise ValueError(
+            "config date range has no overlap with entities.character_availability"
+        )
+    if not _has_date_overlap(setting_rows, start, end):
+        raise ValueError(
+            "config date range has no overlap with entities.setting_availability"
+        )
+
+
+def _validate_sexual_content_weights(config: dict[str, Any]) -> None:
+    _validate_string_list(
+        "config", "sexual_content_options", config["sexual_content_options"]
+    )
+    weights = config["sexual_content_weights"]
+    if not isinstance(weights, list) or not weights:
+        raise ValueError("config.sexual_content_weights must be a non-empty list")
+    if len(weights) != len(config["sexual_content_options"]):
+        raise ValueError("config sexual_content_options/weights must be the same length")
+    for idx, value in enumerate(weights):
+        if isinstance(value, bool) or not isinstance(value, (int, float)):
+            raise ValueError(
+                f"config.sexual_content_weights[{idx}] must be a real number"
+            )
+        if not math.isfinite(value):
+            raise ValueError(
+                f"config.sexual_content_weights[{idx}] must be finite"
+            )
+        if value < 0:
+            raise ValueError(
+                f"config.sexual_content_weights[{idx}] must be non-negative"
+            )
+    if sum(weights) <= 0:
+        raise ValueError("config.sexual_content_weights must sum to > 0")
+
+
+def _validate_word_count_targets(config: dict[str, Any]) -> None:
+    targets = config["word_count_targets"]
+    if not isinstance(targets, list) or not targets:
+        raise ValueError("config.word_count_targets must be a non-empty list")
+    for idx, value in enumerate(targets):
+        if isinstance(value, bool) or not isinstance(value, int) or value <= 0:
+            raise ValueError(f"config.word_count_targets[{idx}] must be a positive integer")
+
+
+def _validate_ordered_keys(config: dict[str, Any]) -> None:
+    ordered_keys = config["ordered_keys"]
+    if not isinstance(ordered_keys, list) or not ordered_keys:
+        raise ValueError("config.ordered_keys must be a non-empty list")
+    if len(set(ordered_keys)) != len(ordered_keys):
+        raise ValueError("config.ordered_keys must not contain duplicates")
+    for idx, key in enumerate(ordered_keys):
+        if not isinstance(key, str) or not key.strip():
+            raise ValueError(f"config.ordered_keys[{idx}] must be a non-empty string")
+    ordered_key_set = set(ordered_keys)
+    missing = sorted(EXPECTED_GENERATED_FIELD_KEYS - ordered_key_set)
+    extra = sorted(ordered_key_set - EXPECTED_GENERATED_FIELD_KEYS)
+    if missing or extra:
+        problems: list[str] = []
+        if missing:
+            problems.append(f"missing expected keys: {', '.join(missing)}")
+        if extra:
+            problems.append(f"unexpected keys: {', '.join(extra)}")
+        raise ValueError(f"config.ordered_keys mismatch: {'; '.join(problems)}")
+
+
+def _validate_writing_preamble(config: dict[str, Any]) -> None:
+    if not isinstance(config["writing_preamble"], str) or not config["writing_preamble"].strip():
+        raise ValueError("config.writing_preamble must be a non-empty string")
+
+
 def validate_story_data(
     titles: dict[str, Any],
     entities: dict[str, Any],
@@ -222,16 +330,7 @@ def validate_story_data(
             "weather",
         },
     )
-    _validate_string_list("prompts", "central_conflicts", prompts["central_conflicts"])
-    _validate_no_duplicate_strings("prompts", "central_conflicts", prompts["central_conflicts"])
-    _validate_string_list("prompts", "inciting_pressures", prompts["inciting_pressures"])
-    _validate_no_duplicate_strings("prompts", "inciting_pressures", prompts["inciting_pressures"])
-    _validate_string_list("prompts", "ending_types", prompts["ending_types"])
-    _validate_no_duplicate_strings("prompts", "ending_types", prompts["ending_types"])
-    _validate_string_list("prompts", "style_guidance", prompts["style_guidance"])
-    _validate_no_duplicate_strings("prompts", "style_guidance", prompts["style_guidance"])
-    _validate_string_list("prompts", "weather", prompts["weather"])
-    _validate_no_duplicate_strings("prompts", "weather", prompts["weather"])
+    _validate_prompt_lists(prompts)
 
     _require_keys(
         "config",
@@ -248,80 +347,13 @@ def validate_story_data(
             "writing_preamble",
         },
     )
-    if not isinstance(config["schema_version"], int) or config["schema_version"] < 1:
-        raise ValueError("config.schema_version must be an integer >= 1")
-    if not isinstance(config["dataset_version"], str) or not config["dataset_version"].strip():
-        raise ValueError("config.dataset_version must be a non-empty string")
-
-    try:
-        start = date.fromisoformat(str(config["date_start"]))
-        end = date.fromisoformat(str(config["date_end"]))
-    except ValueError as exc:
-        raise ValueError("config date_start/date_end must be ISO dates (YYYY-MM-DD)") from exc
-    if start > end:
-        raise ValueError("config.date_start must be <= config.date_end")
-
-    if not _has_date_overlap(character_rows, start, end):
-        raise ValueError(
-            "config date range has no overlap with entities.character_availability"
-        )
-    if not _has_date_overlap(setting_rows, start, end):
-        raise ValueError(
-            "config date range has no overlap with entities.setting_availability"
-        )
-
-    _validate_string_list(
-        "config", "sexual_content_options", config["sexual_content_options"]
-    )
-    weights = config["sexual_content_weights"]
-    if not isinstance(weights, list) or not weights:
-        raise ValueError("config.sexual_content_weights must be a non-empty list")
-    if len(weights) != len(config["sexual_content_options"]):
-        raise ValueError("config sexual_content_options/weights must be the same length")
-    for idx, value in enumerate(weights):
-        if isinstance(value, bool) or not isinstance(value, (int, float)):
-            raise ValueError(
-                f"config.sexual_content_weights[{idx}] must be a real number"
-            )
-        if not math.isfinite(value):
-            raise ValueError(
-                f"config.sexual_content_weights[{idx}] must be finite"
-            )
-        if value < 0:
-            raise ValueError(
-                f"config.sexual_content_weights[{idx}] must be non-negative"
-            )
-    if sum(weights) <= 0:
-        raise ValueError("config.sexual_content_weights must sum to > 0")
-
-    targets = config["word_count_targets"]
-    if not isinstance(targets, list) or not targets:
-        raise ValueError("config.word_count_targets must be a non-empty list")
-    for idx, value in enumerate(targets):
-        if isinstance(value, bool) or not isinstance(value, int) or value <= 0:
-            raise ValueError(f"config.word_count_targets[{idx}] must be a positive integer")
-
-    ordered_keys = config["ordered_keys"]
-    if not isinstance(ordered_keys, list) or not ordered_keys:
-        raise ValueError("config.ordered_keys must be a non-empty list")
-    if len(set(ordered_keys)) != len(ordered_keys):
-        raise ValueError("config.ordered_keys must not contain duplicates")
-    for idx, key in enumerate(ordered_keys):
-        if not isinstance(key, str) or not key.strip():
-            raise ValueError(f"config.ordered_keys[{idx}] must be a non-empty string")
-    ordered_key_set = set(ordered_keys)
-    missing = sorted(EXPECTED_GENERATED_FIELD_KEYS - ordered_key_set)
-    extra = sorted(ordered_key_set - EXPECTED_GENERATED_FIELD_KEYS)
-    if missing or extra:
-        problems: list[str] = []
-        if missing:
-            problems.append(f"missing expected keys: {', '.join(missing)}")
-        if extra:
-            problems.append(f"unexpected keys: {', '.join(extra)}")
-        raise ValueError(f"config.ordered_keys mismatch: {'; '.join(problems)}")
-
-    if not isinstance(config["writing_preamble"], str) or not config["writing_preamble"].strip():
-        raise ValueError("config.writing_preamble must be a non-empty string")
+    _validate_config_versions(config)
+    start, end = _parse_and_validate_config_dates(config)
+    _validate_config_date_overlap(character_rows, setting_rows, start, end)
+    _validate_sexual_content_weights(config)
+    _validate_word_count_targets(config)
+    _validate_ordered_keys(config)
+    _validate_writing_preamble(config)
 
     return ValidatedStoryData(
         character_availability=character_rows,
