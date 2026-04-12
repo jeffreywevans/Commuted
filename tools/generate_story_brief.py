@@ -494,6 +494,13 @@ def weighted_choice(
     return options[-1]
 
 
+def symmetric_peak_weights(length: int) -> list[int]:
+    """Build symmetric bell-curve-like integer weights with a center peak."""
+    if length <= 0:
+        raise ValueError("length must be greater than zero")
+    return [min(index, length - 1 - index) + 1 for index in range(length)]
+
+
 def render_title(
     template: str, *, protagonist: str, setting: str, time_period: str
 ) -> str:
@@ -594,7 +601,11 @@ def pick_story_fields(
         "secondary_character": secondary_character,
         "time_period": time_period,
         "setting": setting,
-        "weather": rng.choice(data["weather"]),
+        "weather": weighted_choice(
+            rng,
+            data["weather"],
+            symmetric_peak_weights(len(data["weather"])),
+        ),
         "central_conflict": rng.choice(data["central_conflicts"]),
         "inciting_pressure": rng.choice(data["inciting_pressures"]),
         "ending_type": rng.choice(data["ending_types"]),
