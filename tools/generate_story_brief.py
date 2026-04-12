@@ -255,11 +255,11 @@ def _validate_config_date_overlap(
 ) -> None:
     if not _has_date_overlap(character_rows, start, end):
         raise ValueError(
-            "config date range has no overlap with entities.character_availability"
+            f"config date range has no overlap with entities.{CHARACTER_AVAILABILITY_KEY}"
         )
     if not _has_date_overlap(setting_rows, start, end):
         raise ValueError(
-            "config date range has no overlap with entities.setting_availability"
+            f"config date range has no overlap with entities.{SETTING_AVAILABILITY_KEY}"
         )
 
 
@@ -375,8 +375,8 @@ def load_story_data() -> dict[str, Any]:
 
     return {
         "titles": [str(v) for v in titles["titles"]],
-        "character_availability": validated.character_availability,
-        "setting_availability": validated.setting_availability,
+        CHARACTER_AVAILABILITY_KEY: validated.character_availability,
+        SETTING_AVAILABILITY_KEY: validated.setting_availability,
         "central_conflicts": [str(v) for v in prompts["central_conflicts"]],
         "inciting_pressures": [str(v) for v in prompts["inciting_pressures"]],
         "ending_types": [str(v) for v in prompts["ending_types"]],
