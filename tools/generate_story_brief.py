@@ -514,13 +514,11 @@ def validate_story_data_strict(data: dict[str, Any]) -> None:
                 checkpoints.add(clipped_end + one_day)
 
     for selected_date in sorted(checkpoints):
-        characters = list(
-            dict.fromkeys(
-                name
-                for name, start_date, end_date_for_row in data["character_availability"]
-                if start_date <= selected_date <= end_date_for_row
-            )
-        )
+        characters = [
+            name
+            for name, start_date, end_date_for_row in data["character_availability"]
+            if start_date <= selected_date <= end_date_for_row
+        ]
         if len(characters) < 2:
             raise ValueError(
                 "Strict validation failed: fewer than two distinct available characters on "

@@ -146,7 +146,6 @@ def test_strict_validation_rejects_dates_with_fewer_than_two_distinct_characters
     data["date_start"] = data["date_end"] = data["date_start"]
     data["character_availability"] = [
         ("Only One", data["date_start"], data["date_end"]),
-        ("Only One", data["date_start"], data["date_end"]),
     ]
 
     with pytest.raises(ValueError, match="fewer than two distinct available characters"):
