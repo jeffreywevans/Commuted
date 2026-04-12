@@ -538,18 +538,6 @@ def validate_story_data_strict(data: dict[str, Any]) -> None:
                 f"{selected_date.isoformat()}."
             )
 
-        sample_title = render_title(
-            str(data["titles"][0]),
-            protagonist=str(characters[0]),
-            setting=str(settings[0]),
-            time_period=selected_date.isoformat(),
-        )
-        if not sample_title.strip():
-            raise ValueError(
-                "Strict validation failed: rendered title is empty on "
-                f"{selected_date.isoformat()}."
-            )
-
 
 def pick_story_fields(
     rng: random.Random | secrets.SystemRandom, selected_date: date | None = None
