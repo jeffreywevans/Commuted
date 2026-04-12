@@ -474,7 +474,7 @@ def available_characters(selected_date: date) -> list[str]:
     """Return characters available for the selected date."""
     return [
         name
-        for name, start_date, end_date in get_data()["character_availability"]
+        for name, start_date, end_date in get_data()[CHARACTER_AVAILABILITY_KEY]
         if start_date <= selected_date <= end_date
     ]
 
@@ -488,7 +488,7 @@ def available_settings(selected_date: date) -> list[str]:
     """Return settings available for the selected date."""
     return [
         setting
-        for setting, start_date, end_date in get_data()["setting_availability"]
+        for setting, start_date, end_date in get_data()[SETTING_AVAILABILITY_KEY]
         if start_date <= selected_date <= end_date
     ]
 
@@ -556,7 +556,7 @@ def validate_story_data_strict(data: dict[str, Any]) -> None:
     one_day = timedelta(days=1)
 
     checkpoints: set[date] = {range_start, range_end}
-    for source in (data["character_availability"], data["setting_availability"]):
+    for source in (data[CHARACTER_AVAILABILITY_KEY], data[SETTING_AVAILABILITY_KEY]):
         for _, row_start, row_end in source:
             clipped_start = max(range_start, row_start)
             clipped_end = min(range_end, row_end)
@@ -568,7 +568,7 @@ def validate_story_data_strict(data: dict[str, Any]) -> None:
     for selected_date in sorted(checkpoints):
         characters = [
             name
-            for name, start_date, end_date_for_row in data["character_availability"]
+            for name, start_date, end_date_for_row in data[CHARACTER_AVAILABILITY_KEY]
             if start_date <= selected_date <= end_date_for_row
         ]
         if len(characters) < 2:
@@ -579,7 +579,7 @@ def validate_story_data_strict(data: dict[str, Any]) -> None:
 
         if not any(
             start_date <= selected_date <= end_date_for_row
-            for _, start_date, end_date_for_row in data["setting_availability"]
+            for _, start_date, end_date_for_row in data[SETTING_AVAILABILITY_KEY]
         ):
             raise ValueError(
                 "Strict validation failed: no available settings on "
