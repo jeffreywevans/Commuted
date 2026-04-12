@@ -494,11 +494,11 @@ def weighted_choice(
     return options[-1]
 
 
-def symmetric_peak_weights(length: int) -> list[int]:
-    """Build symmetric bell-curve-like integer weights with a center peak."""
+def symmetric_peak_weights(length: int) -> list[float]:
+    """Build symmetric bell-curve-like weights with a center peak."""
     if length <= 0:
         raise ValueError("length must be greater than zero")
-    return [min(index, length - 1 - index) + 1 for index in range(length)]
+    return [float(min(index, length - 1 - index) + 1) for index in range(length)]
 
 
 def render_title(
