@@ -34,6 +34,14 @@ EXPECTED_GENERATED_FIELD_KEYS = {
     "sexual_content_level",
     "word_count_target",
 }
+PROMPT_LIST_KEYS = (
+    "central_conflicts",
+    "inciting_pressures",
+    "ending_types",
+    "style_guidance",
+    "weather",
+)
+ENTITY_AVAILABILITY_KEYS = ("character_availability", "setting_availability")
 WINDOWS_RESERVED_BASENAMES = {
     "con",
     "prn",
@@ -189,16 +197,29 @@ def _has_date_overlap(
 
 
 def _validate_prompt_lists(prompts: dict[str, Any]) -> None:
-    prompt_keys = (
-        "central_conflicts",
-        "inciting_pressures",
-        "ending_types",
-        "style_guidance",
-        "weather",
-    )
-    for key in prompt_keys:
+    for key in PROMPT_LIST_KEYS:
         _validate_string_list("prompts", key, prompts[key])
         _validate_no_duplicate_strings("prompts", key, prompts[key])
+
+
+def _validate_titles(titles: dict[str, Any]) -> None:
+    _require_keys("titles", titles, {"titles"})
+    _validate_string_list("titles", "titles", titles["titles"])
+    _validate_no_duplicate_strings("titles", "titles", titles["titles"])
+    _validate_title_tokens(titles["titles"])
+
+
+def _validate_entities(
+    entities: dict[str, Any],
+) -> tuple[list[tuple[str, date, date]], list[tuple[str, date, date]]]:
+    _require_keys("entities", entities, set(ENTITY_AVAILABILITY_KEYS))
+    character_rows = _validate_availability_rows(
+        "entities", "character_availability", entities["character_availability"]
+    )
+    setting_rows = _validate_availability_rows(
+        "entities", "setting_availability", entities["setting_availability"]
+    )
+    return character_rows, setting_rows
 
 
 def _validate_config_versions(config: dict[str, Any]) -> None:
@@ -302,33 +323,13 @@ def validate_story_data(
     prompts: dict[str, Any],
     config: dict[str, Any],
 ) -> ValidatedStoryData:
-    _require_keys("titles", titles, {"titles"})
-    _validate_string_list("titles", "titles", titles["titles"])
-    _validate_no_duplicate_strings("titles", "titles", titles["titles"])
-    _validate_title_tokens(titles["titles"])
-
-    _require_keys(
-        "entities",
-        entities,
-        {"character_availability", "setting_availability"},
-    )
-    character_rows = _validate_availability_rows(
-        "entities", "character_availability", entities["character_availability"]
-    )
-    setting_rows = _validate_availability_rows(
-        "entities", "setting_availability", entities["setting_availability"]
-    )
+    _validate_titles(titles)
+    character_rows, setting_rows = _validate_entities(entities)
 
     _require_keys(
         "prompts",
         prompts,
-        {
-            "central_conflicts",
-            "inciting_pressures",
-            "ending_types",
-            "style_guidance",
-            "weather",
-        },
+        set(PROMPT_LIST_KEYS),
     )
     _validate_prompt_lists(prompts)
 
