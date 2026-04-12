@@ -142,6 +142,7 @@ def _validate_availability_rows(
         name, start_boundary, end_boundary = row
         if not isinstance(name, str) or not name.strip():
             raise ValueError(f"{section_name}.{key}[{idx}][0] must be a non-empty string")
+        name = name.strip()
         try:
             start = _parse_availability_boundary(start_boundary)
             end = _parse_availability_boundary(end_boundary)
@@ -163,7 +164,7 @@ def _validate_availability_name_windows(
     windows_by_name: dict[str, list[tuple[date, date, int]]] = {}
     for idx, row in enumerate(rows):
         name, start, end = row
-        name_norm = name.strip().casefold()
+        name_norm = name.casefold()
         windows_by_name.setdefault(name_norm, []).append((start, end, idx))
 
     for name_windows in windows_by_name.values():

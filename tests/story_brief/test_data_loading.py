@@ -78,3 +78,29 @@ def test_env_override_rejects_unresolved_title_token(
 
     with pytest.raises(ValueError, match="unsupported token"):
         story_brief.load_story_data()
+
+
+def test_load_story_data_strips_availability_names(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    data_dir = tmp_path / "override-data"
+    data_dir.mkdir()
+    _write_minimal_dataset(data_dir)
+    _write_payload(
+        data_dir / "entities.json",
+        {
+            "character_availability": [
+                ["  Alex  ", "2000-01-01", "2005-12-31"],
+                [" Jordan", "2000-01-01", "2005-12-31"],
+            ],
+            "setting_availability": [[" Seattle ", "2000-01-01", "2005-12-31"]],
+        },
+    )
+
+    monkeypatch.setenv("COMMUTED_STORY_BRIEF_DATA_DIR", str(data_dir))
+    story_brief.get_data.cache_clear()
+    loaded = story_brief.load_story_data()
+
+    assert loaded["character_availability"][0][0] == "Alex"
+    assert loaded["character_availability"][1][0] == "Jordan"
+    assert loaded["setting_availability"][0][0] == "Seattle"
