@@ -407,8 +407,8 @@ def sanitize_filename(filename: str) -> str:
     stem, suffix = Path(name).stem, Path(name).suffix
 
     # Remove control chars and characters invalid on common filesystems.
-    safe_stem = re.sub(r'[\x00-\x1f<>:"/\\\\|?*]+', "-", stem).strip(" .")
-    safe_suffix = re.sub(r'[\x00-\x1f<>:"/\\\\|?*]+', "", suffix).strip(" .")
+    safe_stem = re.sub(r'[\x00-\x1f<>:"/\\|?*]+', "-", stem).strip(" .")
+    safe_suffix = re.sub(r'[\x00-\x1f<>:"/\\|?*]+', "", suffix).strip(" .")
 
     if not safe_stem:
         safe_stem = "story-brief"
