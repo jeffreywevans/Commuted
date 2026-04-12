@@ -14,7 +14,7 @@ from datetime import date, datetime, timedelta
 from functools import lru_cache
 from importlib.resources import files
 from pathlib import Path
-from typing import Any
+from typing import Any, NamedTuple
 
 import yaml
 
@@ -42,6 +42,13 @@ WINDOWS_RESERVED_BASENAMES = {
     *(f"com{i}" for i in range(1, 10)),
     *(f"lpt{i}" for i in range(1, 10)),
 }
+
+
+class ValidatedStoryData(NamedTuple):
+    character_availability: list[tuple[str, date, date]]
+    setting_availability: list[tuple[str, date, date]]
+    date_start: date
+    date_end: date
 
 
 def _load_json(path: Any) -> dict[str, Any]:
@@ -185,7 +192,7 @@ def validate_story_data(
     entities: dict[str, Any],
     prompts: dict[str, Any],
     config: dict[str, Any],
-) -> tuple[list[tuple[str, date, date]], list[tuple[str, date, date]], date, date]:
+) -> ValidatedStoryData:
     _require_keys("titles", titles, {"titles"})
     _validate_string_list("titles", "titles", titles["titles"])
     _validate_no_duplicate_strings("titles", "titles", titles["titles"])
@@ -315,7 +322,12 @@ def validate_story_data(
     if not isinstance(config["writing_preamble"], str) or not config["writing_preamble"].strip():
         raise ValueError("config.writing_preamble must be a non-empty string")
 
-    return character_rows, setting_rows, start, end
+    return ValidatedStoryData(
+        character_availability=character_rows,
+        setting_availability=setting_rows,
+        date_start=start,
+        date_end=end,
+    )
 
 
 def load_story_data() -> dict[str, Any]:
@@ -323,19 +335,19 @@ def load_story_data() -> dict[str, Any]:
     entities = _load_json(_data_file("entities.json"))
     prompts = _load_json(_data_file("prompts.json"))
     config = _load_json(_data_file("config.json"))
-    character_rows, setting_rows, start, end = validate_story_data(titles, entities, prompts, config)
+    validated = validate_story_data(titles, entities, prompts, config)
 
     return {
         "titles": [str(v) for v in titles["titles"]],
-        "character_availability": character_rows,
-        "setting_availability": setting_rows,
+        "character_availability": validated.character_availability,
+        "setting_availability": validated.setting_availability,
         "central_conflicts": [str(v) for v in prompts["central_conflicts"]],
         "inciting_pressures": [str(v) for v in prompts["inciting_pressures"]],
         "ending_types": [str(v) for v in prompts["ending_types"]],
         "style_guidance": [str(v) for v in prompts["style_guidance"]],
         "weather": [str(v) for v in prompts["weather"]],
-        "date_start": start,
-        "date_end": end,
+        "date_start": validated.date_start,
+        "date_end": validated.date_end,
         "sexual_content_options": [str(v) for v in config["sexual_content_options"]],
         "sexual_content_weights": [float(v) for v in config["sexual_content_weights"]],
         "word_count_targets": [int(v) for v in config["word_count_targets"]],
