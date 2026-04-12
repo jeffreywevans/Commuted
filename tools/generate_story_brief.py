@@ -525,12 +525,10 @@ def validate_story_data_strict(data: dict[str, Any]) -> None:
                 f"{selected_date.isoformat()}."
             )
 
-        settings = [
-            setting
-            for setting, start_date, end_date_for_row in data["setting_availability"]
-            if start_date <= selected_date <= end_date_for_row
-        ]
-        if not settings:
+        if not any(
+            start_date <= selected_date <= end_date_for_row
+            for _, start_date, end_date_for_row in data["setting_availability"]
+        ):
             raise ValueError(
                 "Strict validation failed: no available settings on "
                 f"{selected_date.isoformat()}."
