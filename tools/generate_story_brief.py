@@ -493,6 +493,51 @@ def render_title(
     return TITLE_TOKEN_PATTERN.sub(lambda match: values[match.group("key")], template)
 
 
+def validate_story_data_strict(data: dict[str, Any]) -> None:
+    """Validate per-date generation preconditions across the configured date range."""
+    selected_date = data["date_start"]
+    end_date = data["date_end"]
+    one_day = timedelta(days=1)
+
+    while selected_date <= end_date:
+        characters = list(
+            dict.fromkeys(
+                name
+                for name, start_date, end_date_for_row in data["character_availability"]
+                if start_date <= selected_date <= end_date_for_row
+            )
+        )
+        if len(characters) < 2:
+            raise ValueError(
+                "Strict validation failed: fewer than two distinct available characters on "
+                f"{selected_date.isoformat()}."
+            )
+
+        settings = [
+            setting
+            for setting, start_date, end_date_for_row in data["setting_availability"]
+            if start_date <= selected_date <= end_date_for_row
+        ]
+        if not settings:
+            raise ValueError(
+                "Strict validation failed: no available settings on "
+                f"{selected_date.isoformat()}."
+            )
+
+        sample_title = render_title(
+            str(data["titles"][0]),
+            protagonist=str(characters[0]),
+            setting=str(settings[0]),
+            time_period=selected_date.isoformat(),
+        )
+        if not sample_title.strip():
+            raise ValueError(
+                "Strict validation failed: rendered title is empty on "
+                f"{selected_date.isoformat()}."
+            )
+        selected_date += one_day
+
+
 def pick_story_fields(
     rng: random.Random | secrets.SystemRandom, selected_date: date | None = None
 ) -> dict[str, str | int]:
@@ -616,6 +661,14 @@ def main() -> None:
         action="store_true",
         help="Print the generated markdown to the terminal and do not write a file.",
     )
+    parser.add_argument(
+        "--validate-strict",
+        action="store_true",
+        help=(
+            "Run strict per-date validation across the configured date range before generating "
+            "output."
+        ),
+    )
     args = parser.parse_args()
 
     rng: random.Random | secrets.SystemRandom
@@ -623,6 +676,9 @@ def main() -> None:
         rng = secrets.SystemRandom()
     else:
         rng = random.Random(args.seed)
+
+    if args.validate_strict:
+        validate_story_data_strict(get_data())
 
     selected_date: date | None = None
     if args.date:
