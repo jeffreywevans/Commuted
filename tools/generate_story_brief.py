@@ -131,13 +131,13 @@ def _validate_availability_rows(
     parsed_rows: list[tuple[str, date, date]] = []
     for idx, row in enumerate(rows):
         if not isinstance(row, list) or len(row) != 3:
-            raise ValueError(f"{section_name}.{key}[{idx}] must be [name, start_year, end_year]")
-        name, start_year, end_year = row
+            raise ValueError(f"{section_name}.{key}[{idx}] must be [name, start, end]")
+        name, start_boundary, end_boundary = row
         if not isinstance(name, str) or not name.strip():
             raise ValueError(f"{section_name}.{key}[{idx}][0] must be a non-empty string")
         try:
-            start = _parse_availability_boundary(start_year)
-            end = _parse_availability_boundary(end_year)
+            start = _parse_availability_boundary(start_boundary)
+            end = _parse_availability_boundary(end_boundary)
         except ValueError as exc:
             raise ValueError(f"{section_name}.{key}[{idx}] {exc}") from exc
         if start > end:
@@ -146,17 +146,17 @@ def _validate_availability_rows(
             )
         parsed_rows.append((name, start, end))
 
-    _validate_availability_name_windows(section_name, key, rows)
+    _validate_availability_name_windows(section_name, key, parsed_rows)
     return parsed_rows
 
 
-def _validate_availability_name_windows(section_name: str, key: str, rows: list[list[Any]]) -> None:
+def _validate_availability_name_windows(
+    section_name: str, key: str, rows: list[tuple[str, date, date]]
+) -> None:
     windows_by_name: dict[str, list[tuple[date, date, int]]] = {}
     for idx, row in enumerate(rows):
-        name, start_boundary, end_boundary = row
-        name_norm = str(name).strip().casefold()
-        start = _parse_availability_boundary(start_boundary)
-        end = _parse_availability_boundary(end_boundary)
+        name, start, end = row
+        name_norm = name.strip().casefold()
         windows_by_name.setdefault(name_norm, []).append((start, end, idx))
 
     for name_windows in windows_by_name.values():
@@ -185,7 +185,7 @@ def validate_story_data(
     entities: dict[str, Any],
     prompts: dict[str, Any],
     config: dict[str, Any],
-) -> None:
+) -> tuple[list[tuple[str, date, date]], list[tuple[str, date, date]], date, date]:
     _require_keys("titles", titles, {"titles"})
     _validate_string_list("titles", "titles", titles["titles"])
     _validate_no_duplicate_strings("titles", "titles", titles["titles"])
@@ -315,12 +315,7 @@ def validate_story_data(
     if not isinstance(config["writing_preamble"], str) or not config["writing_preamble"].strip():
         raise ValueError("config.writing_preamble must be a non-empty string")
 
-
-def _tupleize_availability_rows(rows: list[list[Any]]) -> list[tuple[str, date, date]]:
-    return [
-        (str(name), _parse_availability_boundary(start), _parse_availability_boundary(end))
-        for name, start, end in rows
-    ]
+    return character_rows, setting_rows, start, end
 
 
 def load_story_data() -> dict[str, Any]:
@@ -328,19 +323,19 @@ def load_story_data() -> dict[str, Any]:
     entities = _load_json(_data_file("entities.json"))
     prompts = _load_json(_data_file("prompts.json"))
     config = _load_json(_data_file("config.json"))
-    validate_story_data(titles, entities, prompts, config)
+    character_rows, setting_rows, start, end = validate_story_data(titles, entities, prompts, config)
 
     return {
         "titles": [str(v) for v in titles["titles"]],
-        "character_availability": _tupleize_availability_rows(entities["character_availability"]),
-        "setting_availability": _tupleize_availability_rows(entities["setting_availability"]),
+        "character_availability": character_rows,
+        "setting_availability": setting_rows,
         "central_conflicts": [str(v) for v in prompts["central_conflicts"]],
         "inciting_pressures": [str(v) for v in prompts["inciting_pressures"]],
         "ending_types": [str(v) for v in prompts["ending_types"]],
         "style_guidance": [str(v) for v in prompts["style_guidance"]],
         "weather": [str(v) for v in prompts["weather"]],
-        "date_start": date.fromisoformat(str(config["date_start"])),
-        "date_end": date.fromisoformat(str(config["date_end"])),
+        "date_start": start,
+        "date_end": end,
         "sexual_content_options": [str(v) for v in config["sexual_content_options"]],
         "sexual_content_weights": [float(v) for v in config["sexual_content_weights"]],
         "word_count_targets": [int(v) for v in config["word_count_targets"]],
@@ -505,7 +500,11 @@ def validate_story_data_strict(data: dict[str, Any]) -> None:
     one_day = timedelta(days=1)
 
     checkpoints: set[date] = {range_start, range_end}
-    for _, row_start, row_end in data["character_availability"] + data["setting_availability"]:
+    for _, row_start, row_end in (
+        row
+        for source in (data["character_availability"], data["setting_availability"])
+        for row in source
+    ):
         clipped_start = max(range_start, row_start)
         clipped_end = min(range_end, row_end)
         if clipped_start <= clipped_end:
