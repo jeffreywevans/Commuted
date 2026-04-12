@@ -156,7 +156,7 @@ def _validate_availability_name_windows(
     windows_by_name: dict[str, list[tuple[date, date, int]]] = {}
     for idx, row in enumerate(rows):
         name, start, end = row
-        name_norm = str(name).strip().casefold()
+        name_norm = name.strip().casefold()
         windows_by_name.setdefault(name_norm, []).append((start, end, idx))
 
     for name_windows in windows_by_name.values():
