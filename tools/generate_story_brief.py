@@ -197,6 +197,7 @@ def _has_date_overlap(
 
 
 def _validate_prompt_lists(prompts: dict[str, Any]) -> None:
+    _require_keys("prompts", prompts, set(PROMPT_LIST_KEYS))
     for key in PROMPT_LIST_KEYS:
         _validate_string_list("prompts", key, prompts[key])
         _validate_no_duplicate_strings("prompts", key, prompts[key])
@@ -213,11 +214,12 @@ def _validate_entities(
     entities: dict[str, Any],
 ) -> tuple[list[tuple[str, date, date]], list[tuple[str, date, date]]]:
     _require_keys("entities", entities, set(ENTITY_AVAILABILITY_KEYS))
+    character_key, setting_key = ENTITY_AVAILABILITY_KEYS
     character_rows = _validate_availability_rows(
-        "entities", "character_availability", entities["character_availability"]
+        "entities", character_key, entities[character_key]
     )
     setting_rows = _validate_availability_rows(
-        "entities", "setting_availability", entities["setting_availability"]
+        "entities", setting_key, entities[setting_key]
     )
     return character_rows, setting_rows
 
@@ -326,11 +328,6 @@ def validate_story_data(
     _validate_titles(titles)
     character_rows, setting_rows = _validate_entities(entities)
 
-    _require_keys(
-        "prompts",
-        prompts,
-        set(PROMPT_LIST_KEYS),
-    )
     _validate_prompt_lists(prompts)
 
     _require_keys(
