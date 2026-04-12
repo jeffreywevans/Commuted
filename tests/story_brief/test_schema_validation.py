@@ -143,8 +143,7 @@ def test_strict_validation_detects_current_dataset_gap() -> None:
 
 def test_strict_validation_rejects_dates_with_fewer_than_two_distinct_characters() -> None:
     data = load_story_data()
-    start = data["date_start"]
-    data["date_end"] = start
+    data["date_end"] = data["date_start"]
     data["character_availability"] = [
         ("Only One", data["date_start"], data["date_end"]),
     ]
@@ -155,8 +154,7 @@ def test_strict_validation_rejects_dates_with_fewer_than_two_distinct_characters
 
 def test_strict_validation_rejects_dates_with_no_settings() -> None:
     data = load_story_data()
-    start = data["date_start"]
-    data["date_end"] = start
+    data["date_end"] = data["date_start"]
     data["setting_availability"] = []
     data["character_availability"] = [
         ("Alex", data["date_start"], data["date_end"]),
