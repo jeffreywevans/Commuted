@@ -185,7 +185,7 @@ def validate_story_data(
     entities: dict[str, Any],
     prompts: dict[str, Any],
     config: dict[str, Any],
-) -> None:
+) -> tuple[list[tuple[str, date, date]], list[tuple[str, date, date]], date, date]:
     _require_keys("titles", titles, {"titles"})
     _validate_string_list("titles", "titles", titles["titles"])
     _validate_no_duplicate_strings("titles", "titles", titles["titles"])
@@ -315,12 +315,7 @@ def validate_story_data(
     if not isinstance(config["writing_preamble"], str) or not config["writing_preamble"].strip():
         raise ValueError("config.writing_preamble must be a non-empty string")
 
-
-def _tupleize_availability_rows(rows: list[list[Any]]) -> list[tuple[str, date, date]]:
-    return [
-        (str(name), _parse_availability_boundary(start), _parse_availability_boundary(end))
-        for name, start, end in rows
-    ]
+    return character_rows, setting_rows, start, end
 
 
 def load_story_data() -> dict[str, Any]:
@@ -328,19 +323,19 @@ def load_story_data() -> dict[str, Any]:
     entities = _load_json(_data_file("entities.json"))
     prompts = _load_json(_data_file("prompts.json"))
     config = _load_json(_data_file("config.json"))
-    validate_story_data(titles, entities, prompts, config)
+    character_rows, setting_rows, start, end = validate_story_data(titles, entities, prompts, config)
 
     return {
         "titles": [str(v) for v in titles["titles"]],
-        "character_availability": _tupleize_availability_rows(entities["character_availability"]),
-        "setting_availability": _tupleize_availability_rows(entities["setting_availability"]),
+        "character_availability": character_rows,
+        "setting_availability": setting_rows,
         "central_conflicts": [str(v) for v in prompts["central_conflicts"]],
         "inciting_pressures": [str(v) for v in prompts["inciting_pressures"]],
         "ending_types": [str(v) for v in prompts["ending_types"]],
         "style_guidance": [str(v) for v in prompts["style_guidance"]],
         "weather": [str(v) for v in prompts["weather"]],
-        "date_start": date.fromisoformat(str(config["date_start"])),
-        "date_end": date.fromisoformat(str(config["date_end"])),
+        "date_start": start,
+        "date_end": end,
         "sexual_content_options": [str(v) for v in config["sexual_content_options"]],
         "sexual_content_weights": [float(v) for v in config["sexual_content_weights"]],
         "word_count_targets": [int(v) for v in config["word_count_targets"]],
