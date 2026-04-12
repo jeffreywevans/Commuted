@@ -123,9 +123,12 @@ def _parse_availability_boundary(value: Any) -> date:
     raise ValueError("boundary values must be an integer year or ISO date string")
 
 
-def _validate_availability_rows(section_name: str, key: str, rows: Any) -> None:
+def _validate_availability_rows(
+    section_name: str, key: str, rows: Any
+) -> list[tuple[str, date, date]]:
     if not isinstance(rows, list) or not rows:
         raise ValueError(f"{section_name}.{key} must be a non-empty list")
+    parsed_rows: list[tuple[str, date, date]] = []
     for idx, row in enumerate(rows):
         if not isinstance(row, list) or len(row) != 3:
             raise ValueError(f"{section_name}.{key}[{idx}] must be [name, start_year, end_year]")
@@ -141,8 +144,10 @@ def _validate_availability_rows(section_name: str, key: str, rows: Any) -> None:
             raise ValueError(
                 f"{section_name}.{key}[{idx}] start must be <= end"
             )
+        parsed_rows.append((name, start, end))
 
     _validate_availability_name_windows(section_name, key, rows)
+    return parsed_rows
 
 
 def _validate_availability_name_windows(section_name: str, key: str, rows: list[list[Any]]) -> None:
@@ -166,6 +171,15 @@ def _validate_availability_name_windows(section_name: str, key: str, rows: list[
                 )
 
 
+def _has_date_overlap(
+    rows: list[tuple[str, date, date]], range_start: date, range_end: date
+) -> bool:
+    for _, start, end in rows:
+        if start <= range_end and end >= range_start:
+            return True
+    return False
+
+
 def validate_story_data(
     titles: dict[str, Any],
     entities: dict[str, Any],
@@ -182,10 +196,10 @@ def validate_story_data(
         entities,
         {"character_availability", "setting_availability"},
     )
-    _validate_availability_rows(
+    character_rows = _validate_availability_rows(
         "entities", "character_availability", entities["character_availability"]
     )
-    _validate_availability_rows(
+    setting_rows = _validate_availability_rows(
         "entities", "setting_availability", entities["setting_availability"]
     )
 
@@ -238,6 +252,15 @@ def validate_story_data(
         raise ValueError("config date_start/date_end must be ISO dates (YYYY-MM-DD)") from exc
     if start > end:
         raise ValueError("config.date_start must be <= config.date_end")
+
+    if not _has_date_overlap(character_rows, start, end):
+        raise ValueError(
+            "config date range has no overlap with entities.character_availability"
+        )
+    if not _has_date_overlap(setting_rows, start, end):
+        raise ValueError(
+            "config date range has no overlap with entities.setting_availability"
+        )
 
     _validate_string_list(
         "config", "sexual_content_options", config["sexual_content_options"]
@@ -293,14 +316,7 @@ def validate_story_data(
         raise ValueError("config.writing_preamble must be a non-empty string")
 
 
-def _tupleize_character_rows(rows: list[list[Any]]) -> list[tuple[str, date, date]]:
-    return [
-        (str(name), _parse_availability_boundary(start), _parse_availability_boundary(end))
-        for name, start, end in rows
-    ]
-
-
-def _tupleize_setting_rows(rows: list[list[Any]]) -> list[tuple[str, date, date]]:
+def _tupleize_availability_rows(rows: list[list[Any]]) -> list[tuple[str, date, date]]:
     return [
         (str(name), _parse_availability_boundary(start), _parse_availability_boundary(end))
         for name, start, end in rows
@@ -316,8 +332,8 @@ def load_story_data() -> dict[str, Any]:
 
     return {
         "titles": [str(v) for v in titles["titles"]],
-        "character_availability": _tupleize_character_rows(entities["character_availability"]),
-        "setting_availability": _tupleize_setting_rows(entities["setting_availability"]),
+        "character_availability": _tupleize_availability_rows(entities["character_availability"]),
+        "setting_availability": _tupleize_availability_rows(entities["setting_availability"]),
         "central_conflicts": [str(v) for v in prompts["central_conflicts"]],
         "inciting_pressures": [str(v) for v in prompts["inciting_pressures"]],
         "ending_types": [str(v) for v in prompts["ending_types"]],
@@ -422,13 +438,7 @@ def available_characters(selected_date: date) -> list[str]:
 
 def unique_preserving_order(values: list[str]) -> list[str]:
     """Return unique items in first-seen order."""
-    seen: set[str] = set()
-    unique: list[str] = []
-    for value in values:
-        if value not in seen:
-            seen.add(value)
-            unique.append(value)
-    return unique
+    return list(dict.fromkeys(values))
 
 
 def available_settings(selected_date: date) -> list[str]:
@@ -486,6 +496,59 @@ def render_title(
         "time_period": time_period,
     }
     return TITLE_TOKEN_PATTERN.sub(lambda match: values[match.group("key")], template)
+
+
+def validate_story_data_strict(data: dict[str, Any]) -> None:
+    """Validate per-date generation preconditions across the configured date range."""
+    range_start = data["date_start"]
+    range_end = data["date_end"]
+    one_day = timedelta(days=1)
+
+    checkpoints: set[date] = {range_start, range_end}
+    for _, row_start, row_end in data["character_availability"] + data["setting_availability"]:
+        clipped_start = max(range_start, row_start)
+        clipped_end = min(range_end, row_end)
+        if clipped_start <= clipped_end:
+            checkpoints.add(clipped_start)
+            if clipped_end + one_day <= range_end:
+                checkpoints.add(clipped_end + one_day)
+
+    for selected_date in sorted(checkpoints):
+        characters = list(
+            dict.fromkeys(
+                name
+                for name, start_date, end_date_for_row in data["character_availability"]
+                if start_date <= selected_date <= end_date_for_row
+            )
+        )
+        if len(characters) < 2:
+            raise ValueError(
+                "Strict validation failed: fewer than two distinct available characters on "
+                f"{selected_date.isoformat()}."
+            )
+
+        settings = [
+            setting
+            for setting, start_date, end_date_for_row in data["setting_availability"]
+            if start_date <= selected_date <= end_date_for_row
+        ]
+        if not settings:
+            raise ValueError(
+                "Strict validation failed: no available settings on "
+                f"{selected_date.isoformat()}."
+            )
+
+        sample_title = render_title(
+            str(data["titles"][0]),
+            protagonist=str(characters[0]),
+            setting=str(settings[0]),
+            time_period=selected_date.isoformat(),
+        )
+        if not sample_title.strip():
+            raise ValueError(
+                "Strict validation failed: rendered title is empty on "
+                f"{selected_date.isoformat()}."
+            )
 
 
 def pick_story_fields(
@@ -611,6 +674,14 @@ def main() -> None:
         action="store_true",
         help="Print the generated markdown to the terminal and do not write a file.",
     )
+    parser.add_argument(
+        "--validate-strict",
+        action="store_true",
+        help=(
+            "Run strict per-date validation across the configured date range before generating "
+            "output."
+        ),
+    )
     args = parser.parse_args()
 
     rng: random.Random | secrets.SystemRandom
@@ -618,6 +689,12 @@ def main() -> None:
         rng = secrets.SystemRandom()
     else:
         rng = random.Random(args.seed)
+
+    if args.validate_strict:
+        try:
+            validate_story_data_strict(get_data())
+        except ValueError as exc:
+            raise SystemExit(str(exc)) from exc
 
     selected_date: date | None = None
     if args.date:
