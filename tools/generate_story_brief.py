@@ -219,6 +219,7 @@ def _validate_entities(
     entities: dict[str, Any],
 ) -> tuple[list[tuple[str, date, date]], list[tuple[str, date, date]]]:
     _require_keys("entities", entities, set(ENTITY_AVAILABILITY_KEYS))
+    character_key, setting_key = ENTITY_AVAILABILITY_KEYS
     character_rows = _validate_availability_rows(
         "entities", CHARACTER_AVAILABILITY_KEY, entities[CHARACTER_AVAILABILITY_KEY]
     )
