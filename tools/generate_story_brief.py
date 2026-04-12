@@ -34,6 +34,14 @@ EXPECTED_GENERATED_FIELD_KEYS = {
     "sexual_content_level",
     "word_count_target",
 }
+PROMPT_LIST_KEYS = (
+    "central_conflicts",
+    "inciting_pressures",
+    "ending_types",
+    "style_guidance",
+    "weather",
+)
+ENTITY_AVAILABILITY_KEYS = ("character_availability", "setting_availability")
 WINDOWS_RESERVED_BASENAMES = {
     "con",
     "prn",
@@ -188,71 +196,40 @@ def _has_date_overlap(
     return False
 
 
-def validate_story_data(
-    titles: dict[str, Any],
-    entities: dict[str, Any],
-    prompts: dict[str, Any],
-    config: dict[str, Any],
-) -> ValidatedStoryData:
+def _validate_prompt_lists(prompts: dict[str, Any]) -> None:
+    for key in PROMPT_LIST_KEYS:
+        _validate_string_list("prompts", key, prompts[key])
+        _validate_no_duplicate_strings("prompts", key, prompts[key])
+
+
+def _validate_titles(titles: dict[str, Any]) -> None:
     _require_keys("titles", titles, {"titles"})
     _validate_string_list("titles", "titles", titles["titles"])
     _validate_no_duplicate_strings("titles", "titles", titles["titles"])
     _validate_title_tokens(titles["titles"])
 
-    _require_keys(
-        "entities",
-        entities,
-        {"character_availability", "setting_availability"},
-    )
+
+def _validate_entities(
+    entities: dict[str, Any],
+) -> tuple[list[tuple[str, date, date]], list[tuple[str, date, date]]]:
+    _require_keys("entities", entities, set(ENTITY_AVAILABILITY_KEYS))
     character_rows = _validate_availability_rows(
         "entities", "character_availability", entities["character_availability"]
     )
     setting_rows = _validate_availability_rows(
         "entities", "setting_availability", entities["setting_availability"]
     )
+    return character_rows, setting_rows
 
-    _require_keys(
-        "prompts",
-        prompts,
-        {
-            "central_conflicts",
-            "inciting_pressures",
-            "ending_types",
-            "style_guidance",
-            "weather",
-        },
-    )
-    _validate_string_list("prompts", "central_conflicts", prompts["central_conflicts"])
-    _validate_no_duplicate_strings("prompts", "central_conflicts", prompts["central_conflicts"])
-    _validate_string_list("prompts", "inciting_pressures", prompts["inciting_pressures"])
-    _validate_no_duplicate_strings("prompts", "inciting_pressures", prompts["inciting_pressures"])
-    _validate_string_list("prompts", "ending_types", prompts["ending_types"])
-    _validate_no_duplicate_strings("prompts", "ending_types", prompts["ending_types"])
-    _validate_string_list("prompts", "style_guidance", prompts["style_guidance"])
-    _validate_no_duplicate_strings("prompts", "style_guidance", prompts["style_guidance"])
-    _validate_string_list("prompts", "weather", prompts["weather"])
-    _validate_no_duplicate_strings("prompts", "weather", prompts["weather"])
 
-    _require_keys(
-        "config",
-        config,
-        {
-            "schema_version",
-            "dataset_version",
-            "date_start",
-            "date_end",
-            "sexual_content_options",
-            "sexual_content_weights",
-            "word_count_targets",
-            "ordered_keys",
-            "writing_preamble",
-        },
-    )
+def _validate_config_versions(config: dict[str, Any]) -> None:
     if not isinstance(config["schema_version"], int) or config["schema_version"] < 1:
         raise ValueError("config.schema_version must be an integer >= 1")
     if not isinstance(config["dataset_version"], str) or not config["dataset_version"].strip():
         raise ValueError("config.dataset_version must be a non-empty string")
 
+
+def _parse_and_validate_config_dates(config: dict[str, Any]) -> tuple[date, date]:
     try:
         start = date.fromisoformat(str(config["date_start"]))
         end = date.fromisoformat(str(config["date_end"]))
@@ -260,7 +237,15 @@ def validate_story_data(
         raise ValueError("config date_start/date_end must be ISO dates (YYYY-MM-DD)") from exc
     if start > end:
         raise ValueError("config.date_start must be <= config.date_end")
+    return start, end
 
+
+def _validate_config_date_overlap(
+    character_rows: list[tuple[str, date, date]],
+    setting_rows: list[tuple[str, date, date]],
+    start: date,
+    end: date,
+) -> None:
     if not _has_date_overlap(character_rows, start, end):
         raise ValueError(
             "config date range has no overlap with entities.character_availability"
@@ -270,6 +255,8 @@ def validate_story_data(
             "config date range has no overlap with entities.setting_availability"
         )
 
+
+def _validate_sexual_content_weights(config: dict[str, Any]) -> None:
     _validate_string_list(
         "config", "sexual_content_options", config["sexual_content_options"]
     )
@@ -294,6 +281,8 @@ def validate_story_data(
     if sum(weights) <= 0:
         raise ValueError("config.sexual_content_weights must sum to > 0")
 
+
+def _validate_word_count_targets(config: dict[str, Any]) -> None:
     targets = config["word_count_targets"]
     if not isinstance(targets, list) or not targets:
         raise ValueError("config.word_count_targets must be a non-empty list")
@@ -301,6 +290,8 @@ def validate_story_data(
         if isinstance(value, bool) or not isinstance(value, int) or value <= 0:
             raise ValueError(f"config.word_count_targets[{idx}] must be a positive integer")
 
+
+def _validate_ordered_keys(config: dict[str, Any]) -> None:
     ordered_keys = config["ordered_keys"]
     if not isinstance(ordered_keys, list) or not ordered_keys:
         raise ValueError("config.ordered_keys must be a non-empty list")
@@ -320,8 +311,50 @@ def validate_story_data(
             problems.append(f"unexpected keys: {', '.join(extra)}")
         raise ValueError(f"config.ordered_keys mismatch: {'; '.join(problems)}")
 
+
+def _validate_writing_preamble(config: dict[str, Any]) -> None:
     if not isinstance(config["writing_preamble"], str) or not config["writing_preamble"].strip():
         raise ValueError("config.writing_preamble must be a non-empty string")
+
+
+def validate_story_data(
+    titles: dict[str, Any],
+    entities: dict[str, Any],
+    prompts: dict[str, Any],
+    config: dict[str, Any],
+) -> ValidatedStoryData:
+    _validate_titles(titles)
+    character_rows, setting_rows = _validate_entities(entities)
+
+    _require_keys(
+        "prompts",
+        prompts,
+        set(PROMPT_LIST_KEYS),
+    )
+    _validate_prompt_lists(prompts)
+
+    _require_keys(
+        "config",
+        config,
+        {
+            "schema_version",
+            "dataset_version",
+            "date_start",
+            "date_end",
+            "sexual_content_options",
+            "sexual_content_weights",
+            "word_count_targets",
+            "ordered_keys",
+            "writing_preamble",
+        },
+    )
+    _validate_config_versions(config)
+    start, end = _parse_and_validate_config_dates(config)
+    _validate_config_date_overlap(character_rows, setting_rows, start, end)
+    _validate_sexual_content_weights(config)
+    _validate_word_count_targets(config)
+    _validate_ordered_keys(config)
+    _validate_writing_preamble(config)
 
     return ValidatedStoryData(
         character_availability=character_rows,
