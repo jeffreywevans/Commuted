@@ -494,6 +494,7 @@ def weighted_choice(
     return options[-1]
 
 
+@lru_cache(maxsize=16)
 def symmetric_peak_weights(length: int) -> list[float]:
     """Build symmetric bell-curve-like weights with a center peak."""
     if length <= 0:

@@ -52,5 +52,6 @@ def test_symmetric_peak_weights_shape_for_even_length() -> None:
 
 
 def test_symmetric_peak_weights_rejects_non_positive_lengths() -> None:
-    with pytest.raises(ValueError, match="greater than zero"):
-        symmetric_peak_weights(0)
+    for length in (0, -1):
+        with pytest.raises(ValueError, match="greater than zero"):
+            symmetric_peak_weights(length)
