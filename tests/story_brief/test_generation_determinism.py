@@ -74,7 +74,7 @@ def test_weather_value_is_from_allowed_pool() -> None:
         "good",
         "typical",
         "lousy",
-        "the sky is trying to kill everyone",
+        "the sky is trying to kill someone",
     }
     for seed in range(25):
         fields = pick_story_fields(random.Random(seed))
