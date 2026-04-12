@@ -513,17 +513,14 @@ def validate_story_data_strict(data: dict[str, Any]) -> None:
     one_day = timedelta(days=1)
 
     checkpoints: set[date] = {range_start, range_end}
-    for _, row_start, row_end in (
-        row
-        for source in (data["character_availability"], data["setting_availability"])
-        for row in source
-    ):
-        clipped_start = max(range_start, row_start)
-        clipped_end = min(range_end, row_end)
-        if clipped_start <= clipped_end:
-            checkpoints.add(clipped_start)
-            if clipped_end < range_end:
-                checkpoints.add(clipped_end + one_day)
+    for source in (data["character_availability"], data["setting_availability"]):
+        for _, row_start, row_end in source:
+            clipped_start = max(range_start, row_start)
+            clipped_end = min(range_end, row_end)
+            if clipped_start <= clipped_end:
+                checkpoints.add(clipped_start)
+                if clipped_end < range_end:
+                    checkpoints.add(clipped_end + one_day)
 
     for selected_date in sorted(checkpoints):
         characters = [
