@@ -41,7 +41,12 @@ PROMPT_LIST_KEYS = (
     "style_guidance",
     "weather",
 )
-ENTITY_AVAILABILITY_KEYS = ("character_availability", "setting_availability")
+CHARACTER_AVAILABILITY_KEY = "character_availability"
+SETTING_AVAILABILITY_KEY = "setting_availability"
+ENTITY_AVAILABILITY_KEYS = (
+    CHARACTER_AVAILABILITY_KEY,
+    SETTING_AVAILABILITY_KEY,
+)
 WINDOWS_RESERVED_BASENAMES = {
     "con",
     "prn",
@@ -197,6 +202,7 @@ def _has_date_overlap(
 
 
 def _validate_prompt_lists(prompts: dict[str, Any]) -> None:
+    _require_keys("prompts", prompts, set(PROMPT_LIST_KEYS))
     for key in PROMPT_LIST_KEYS:
         _validate_string_list("prompts", key, prompts[key])
         _validate_no_duplicate_strings("prompts", key, prompts[key])
@@ -214,10 +220,10 @@ def _validate_entities(
 ) -> tuple[list[tuple[str, date, date]], list[tuple[str, date, date]]]:
     _require_keys("entities", entities, set(ENTITY_AVAILABILITY_KEYS))
     character_rows = _validate_availability_rows(
-        "entities", "character_availability", entities["character_availability"]
+        "entities", CHARACTER_AVAILABILITY_KEY, entities[CHARACTER_AVAILABILITY_KEY]
     )
     setting_rows = _validate_availability_rows(
-        "entities", "setting_availability", entities["setting_availability"]
+        "entities", SETTING_AVAILABILITY_KEY, entities[SETTING_AVAILABILITY_KEY]
     )
     return character_rows, setting_rows
 
@@ -326,11 +332,6 @@ def validate_story_data(
     _validate_titles(titles)
     character_rows, setting_rows = _validate_entities(entities)
 
-    _require_keys(
-        "prompts",
-        prompts,
-        set(PROMPT_LIST_KEYS),
-    )
     _validate_prompt_lists(prompts)
 
     _require_keys(
@@ -399,9 +400,9 @@ def get_data() -> dict[str, Any]:
 
 _COMPAT_ALIASES: dict[str, str] = {
     "TITLES": "titles",
-    "PROTAGONIST_AVAILABILITY": "character_availability",
-    "CHARACTER_AVAILABILITY": "character_availability",
-    "SETTING_AVAILABILITY": "setting_availability",
+    "PROTAGONIST_AVAILABILITY": CHARACTER_AVAILABILITY_KEY,
+    "CHARACTER_AVAILABILITY": CHARACTER_AVAILABILITY_KEY,
+    "SETTING_AVAILABILITY": SETTING_AVAILABILITY_KEY,
     "CENTRAL_CONFLICTS": "central_conflicts",
     "INCITING_PRESSURES": "inciting_pressures",
     "ENDING_TYPES": "ending_types",
