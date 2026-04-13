@@ -376,16 +376,16 @@ def load_story_data() -> dict[str, Any]:
     prompts = _load_json(_data_file("prompts.json"))
     config = _load_json(_data_file("config.json"))
     validated = validate_story_data(titles, entities, prompts, config)
+    prompt_lists = {
+        key: [str(value) for value in prompts[key]]
+        for key in PROMPT_LIST_KEYS
+    }
 
     return {
         "titles": [str(v) for v in titles["titles"]],
         CHARACTER_AVAILABILITY_KEY: validated.character_availability,
         SETTING_AVAILABILITY_KEY: validated.setting_availability,
-        "central_conflicts": [str(v) for v in prompts["central_conflicts"]],
-        "inciting_pressures": [str(v) for v in prompts["inciting_pressures"]],
-        "ending_types": [str(v) for v in prompts["ending_types"]],
-        "style_guidance": [str(v) for v in prompts["style_guidance"]],
-        "weather": [str(v) for v in prompts["weather"]],
+        **prompt_lists,
         "date_start": validated.date_start,
         "date_end": validated.date_end,
         "sexual_content_options": [str(v) for v in config["sexual_content_options"]],
