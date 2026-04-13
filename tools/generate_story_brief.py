@@ -43,10 +43,10 @@ PROMPT_LIST_KEYS = (
 )
 CHARACTER_AVAILABILITY_KEY = "character_availability"
 SETTING_AVAILABILITY_KEY = "setting_availability"
-ENTITY_AVAILABILITY_KEYS = (
+ENTITY_AVAILABILITY_KEYS = {
     CHARACTER_AVAILABILITY_KEY,
     SETTING_AVAILABILITY_KEY,
-)
+}
 WINDOWS_RESERVED_BASENAMES = {
     "con",
     "prn",
@@ -218,8 +218,7 @@ def _validate_titles(titles: dict[str, Any]) -> None:
 def _validate_entities(
     entities: dict[str, Any],
 ) -> tuple[list[tuple[str, date, date]], list[tuple[str, date, date]]]:
-    _require_keys("entities", entities, set(ENTITY_AVAILABILITY_KEYS))
-    character_key, setting_key = ENTITY_AVAILABILITY_KEYS
+    _require_keys("entities", entities, ENTITY_AVAILABILITY_KEYS)
     character_rows = _validate_availability_rows(
         "entities", CHARACTER_AVAILABILITY_KEY, entities[CHARACTER_AVAILABILITY_KEY]
     )
