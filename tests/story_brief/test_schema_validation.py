@@ -136,13 +136,8 @@ def test_strict_validation_accepts_well_formed_small_range() -> None:
     validate_story_data_strict(data)
 
 
-def test_strict_validation_detects_current_dataset_gap() -> None:
-    # TODO(data-health): Update canonical dataset windows so strict validation
-    # can pass across the full configured range.
-    data = load_story_data()
-
-    with pytest.raises(ValueError, match="fewer than two distinct available characters"):
-        validate_story_data_strict(data)
+def test_strict_validation_accepts_current_dataset_range() -> None:
+    validate_story_data_strict(load_story_data())
 
 
 def test_strict_validation_rejects_dates_with_fewer_than_two_distinct_characters() -> None:
