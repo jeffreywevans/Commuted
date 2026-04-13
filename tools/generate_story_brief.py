@@ -41,7 +41,12 @@ PROMPT_LIST_KEYS = (
     "style_guidance",
     "weather",
 )
-ENTITY_AVAILABILITY_KEYS = ("character_availability", "setting_availability")
+CHARACTER_AVAILABILITY_KEY = "character_availability"
+SETTING_AVAILABILITY_KEY = "setting_availability"
+ENTITY_AVAILABILITY_KEYS = {
+    CHARACTER_AVAILABILITY_KEY,
+    SETTING_AVAILABILITY_KEY,
+}
 WINDOWS_RESERVED_BASENAMES = {
     "con",
     "prn",
@@ -197,6 +202,7 @@ def _has_date_overlap(
 
 
 def _validate_prompt_lists(prompts: dict[str, Any]) -> None:
+    _require_keys("prompts", prompts, set(PROMPT_LIST_KEYS))
     for key in PROMPT_LIST_KEYS:
         _validate_string_list("prompts", key, prompts[key])
         _validate_no_duplicate_strings("prompts", key, prompts[key])
@@ -212,12 +218,12 @@ def _validate_titles(titles: dict[str, Any]) -> None:
 def _validate_entities(
     entities: dict[str, Any],
 ) -> tuple[list[tuple[str, date, date]], list[tuple[str, date, date]]]:
-    _require_keys("entities", entities, set(ENTITY_AVAILABILITY_KEYS))
+    _require_keys("entities", entities, ENTITY_AVAILABILITY_KEYS)
     character_rows = _validate_availability_rows(
-        "entities", "character_availability", entities["character_availability"]
+        "entities", CHARACTER_AVAILABILITY_KEY, entities[CHARACTER_AVAILABILITY_KEY]
     )
     setting_rows = _validate_availability_rows(
-        "entities", "setting_availability", entities["setting_availability"]
+        "entities", SETTING_AVAILABILITY_KEY, entities[SETTING_AVAILABILITY_KEY]
     )
     return character_rows, setting_rows
 
@@ -248,11 +254,11 @@ def _validate_config_date_overlap(
 ) -> None:
     if not _has_date_overlap(character_rows, start, end):
         raise ValueError(
-            "config date range has no overlap with entities.character_availability"
+            f"config date range has no overlap with entities.{CHARACTER_AVAILABILITY_KEY}"
         )
     if not _has_date_overlap(setting_rows, start, end):
         raise ValueError(
-            "config date range has no overlap with entities.setting_availability"
+            f"config date range has no overlap with entities.{SETTING_AVAILABILITY_KEY}"
         )
 
 
@@ -326,11 +332,6 @@ def validate_story_data(
     _validate_titles(titles)
     character_rows, setting_rows = _validate_entities(entities)
 
-    _require_keys(
-        "prompts",
-        prompts,
-        set(PROMPT_LIST_KEYS),
-    )
     _validate_prompt_lists(prompts)
 
     _require_keys(
@@ -373,8 +374,8 @@ def load_story_data() -> dict[str, Any]:
 
     return {
         "titles": [str(v) for v in titles["titles"]],
-        "character_availability": validated.character_availability,
-        "setting_availability": validated.setting_availability,
+        CHARACTER_AVAILABILITY_KEY: validated.character_availability,
+        SETTING_AVAILABILITY_KEY: validated.setting_availability,
         "central_conflicts": [str(v) for v in prompts["central_conflicts"]],
         "inciting_pressures": [str(v) for v in prompts["inciting_pressures"]],
         "ending_types": [str(v) for v in prompts["ending_types"]],
@@ -399,9 +400,9 @@ def get_data() -> dict[str, Any]:
 
 _COMPAT_ALIASES: dict[str, str] = {
     "TITLES": "titles",
-    "PROTAGONIST_AVAILABILITY": "character_availability",
-    "CHARACTER_AVAILABILITY": "character_availability",
-    "SETTING_AVAILABILITY": "setting_availability",
+    "PROTAGONIST_AVAILABILITY": CHARACTER_AVAILABILITY_KEY,
+    "CHARACTER_AVAILABILITY": CHARACTER_AVAILABILITY_KEY,
+    "SETTING_AVAILABILITY": SETTING_AVAILABILITY_KEY,
     "CENTRAL_CONFLICTS": "central_conflicts",
     "INCITING_PRESSURES": "inciting_pressures",
     "ENDING_TYPES": "ending_types",
@@ -472,7 +473,7 @@ def available_characters(selected_date: date) -> list[str]:
     """Return characters available for the selected date."""
     return [
         name
-        for name, start_date, end_date in get_data()["character_availability"]
+        for name, start_date, end_date in get_data()[CHARACTER_AVAILABILITY_KEY]
         if start_date <= selected_date <= end_date
     ]
 
@@ -486,7 +487,7 @@ def available_settings(selected_date: date) -> list[str]:
     """Return settings available for the selected date."""
     return [
         setting
-        for setting, start_date, end_date in get_data()["setting_availability"]
+        for setting, start_date, end_date in get_data()[SETTING_AVAILABILITY_KEY]
         if start_date <= selected_date <= end_date
     ]
 
@@ -554,7 +555,7 @@ def validate_story_data_strict(data: dict[str, Any]) -> None:
     one_day = timedelta(days=1)
 
     checkpoints: set[date] = {range_start, range_end}
-    for source in (data["character_availability"], data["setting_availability"]):
+    for source in (data[CHARACTER_AVAILABILITY_KEY], data[SETTING_AVAILABILITY_KEY]):
         for _, row_start, row_end in source:
             clipped_start = max(range_start, row_start)
             clipped_end = min(range_end, row_end)
@@ -566,7 +567,7 @@ def validate_story_data_strict(data: dict[str, Any]) -> None:
     for selected_date in sorted(checkpoints):
         characters = [
             name
-            for name, start_date, end_date_for_row in data["character_availability"]
+            for name, start_date, end_date_for_row in data[CHARACTER_AVAILABILITY_KEY]
             if start_date <= selected_date <= end_date_for_row
         ]
         if len(characters) < 2:
@@ -577,7 +578,7 @@ def validate_story_data_strict(data: dict[str, Any]) -> None:
 
         if not any(
             start_date <= selected_date <= end_date_for_row
-            for _, start_date, end_date_for_row in data["setting_availability"]
+            for _, start_date, end_date_for_row in data[SETTING_AVAILABILITY_KEY]
         ):
             raise ValueError(
                 "Strict validation failed: no available settings on "
