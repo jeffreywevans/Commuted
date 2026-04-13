@@ -14,7 +14,7 @@ from datetime import date, datetime, timedelta
 from functools import lru_cache
 from importlib.resources import files
 from pathlib import Path
-from typing import Any, NamedTuple
+from typing import AbstractSet, Any, NamedTuple
 
 import yaml
 
@@ -44,10 +44,12 @@ PROMPT_LIST_KEYS = (
 PROMPT_LIST_KEYS_SET = frozenset(PROMPT_LIST_KEYS)
 CHARACTER_AVAILABILITY_KEY = "character_availability"
 SETTING_AVAILABILITY_KEY = "setting_availability"
-ENTITY_AVAILABILITY_KEYS = {
-    CHARACTER_AVAILABILITY_KEY,
-    SETTING_AVAILABILITY_KEY,
-}
+ENTITY_AVAILABILITY_KEYS = frozenset(
+    {
+        CHARACTER_AVAILABILITY_KEY,
+        SETTING_AVAILABILITY_KEY,
+    }
+)
 WINDOWS_RESERVED_BASENAMES = {
     "con",
     "prn",
@@ -94,7 +96,9 @@ def _data_file(filename: str) -> Any:
         return Path(__file__).resolve().parent.parent / "data" / "story_brief" / filename
 
 
-def _require_keys(section_name: str, payload: dict[str, Any], required: set[str]) -> None:
+def _require_keys(
+    section_name: str, payload: dict[str, Any], required: AbstractSet[str]
+) -> None:
     missing = sorted(required - payload.keys())
     if missing:
         raise ValueError(f"{section_name}: missing required keys: {', '.join(missing)}")
