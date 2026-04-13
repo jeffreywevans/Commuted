@@ -1,0 +1,46 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+
+jobs:
+  sonarqube:
+    name: SonarQube Cloud
+    runs-on: ubuntu-latest
+    env:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install tox
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install tox
+
+      - name: Run tox
+        run: tox -e py312
+
+      - name: SonarQube Scan
+        if: ${{ env.SONAR_TOKEN != '' }}
+        uses: SonarSource/sonarqube-scan-action@fd88b7d7ccbaefd23d8f36f73b59db7a3d246602
+        with:
+          args: >-
+            -Dsonar.python.coverage.reportPaths=coverage.xml
+            -Dsonar.python.xunit.reportPath=test-results.xml
