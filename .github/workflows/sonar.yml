@@ -34,7 +34,7 @@ jobs:
 
       - name: Run tests with coverage
         run: |
-          coverage run -m pytest -q --junitxml=test-results.xml
+          coverage run --branch -m pytest -q --junitxml=test-results.xml
           coverage xml -o coverage.xml
 
       - name: SonarQube Scan
