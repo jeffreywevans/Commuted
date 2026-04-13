@@ -41,6 +41,7 @@ PROMPT_LIST_KEYS = (
     "style_guidance",
     "weather",
 )
+PROMPT_LIST_KEYS_SET = frozenset(PROMPT_LIST_KEYS)
 CHARACTER_AVAILABILITY_KEY = "character_availability"
 SETTING_AVAILABILITY_KEY = "setting_availability"
 ENTITY_AVAILABILITY_KEYS = {
@@ -202,7 +203,7 @@ def _has_date_overlap(
 
 
 def _validate_prompt_lists(prompts: dict[str, Any]) -> None:
-    _require_keys("prompts", prompts, set(PROMPT_LIST_KEYS))
+    _require_keys("prompts", prompts, PROMPT_LIST_KEYS_SET)
     for key in PROMPT_LIST_KEYS:
         _validate_string_list("prompts", key, prompts[key])
         _validate_no_duplicate_strings("prompts", key, prompts[key])
