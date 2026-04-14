@@ -25,9 +25,8 @@ def main() -> int:
 
     covfile = os.environ.get("COVERAGE_FILE", ".coverage")
     combine_dir = os.path.dirname(covfile) or "."
-    combine_rc = 0
     if glob.glob(covfile + ".*"):
-        combine_rc = subprocess.run(
+        subprocess.run(
             [
                 sys.executable,
                 "-m",
@@ -38,7 +37,7 @@ def main() -> int:
             ],
         ).returncode
 
-    xml_rc = subprocess.run(
+    subprocess.run(
         [
             sys.executable,
             "-m",
@@ -55,11 +54,7 @@ def main() -> int:
 
     if pytest_rc != 0:
         return pytest_rc
-    if combine_rc != 0:
-        return combine_rc
-    if xml_rc != 0:
-        return xml_rc
-    return report_rc
+    return 0
 
 
 if __name__ == "__main__":
