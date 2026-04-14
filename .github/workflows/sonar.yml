@@ -33,9 +33,11 @@ jobs:
           python -m pip install coverage
 
       - name: Run tests with coverage
-        run: |
-          coverage run --branch -m pytest -q --junitxml=test-results.xml
-          coverage xml -o coverage.xml
+        env:
+          COVERAGE_PROCESS_START: ${{ github.workspace }}/tox.ini
+          COVERAGE_FILE: ${{ github.workspace }}/.coverage
+          PYTHONPATH: ${{ github.workspace }}/scripts/cov_init:${{ github.workspace }}
+        run: python scripts/run_coverage_workflow.py
 
       - name: SonarQube Scan
         if: ${{ env.SONAR_TOKEN != '' }}
