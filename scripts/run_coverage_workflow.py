@@ -32,8 +32,8 @@ def main() -> int:
                 sys.executable,
                 "-m",
                 "coverage",
-                "--rcfile=tox.ini",
                 "combine",
+                "--rcfile=tox.ini",
                 combine_dir,
             ],
         ).returncode
@@ -43,14 +43,14 @@ def main() -> int:
             sys.executable,
             "-m",
             "coverage",
-            "--rcfile=tox.ini",
             "xml",
+            "--rcfile=tox.ini",
             "-o",
             "coverage.xml",
         ],
     ).returncode
     report_rc = subprocess.run(
-        [sys.executable, "-m", "coverage", "--rcfile=tox.ini", "report"],
+        [sys.executable, "-m", "coverage", "report", "--rcfile=tox.ini"],
     ).returncode
 
     if pytest_rc != 0:
