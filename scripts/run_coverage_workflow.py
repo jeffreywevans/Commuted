@@ -10,7 +10,7 @@ import sys
 
 
 def main() -> int:
-    pytest_rc = subprocess.call(
+    pytest_rc = subprocess.run(
         [
             sys.executable,
             "-m",
@@ -21,18 +21,37 @@ def main() -> int:
             "--cov-report=",
             "--junitxml=test-results.xml",
         ]
-    )
+    ).returncode
 
     covfile = os.environ.get("COVERAGE_FILE", ".coverage")
     combine_dir = os.path.dirname(covfile) or "."
     combine_rc = 0
     if glob.glob(covfile + ".*"):
-        combine_rc = subprocess.call(
-            [sys.executable, "-m", "coverage", "combine", combine_dir]
-        )
+        combine_rc = subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                "coverage",
+                "--rcfile=tox.ini",
+                "combine",
+                combine_dir,
+            ]
+        ).returncode
 
-    xml_rc = subprocess.call([sys.executable, "-m", "coverage", "xml", "-o", "coverage.xml"])
-    report_rc = subprocess.call([sys.executable, "-m", "coverage", "report", "-m"])
+    xml_rc = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "coverage",
+            "--rcfile=tox.ini",
+            "xml",
+            "-o",
+            "coverage.xml",
+        ]
+    ).returncode
+    report_rc = subprocess.run(
+        [sys.executable, "-m", "coverage", "--rcfile=tox.ini", "report", "-m"]
+    ).returncode
 
     if pytest_rc != 0:
         return pytest_rc
