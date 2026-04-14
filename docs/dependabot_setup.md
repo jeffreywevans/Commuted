@@ -29,7 +29,7 @@ This repository is a good fit for two Dependabot ecosystems:
 
 For this repository's small dependency footprint, a lightweight CI security audit has high ROI and low maintenance cost.
 
-- Prefer running `pip-audit` in CI after installing the resolved environment used for tests.
+- Prefer running `pip-audit` against dependency definition files (for example, `requirements.txt`) before installing project dependencies in CI.
 - Keep Dependabot enabled so known issues can be remediated quickly.
 - Treat `pip freeze` snapshots (for example, `requirements-locked.txt`) as optional unless the project needs strict, reproducible dependency pinning across environments.
 
