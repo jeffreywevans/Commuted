@@ -17,15 +17,23 @@ def run() -> int:
         "--cov-report=",
         "--junitxml=test-results.xml",
     ]
-    pytest_rc = subprocess.call(pytest_cmd)
+    pytest_rc = subprocess.run(pytest_cmd, check=False).returncode
 
     covfile = os.environ.get("COVERAGE_FILE", ".coverage")
     combine_dir = os.path.dirname(covfile) or "."
     if glob.glob(covfile + ".*"):
-        subprocess.call([sys.executable, "-m", "coverage", "combine", combine_dir])
+        subprocess.run(
+            [sys.executable, "-m", "coverage", "combine", combine_dir],
+            check=False,
+        )
 
-    xml_rc = subprocess.call([sys.executable, "-m", "coverage", "xml", "-o", "coverage.xml"])
-    report_rc = subprocess.call([sys.executable, "-m", "coverage", "report", "-m"])
+    xml_rc = subprocess.run(
+        [sys.executable, "-m", "coverage", "xml", "-o", "coverage.xml"],
+        check=False,
+    ).returncode
+    report_rc = subprocess.run(
+        [sys.executable, "-m", "coverage", "report", "-m"], check=False
+    ).returncode
 
     if pytest_rc != 0:
         return pytest_rc
