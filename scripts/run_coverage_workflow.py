@@ -12,6 +12,8 @@ import sys
 def main() -> int:
     pytest_rc = subprocess.call(
         [
+            sys.executable,
+            "-m",
             "pytest",
             "--cov=commuted_calligraphy",
             "--cov-config=tox.ini",
