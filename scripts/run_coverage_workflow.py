@@ -25,9 +25,8 @@ def main() -> int:
 
     covfile = os.environ.get("COVERAGE_FILE", ".coverage")
     combine_dir = os.path.dirname(covfile) or "."
-    combine_rc = 0
     if glob.glob(covfile + ".*"):
-        combine_rc = subprocess.run(
+        subprocess.run(
             [
                 sys.executable,
                 "-m",
@@ -37,9 +36,9 @@ def main() -> int:
                 combine_dir,
             ],
             check=True,
-        ).returncode
+        )
 
-    xml_rc = subprocess.run(
+    subprocess.run(
         [
             sys.executable,
             "-m",
@@ -50,19 +49,15 @@ def main() -> int:
             "coverage.xml",
         ],
         check=True,
-    ).returncode
-    report_rc = subprocess.run(
+    )
+    subprocess.run(
         [sys.executable, "-m", "coverage", "--rcfile=tox.ini", "report"],
-        check=True
-    ).returncode
+        check=True,
+    )
 
     if pytest_rc != 0:
         return pytest_rc
-    if combine_rc != 0:
-        return combine_rc
-    if xml_rc != 0:
-        return xml_rc
-    return report_rc
+    return 0
 
 
 if __name__ == "__main__":
