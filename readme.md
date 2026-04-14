@@ -93,8 +93,8 @@ The tox test command is configured to capture coverage from subprocess-based CLI
 Under the hood this runs:
 
 1. `pytest` with `pytest-cov` and branch coverage enabled
-2. `coverage combine` to merge process data files
-3. `coverage xml -o coverage.xml` for CI upload
-4. `coverage report -m` for terminal visibility
+2. `python -m coverage combine` to merge process data files
+3. `python -m coverage xml -o coverage.xml` for CI upload
+4. `python -m coverage report -m` for terminal visibility
 
 This pattern keeps local runs practical while producing CI-friendly artifacts.
