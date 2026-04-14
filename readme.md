@@ -90,13 +90,12 @@ The tox test command is configured to capture coverage from subprocess-based CLI
 
 - `tox -e py312`
 
-Under the hood this runs:
+Under the hood this runs `python scripts/run_coverage_workflow.py`, which:
 
-1. `pytest` with `pytest-cov` and branch coverage enabled
+1. runs `pytest` with `pytest-cov` and branch coverage enabled
 2. ensures subprocesses start coverage via `sitecustomize.py` + `COVERAGE_PROCESS_START`
 3. stores coverage data in a single tox-managed location (via `COVERAGE_FILE`) even when tests spawn subprocesses in temp directories
-4. `python -m coverage combine` to merge process data files from that shared location
-5. `python -m coverage xml -o coverage.xml` for CI upload
-6. `python -m coverage report -m` for terminal visibility
+4. combines subprocess data and emits `coverage.xml` + `coverage report -m`
+5. exits with the pytest status after reporting, so coverage artifacts are still produced even on failing test runs
 
 This pattern keeps local runs practical while producing CI-friendly artifacts.
