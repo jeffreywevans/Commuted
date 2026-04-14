@@ -83,3 +83,19 @@ Install development dependencies:
 Run lint checks:
 
 - `ruff check .`
+
+### Coverage + CLI subprocess accounting
+
+The tox test command is configured to capture coverage from subprocess-based CLI tests (for example, tests that call the story brief script using `subprocess.run(...)`) and then produce combined reports:
+
+- `tox -e py312`
+
+Under the hood this runs `python scripts/run_coverage_workflow.py`, which:
+
+1. runs `pytest` with `pytest-cov` and branch coverage enabled
+2. ensures subprocesses start coverage via `sitecustomize.py` + `COVERAGE_PROCESS_START`
+3. stores coverage data in a single tox-managed location (via `COVERAGE_FILE`) even when tests spawn subprocesses in temp directories
+4. combines subprocess data and emits `coverage.xml` + `coverage report -m`
+5. exits with the pytest status after reporting, so coverage artifacts are still produced even on failing test runs
+
+This pattern keeps local runs practical while producing CI-friendly artifacts.
