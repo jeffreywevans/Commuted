@@ -2,7 +2,10 @@ import random
 
 import pytest
 
-from tools.generate_story_brief import symmetric_peak_weights, weighted_choice
+from commuted_calligraphy.story_brief.generate_story_brief import (
+    symmetric_peak_weights,
+    weighted_choice,
+)
 
 
 def test_weighted_choice_returns_option_from_domain() -> None:

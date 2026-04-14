@@ -3,7 +3,7 @@ from datetime import date
 
 import pytest
 
-from tools.generate_story_brief import get_data, pick_story_fields
+from commuted_calligraphy.story_brief.generate_story_brief import get_data, pick_story_fields
 
 
 def test_same_seed_is_deterministic() -> None:
@@ -57,7 +57,7 @@ def test_selected_characters_are_valid_for_time_period_year() -> None:
 def test_duplicate_character_rows_require_two_distinct_names(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    from tools import generate_story_brief as story_brief
+    from commuted_calligraphy.story_brief import generate_story_brief as story_brief
 
     data = dict(story_brief.get_data())
     data["character_availability"] = [

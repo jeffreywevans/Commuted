@@ -7,8 +7,8 @@
 
 ## Current implementation
 
-- `schema_version` is present in `data/story_brief/config.json`.
-- `dataset_version` is now present in `data/story_brief/config.json` and validated at load time.
+- `schema_version` is present in `commuted_calligraphy/story_brief/data/config.json`.
+- `dataset_version` is now present in `commuted_calligraphy/story_brief/data/config.json` and validated at load time.
 
 ## Why per-file versions are usually too much
 
@@ -20,12 +20,12 @@ Adding separate `version` values to every JSON file often creates:
 
 ## Recommended approach
 
-Use a **single top-level data version strategy** in `data/story_brief/config.json`:
+Use a **single top-level data version strategy** in `commuted_calligraphy/story_brief/data/config.json`:
 
 1. Keep `schema_version` for structure compatibility (already present).
 2. Add `dataset_version` (semantic-style, e.g. `2026.04.10` or `1.3.0`) for content snapshots.
 3. Update `dataset_version` only when prompt pools/config materially change.
-4. Keep human-readable notes in a small changelog file (e.g., `data/story_brief/CHANGELOG.md`).
+4. Keep human-readable notes in a small changelog file (e.g., `commuted_calligraphy/story_brief/data/CHANGELOG.md`).
 
 ## When per-file versions make sense
 

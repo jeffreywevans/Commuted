@@ -77,7 +77,8 @@ def _data_file(filename: str) -> Any:
 
     Resolution order:
       1) COMMUTED_STORY_BRIEF_DATA_DIR env var (custom/system deployments).
-      2) Installed package resources under data.story_brief (packaged installs).
+      2) Installed package resources under
+         commuted_calligraphy.story_brief.data (packaged installs).
       3) Repo-relative fallback for source checkout execution (local development).
 
     Why this chain exists:
@@ -91,9 +92,9 @@ def _data_file(filename: str) -> Any:
         return override / filename
 
     try:
-        return files("data.story_brief").joinpath(filename)
+        return files("commuted_calligraphy.story_brief.data").joinpath(filename)
     except (ModuleNotFoundError, FileNotFoundError):
-        return Path(__file__).resolve().parent.parent / "data" / "story_brief" / filename
+        return Path(__file__).resolve().parent / "data" / filename
 
 
 def _require_keys(

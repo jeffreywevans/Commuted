@@ -5,10 +5,10 @@ import subprocess
 import sys
 from pathlib import Path
 
-from tools.generate_story_brief import sanitize_filename
+from commuted_calligraphy.story_brief.generate_story_brief import sanitize_filename
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-SCRIPT = REPO_ROOT / "tools" / "generate_story_brief.py"
+SCRIPT = REPO_ROOT / "commuted_calligraphy" / "story_brief" / "generate_story_brief.py"
 
 
 def run_cli(*args: str, cwd: Path) -> subprocess.CompletedProcess[str]:

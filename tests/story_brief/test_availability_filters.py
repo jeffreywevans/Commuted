@@ -2,7 +2,7 @@ from datetime import date
 
 import pytest
 
-from tools import generate_story_brief as story_brief
+from commuted_calligraphy.story_brief import generate_story_brief as story_brief
 
 
 def test_available_characters_filters_by_date(monkeypatch: pytest.MonkeyPatch) -> None:

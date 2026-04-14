@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from tools.generate_story_brief import (
+from commuted_calligraphy.story_brief.generate_story_brief import (
     load_story_data,
     validate_story_data,
     validate_story_data_strict,
@@ -12,7 +12,12 @@ from tools.generate_story_brief import (
 
 
 def load_all():
-    data_dir = Path(__file__).resolve().parents[2] / "data" / "story_brief"
+    data_dir = (
+        Path(__file__).resolve().parents[2]
+        / "commuted_calligraphy"
+        / "story_brief"
+        / "data"
+    )
     titles = json.loads((data_dir / "titles.json").read_text(encoding="utf-8"))
     entities = json.loads((data_dir / "entities.json").read_text(encoding="utf-8"))
     prompts = json.loads((data_dir / "prompts.json").read_text(encoding="utf-8"))
