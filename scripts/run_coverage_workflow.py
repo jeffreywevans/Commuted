@@ -36,7 +36,6 @@ def main() -> int:
                 "combine",
                 combine_dir,
             ],
-            check=True,
         ).returncode
 
     xml_rc = subprocess.run(
@@ -49,11 +48,9 @@ def main() -> int:
             "-o",
             "coverage.xml",
         ],
-        check=True,
     ).returncode
     report_rc = subprocess.run(
         [sys.executable, "-m", "coverage", "--rcfile=tox.ini", "report"],
-        check=True
     ).returncode
 
     if pytest_rc != 0:
