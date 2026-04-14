@@ -11,8 +11,8 @@
 A regression suite is a set of automated tests that re-check previously working behavior whenever code or data changes.
 
 For this project, it means:
-- every edit to `tools/generate_story_brief.py`
-- every edit to `data/story_brief/*.json`
+- every edit to `commuted_calligraphy/story_brief/generate_story_brief.py`
+- every edit to `commuted_calligraphy/story_brief/data/*.json`
 
 …gets validated automatically so accidental breakage is caught immediately.
 

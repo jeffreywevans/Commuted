@@ -15,13 +15,13 @@ dependencies = ["PyYAML>=6.0"]
 dev = ["pytest>=8.0", "ruff>=0.11.0"]
 
 [project.scripts]
-story-brief = "tools.generate_story_brief:main"
+story-brief = "commuted_calligraphy.story_brief.generate_story_brief:main"
 
 [tool.setuptools.packages.find]
-include = ["tools*", "data*"]
+include = ["commuted_calligraphy*"]
 
 [tool.setuptools.package-data]
-"data.story_brief" = ["*.json"]
+"commuted_calligraphy.story_brief.data" = ["*.json"]
 
 [tool.ruff]
 target-version = "py310"

@@ -6,10 +6,10 @@ Use a **small set of domain-based JSON files** (not one giant file, and not one 
 
 ### Suggested layout
 
-- `data/story_brief/titles.json`
-- `data/story_brief/entities.json` (characters, settings, availability windows)
-- `data/story_brief/prompts.json` (conflicts, pressures, endings, style)
-- `data/story_brief/config.json` (ordered keys, weights, date range, word-count targets)
+- `commuted_calligraphy/story_brief/data/titles.json`
+- `commuted_calligraphy/story_brief/data/entities.json` (characters, settings, availability windows)
+- `commuted_calligraphy/story_brief/data/prompts.json` (conflicts, pressures, endings, style)
+- `commuted_calligraphy/story_brief/data/config.json` (ordered keys, weights, date range, word-count targets)
 
 ## Why this approach
 
@@ -51,7 +51,7 @@ Cons of per-key files:
 
 ## Practical migration plan
 
-1. Move constants to `data/story_brief/*.json`.
+1. Move constants to `commuted_calligraphy/story_brief/data/*.json`.
 2. Add a loader module that validates and returns typed structures.
 3. Keep existing Python names as compatibility aliases during transition.
 4. Add smoke tests for data loading + generation with `--seed`.

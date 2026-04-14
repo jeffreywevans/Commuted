@@ -1,4 +1,8 @@
-from tools.generate_story_brief import ORDERED_KEYS, render_title, to_markdown
+from commuted_calligraphy.story_brief.generate_story_brief import (
+    ORDERED_KEYS,
+    render_title,
+    to_markdown,
+)
 
 
 def test_markdown_front_matter_delimiters_present() -> None:
