@@ -1,3 +1,6 @@
-import coverage
+import importlib.util
 
-coverage.process_startup()
+if importlib.util.find_spec("coverage") is not None:
+    import coverage
+
+    coverage.process_startup()
