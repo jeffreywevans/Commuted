@@ -32,7 +32,7 @@ def main() -> int:
                 sys.executable,
                 "-m",
                 "coverage",
-                "--config-file=tox.ini",
+                "--rcfile=tox.ini",
                 "combine",
                 combine_dir,
             ],
@@ -44,7 +44,7 @@ def main() -> int:
             sys.executable,
             "-m",
             "coverage",
-            "--config-file=tox.ini",
+            "--rcfile=tox.ini",
             "xml",
             "-o",
             "coverage.xml",
@@ -52,7 +52,7 @@ def main() -> int:
         check=True,
     ).returncode
     report_rc = subprocess.run(
-        [sys.executable, "-m", "coverage", "--config-file=tox.ini", "report"],
+        [sys.executable, "-m", "coverage", "--rcfile=tox.ini", "report"],
         check=True
     ).returncode
 
