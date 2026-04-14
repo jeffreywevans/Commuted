@@ -1,10 +1,10 @@
 import json
 from copy import deepcopy
-from pathlib import Path
 
 import pytest
 
-from tools.generate_story_brief import (
+from commuted_calligraphy.story_brief import generate_story_brief as story_brief
+from commuted_calligraphy.story_brief.generate_story_brief import (
     load_story_data,
     validate_story_data,
     validate_story_data_strict,
@@ -12,11 +12,10 @@ from tools.generate_story_brief import (
 
 
 def load_all():
-    data_dir = Path(__file__).resolve().parents[2] / "data" / "story_brief"
-    titles = json.loads((data_dir / "titles.json").read_text(encoding="utf-8"))
-    entities = json.loads((data_dir / "entities.json").read_text(encoding="utf-8"))
-    prompts = json.loads((data_dir / "prompts.json").read_text(encoding="utf-8"))
-    config = json.loads((data_dir / "config.json").read_text(encoding="utf-8"))
+    titles = json.loads(story_brief._data_file("titles.json").read_text(encoding="utf-8"))
+    entities = json.loads(story_brief._data_file("entities.json").read_text(encoding="utf-8"))
+    prompts = json.loads(story_brief._data_file("prompts.json").read_text(encoding="utf-8"))
+    config = json.loads(story_brief._data_file("config.json").read_text(encoding="utf-8"))
     return titles, entities, prompts, config
 
 
