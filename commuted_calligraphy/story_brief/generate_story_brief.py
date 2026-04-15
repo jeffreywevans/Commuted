@@ -861,9 +861,6 @@ def pick_story_fields(
         "ending_type": rng.choice(data["ending_types"]),
         "style_guidance": rng.choice(data["style_guidance"]),
     }
-    sexual_content_level = weighted_choice(
-        rng, data["sexual_content_options"], data["sexual_content_weights"]
-    )
     result["sexual_content_level"] = sexual_content_level
     result["sexual_scene_tags"] = [] if sexual_content_level == "none" else sexual_scene_tags
     result["word_count_target"] = rng.choice(data["word_count_targets"])
