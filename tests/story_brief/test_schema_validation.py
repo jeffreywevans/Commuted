@@ -5,6 +5,7 @@ import pytest
 
 from commuted_calligraphy.story_brief import generate_story_brief as story_brief
 from commuted_calligraphy.story_brief.generate_story_brief import (
+    lint_story_data,
     load_story_data,
     validate_story_data,
     validate_story_data_strict,
@@ -179,3 +180,42 @@ def test_strict_validation_handles_max_date_boundary_without_overflow() -> None:
     }
 
     validate_story_data_strict(data)
+
+
+def test_dataset_lint_reports_coverage_gap_errors() -> None:
+    data = load_story_data()
+    data["date_end"] = data["date_start"]
+    data["character_availability"] = [
+        ("Only One", data["date_start"], data["date_end"]),
+    ]
+    data["setting_availability"] = []
+
+    report = lint_story_data(data)
+
+    assert report.has_errors
+    assert any("fewer than two distinct characters" in msg for msg in report.errors)
+    assert any("no available settings" in msg for msg in report.errors)
+
+
+def test_dataset_lint_reports_non_blocking_warnings() -> None:
+    data = load_story_data()
+    day = data["date_start"]
+    data["date_end"] = day
+    data["character_availability"] = [
+        ("Alex", day, day),
+        ("Jordan", day, day),
+    ]
+    data["setting_availability"] = [
+        ("Seattle", day, day),
+    ]
+    data["titles"] = ["A Night in @setting"]
+    data["weather"] = ["Rain"]
+    data["word_count_targets"] = [700]
+
+    report = lint_story_data(data)
+
+    assert not report.has_errors
+    assert any("exactly two characters" in msg for msg in report.warnings)
+    assert any("exactly one setting" in msg for msg in report.warnings)
+    assert any("token(s) never used" in msg for msg in report.warnings)
+    assert any("weather has only 1 option(s)" in msg for msg in report.warnings)

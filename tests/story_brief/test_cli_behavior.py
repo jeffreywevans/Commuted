@@ -103,3 +103,11 @@ def test_cli_validate_strict_flag_accepts_current_dataset_range(tmp_path: Path) 
     combined = result.stdout + result.stderr
     assert "Strict validation failed" not in combined
     assert "Traceback" not in combined
+
+
+def test_cli_lint_dataset_flag_reports_results_and_exits_cleanly(tmp_path: Path) -> None:
+    result = run_cli("--lint-dataset", cwd=tmp_path)
+    assert result.returncode == 0
+    combined = result.stdout + result.stderr
+    assert "Dataset lint:" in combined
+    assert "Traceback" not in combined

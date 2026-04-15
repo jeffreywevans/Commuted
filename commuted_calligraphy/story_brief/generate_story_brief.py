@@ -67,6 +67,15 @@ class ValidatedStoryData(NamedTuple):
     date_end: date
 
 
+class DatasetLintReport(NamedTuple):
+    errors: list[str]
+    warnings: list[str]
+
+    @property
+    def has_errors(self) -> bool:
+        return bool(self.errors)
+
+
 def _load_json(path: Any) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
@@ -592,6 +601,141 @@ def validate_story_data_strict(data: dict[str, Any]) -> None:
             )
 
 
+def _coalesce_dates_to_ranges(dates: list[date]) -> list[tuple[date, date]]:
+    if not dates:
+        return []
+    sorted_unique = sorted(set(dates))
+    ranges: list[tuple[date, date]] = []
+    range_start = sorted_unique[0]
+    range_end = sorted_unique[0]
+    one_day = timedelta(days=1)
+    for current in sorted_unique[1:]:
+        if current == range_end + one_day:
+            range_end = current
+            continue
+        ranges.append((range_start, range_end))
+        range_start = current
+        range_end = current
+    ranges.append((range_start, range_end))
+    return ranges
+
+
+def _format_date_ranges(ranges: list[tuple[date, date]]) -> str:
+    if not ranges:
+        return "none"
+    rendered = []
+    for start, end in ranges:
+        if start == end:
+            rendered.append(start.isoformat())
+        else:
+            rendered.append(f"{start.isoformat()}..{end.isoformat()}")
+    return ", ".join(rendered)
+
+
+def lint_story_data(data: dict[str, Any]) -> DatasetLintReport:
+    """Report actionable dataset diagnostics and coverage gaps."""
+    range_start = data["date_start"]
+    range_end = data["date_end"]
+    day_count = (range_end - range_start).days + 1
+
+    missing_character_dates: list[date] = []
+    thin_character_dates: list[date] = []
+    missing_setting_dates: list[date] = []
+    thin_setting_dates: list[date] = []
+
+    for day_offset in range(day_count):
+        selected_date = range_start + timedelta(days=day_offset)
+        characters = unique_preserving_order(
+            [
+                name
+                for name, start_date, end_date in data[CHARACTER_AVAILABILITY_KEY]
+                if start_date <= selected_date <= end_date
+            ]
+        )
+        settings = unique_preserving_order(
+            [
+                name
+                for name, start_date, end_date in data[SETTING_AVAILABILITY_KEY]
+                if start_date <= selected_date <= end_date
+            ]
+        )
+        if len(characters) < 2:
+            missing_character_dates.append(selected_date)
+        elif len(characters) == 2:
+            thin_character_dates.append(selected_date)
+
+        if not settings:
+            missing_setting_dates.append(selected_date)
+        elif len(settings) == 1:
+            thin_setting_dates.append(selected_date)
+
+    errors: list[str] = []
+    if missing_character_dates:
+        errors.append(
+            "Coverage gap: fewer than two distinct characters on "
+            f"{_format_date_ranges(_coalesce_dates_to_ranges(missing_character_dates))}."
+        )
+    if missing_setting_dates:
+        errors.append(
+            "Coverage gap: no available settings on "
+            f"{_format_date_ranges(_coalesce_dates_to_ranges(missing_setting_dates))}."
+        )
+
+    warnings: list[str] = []
+    if thin_character_dates:
+        warnings.append(
+            "Fragile coverage: exactly two characters available on "
+            f"{_format_date_ranges(_coalesce_dates_to_ranges(thin_character_dates))}."
+        )
+    if thin_setting_dates:
+        warnings.append(
+            "Fragile coverage: exactly one setting available on "
+            f"{_format_date_ranges(_coalesce_dates_to_ranges(thin_setting_dates))}."
+        )
+
+    tokens_seen: set[str] = set()
+    for template in data["titles"]:
+        tokens_seen.update(TITLE_TOKEN_PATTERN.findall(template))
+    missing_title_tokens = sorted({"protagonist", "setting", "time_period"} - tokens_seen)
+    if missing_title_tokens:
+        warnings.append(
+            "Title coverage gap: token(s) never used in templates: "
+            f"{', '.join(f'@{token}' for token in missing_title_tokens)}."
+        )
+
+    for key in PROMPT_LIST_KEYS:
+        options = data[key]
+        if len(options) < 3:
+            warnings.append(
+                f"Prompt depth warning: {key} has only {len(options)} option(s); "
+                "consider adding at least 3 for variety."
+            )
+
+    if len(data["word_count_targets"]) < 3:
+        warnings.append(
+            "Prompt depth warning: word_count_targets has fewer than 3 options; "
+            "consider adding more range variety."
+        )
+
+    return DatasetLintReport(errors=errors, warnings=warnings)
+
+
+def _emit_lint_report(report: DatasetLintReport) -> None:
+    if report.errors:
+        print("Dataset lint: errors")
+        for message in report.errors:
+            print(f"  - {message}")
+    else:
+        print("Dataset lint: no blocking coverage gaps found.")
+
+    if report.warnings:
+        print("Dataset lint: warnings")
+        for message in report.warnings:
+            print(f"  - {message}")
+    else:
+        print("Dataset lint: no warnings.")
+
+
 def pick_story_fields(
     rng: random.Random | secrets.SystemRandom, selected_date: date | None = None
 ) -> dict[str, str | int]:
@@ -727,6 +871,14 @@ def main() -> None:
             "output."
         ),
     )
+    parser.add_argument(
+        "--lint-dataset",
+        action="store_true",
+        help=(
+            "Run dataset lint diagnostics (coverage gaps + fragile spots) and exit "
+            "without generating output."
+        ),
+    )
     args = parser.parse_args()
 
     rng: random.Random | secrets.SystemRandom
@@ -740,6 +892,12 @@ def main() -> None:
             validate_story_data_strict(get_data())
         except ValueError as exc:
             raise SystemExit(str(exc)) from exc
+    if args.lint_dataset:
+        report = lint_story_data(get_data())
+        _emit_lint_report(report)
+        if report.has_errors:
+            raise SystemExit(1)
+        return
 
     selected_date: date | None = None
     if args.date:
