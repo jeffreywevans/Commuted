@@ -67,6 +67,15 @@ class ValidatedStoryData(NamedTuple):
     date_end: date
 
 
+class DatasetLintReport(NamedTuple):
+    errors: list[str]
+    warnings: list[str]
+
+    @property
+    def has_errors(self) -> bool:
+        return bool(self.errors)
+
+
 def _load_json(path: Any) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
@@ -592,6 +601,150 @@ def validate_story_data_strict(data: dict[str, Any]) -> None:
             )
 
 
+def _format_date_ranges(ranges: list[tuple[date, date]]) -> str:
+    if not ranges:
+        return "none"
+    rendered = []
+    for start, end in ranges:
+        if start == end:
+            rendered.append(start.isoformat())
+        else:
+            rendered.append(f"{start.isoformat()}..{end.isoformat()}")
+    return ", ".join(rendered)
+
+
+def _coalesce_ranges(ranges: list[tuple[date, date]]) -> list[tuple[date, date]]:
+    if not ranges:
+        return []
+    sorted_ranges = sorted(ranges, key=lambda item: item[0])
+    merged: list[tuple[date, date]] = [sorted_ranges[0]]
+    one_day = timedelta(days=1)
+    for current_start, current_end in sorted_ranges[1:]:
+        last_start, last_end = merged[-1]
+        if current_start <= last_end + one_day:
+            merged[-1] = (last_start, max(last_end, current_end))
+            continue
+        merged.append((current_start, current_end))
+    return merged
+
+
+def lint_story_data(data: dict[str, Any]) -> DatasetLintReport:
+    """Report actionable dataset diagnostics and coverage gaps."""
+    range_start = data["date_start"]
+    range_end = data["date_end"]
+
+    one_day = timedelta(days=1)
+    checkpoints: set[date] = {range_start}
+    if range_end < date.max:
+        checkpoints.add(range_end + one_day)
+    else:
+        checkpoints.add(range_end)
+    for source in (data[CHARACTER_AVAILABILITY_KEY], data[SETTING_AVAILABILITY_KEY]):
+        for _, row_start, row_end in source:
+            clipped_start = max(range_start, row_start)
+            clipped_end = min(range_end, row_end)
+            if clipped_start <= clipped_end:
+                checkpoints.add(clipped_start)
+                if clipped_end < range_end:
+                    checkpoints.add(clipped_end + one_day)
+
+    missing_character_ranges: list[tuple[date, date]] = []
+    thin_character_ranges: list[tuple[date, date]] = []
+    missing_setting_ranges: list[tuple[date, date]] = []
+    thin_setting_ranges: list[tuple[date, date]] = []
+
+    sorted_checkpoints = sorted(checkpoints)
+    for current_start, next_start in zip(sorted_checkpoints, sorted_checkpoints[1:]):
+        interval_end = min(range_end, next_start - one_day)
+        if interval_end < current_start:
+            continue
+        characters = [
+            name
+            for name, start_date, end_date in data[CHARACTER_AVAILABILITY_KEY]
+            if start_date <= current_start <= end_date
+        ]
+        settings = [
+            name
+            for name, start_date, end_date in data[SETTING_AVAILABILITY_KEY]
+            if start_date <= current_start <= end_date
+        ]
+        if len(characters) < 2:
+            missing_character_ranges.append((current_start, interval_end))
+        elif len(characters) == 2:
+            thin_character_ranges.append((current_start, interval_end))
+
+        if not settings:
+            missing_setting_ranges.append((current_start, interval_end))
+        elif len(settings) == 1:
+            thin_setting_ranges.append((current_start, interval_end))
+
+    errors: list[str] = []
+    if missing_character_ranges:
+        errors.append(
+            "Coverage gap: fewer than two distinct characters on "
+            f"{_format_date_ranges(_coalesce_ranges(missing_character_ranges))}."
+        )
+    if missing_setting_ranges:
+        errors.append(
+            "Coverage gap: no available settings on "
+            f"{_format_date_ranges(_coalesce_ranges(missing_setting_ranges))}."
+        )
+
+    warnings: list[str] = []
+    if thin_character_ranges:
+        warnings.append(
+            "Fragile coverage: exactly two characters available on "
+            f"{_format_date_ranges(_coalesce_ranges(thin_character_ranges))}."
+        )
+    if thin_setting_ranges:
+        warnings.append(
+            "Fragile coverage: exactly one setting available on "
+            f"{_format_date_ranges(_coalesce_ranges(thin_setting_ranges))}."
+        )
+
+    tokens_seen: set[str] = set()
+    for template in data["titles"]:
+        tokens_seen.update(TITLE_TOKEN_PATTERN.findall(template))
+    missing_title_tokens = sorted({"protagonist", "setting", "time_period"} - tokens_seen)
+    if missing_title_tokens:
+        warnings.append(
+            "Title coverage gap: token(s) never used in templates: "
+            f"{', '.join(f'@{token}' for token in missing_title_tokens)}."
+        )
+
+    for key in PROMPT_LIST_KEYS:
+        options = data[key]
+        if len(options) < 3:
+            warnings.append(
+                f"Prompt depth warning: {key} has only {len(options)} option(s); "
+                "consider adding at least 3 for variety."
+            )
+
+    if len(data["word_count_targets"]) < 3:
+        warnings.append(
+            "Prompt depth warning: word_count_targets has fewer than 3 options; "
+            "consider adding more range variety."
+        )
+
+    return DatasetLintReport(errors=errors, warnings=warnings)
+
+
+def _emit_lint_report(report: DatasetLintReport) -> None:
+    if report.errors:
+        print("Dataset lint: errors")
+        for message in report.errors:
+            print(f"  - {message}")
+    else:
+        print("Dataset lint: no blocking coverage gaps found.")
+
+    if report.warnings:
+        print("Dataset lint: warnings")
+        for message in report.warnings:
+            print(f"  - {message}")
+    else:
+        print("Dataset lint: no warnings.")
+
+
 def pick_story_fields(
     rng: random.Random | secrets.SystemRandom, selected_date: date | None = None
 ) -> dict[str, str | int]:
@@ -727,6 +880,14 @@ def main() -> None:
             "output."
         ),
     )
+    parser.add_argument(
+        "--lint-dataset",
+        action="store_true",
+        help=(
+            "Run dataset lint diagnostics (coverage gaps + fragile spots) and exit "
+            "without generating output."
+        ),
+    )
     args = parser.parse_args()
 
     rng: random.Random | secrets.SystemRandom
@@ -735,6 +896,15 @@ def main() -> None:
     else:
         rng = random.Random(args.seed)
 
+    if args.lint_dataset:
+        try:
+            report = lint_story_data(get_data())
+        except ValueError as exc:
+            raise SystemExit(str(exc)) from exc
+        _emit_lint_report(report)
+        if report.has_errors:
+            raise SystemExit(1)
+        return
     if args.validate_strict:
         try:
             validate_story_data_strict(get_data())

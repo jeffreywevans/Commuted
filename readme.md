@@ -67,12 +67,20 @@ When generating a brief, data files are resolved in this order:
 For deeper dataset-health checks, run the generator with:
 
 - `--validate-strict`
+- `--lint-dataset`
 
 This performs per-date preflight checks across the configured date range to ensure each date has:
 - at least one available setting, and
 - at least two distinct available characters.
 
 If strict validation fails, the generator exits early with a targeted error message.
+
+`--lint-dataset` provides richer diagnostics, including:
+- explicit date-range coverage gaps,
+- fragile areas (exactly two characters or one setting), and
+- low-diversity prompt pools / unused title tokens.
+
+Lint mode exits without generating a story brief file.
 
 ### Linting with Ruff
 
