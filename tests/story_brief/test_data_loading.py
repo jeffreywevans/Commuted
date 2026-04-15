@@ -43,6 +43,10 @@ def _write_minimal_dataset(data_dir: Path) -> None:
             "date_end": "2005-12-31",
             "sexual_content_options": ["none"],
             "sexual_content_weights": [1],
+            "sexual_scene_tag_groups": {
+                "tone": ["tender"],
+                "partner": ["married"],
+            },
             "word_count_targets": [1200],
             "ordered_keys": sorted(story_brief.EXPECTED_GENERATED_FIELD_KEYS),
             "writing_preamble": "Write.",

@@ -17,6 +17,70 @@
     0.1,
     0.1
   ],
+  "sexual_scene_tag_groups": {
+    "tone": [
+      "tender",
+      "passionate",
+      "rough",
+      "filthy",
+      "loving",
+      "desperate",
+      "playful",
+      "guilty",
+      "joyful",
+      "detached",
+      "worshipful",
+      "teasing",
+      "dominant",
+      "submissive",
+      "equal",
+      "power-exchange"
+    ],
+    "partner": [
+      "married",
+      "groupie",
+      "roadie",
+      "fan",
+      "ex",
+      "band-mate",
+      "voyeuristic",
+      "mutual"
+    ],
+    "location": [
+      "backstage",
+      "tour-bus",
+      "hotel-room",
+      "green-room",
+      "venue",
+      "stadium",
+      "no-tell-motel",
+      "semi-public",
+      "public-risk",
+      "quickie",
+      "marathon"
+    ],
+    "pacing": [
+      "slow-burn",
+      "rushed",
+      "afternoon",
+      "post-show",
+      "morning-after",
+      "midnight"
+    ],
+    "type": [
+      "explicit",
+      "graphic",
+      "sensual",
+      "raw",
+      "awkward",
+      "clumsy",
+      "choreographed",
+      "oral-focused",
+      "penetrative",
+      "manual",
+      "body-worship"
+    ]
+  },
   "word_count_targets": [
     3000,
     4000,
@@ -38,6 +102,7 @@
     "ending_type",
     "style_guidance",
     "sexual_content_level",
+    "sexual_scene_tags",
     "word_count_target"
   ],
   "writing_preamble": "Interpret the YAML and write a deliciously wild short story, based on the material. You may indulge yourself in every regard. Use the canon, and writing style guidelines. Before writing the final story, use your writing style-book guidelines: 1. Scene headers use slug format. 2. Dialogue appears only in CHARACTER NAME blocks. 3. No dialogue appears inside prose paragraphs. 4. Character names in dialogue blocks are ALL CAPS."

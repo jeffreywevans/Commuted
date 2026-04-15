@@ -32,8 +32,11 @@ EXPECTED_GENERATED_FIELD_KEYS = {
     "ending_type",
     "style_guidance",
     "sexual_content_level",
+    "sexual_scene_tags",
     "word_count_target",
 }
+SEXUAL_SCENE_TAG_COUNT_OPTIONS = (2, 3, 4, 5)
+SEXUAL_SCENE_TAG_COUNT_WEIGHTS = (0.7, 0.1, 0.1, 0.1)
 PROMPT_LIST_KEYS = (
     "central_conflicts",
     "inciting_pressures",
@@ -86,9 +89,9 @@ def _data_file(filename: str) -> Any:
 
     Resolution order:
       1) COMMUTED_STORY_BRIEF_DATA_DIR env var (custom/system deployments).
-      2) Installed package resources under
+      2) Direct-script source checkout fallback (repo-relative `data/`).
+      3) Installed package resources under
          commuted_calligraphy.story_brief.data (packaged installs).
-      3) Repo-relative fallback for source checkout execution (local development).
 
     Why this chain exists:
       - Allows testing against alternate datasets without code changes.
@@ -100,10 +103,14 @@ def _data_file(filename: str) -> Any:
         override = Path(override_raw).expanduser()
         return override / filename
 
+    repo_relative = Path(__file__).resolve().parent / "data" / filename
+    if __package__ in (None, "") and repo_relative.exists():
+        return repo_relative
+
     try:
         return files("commuted_calligraphy.story_brief.data").joinpath(filename)
     except (ModuleNotFoundError, FileNotFoundError):
-        return Path(__file__).resolve().parent / "data" / filename
+        return repo_relative
 
 
 def _require_keys(
@@ -312,6 +319,24 @@ def _validate_word_count_targets(config: dict[str, Any]) -> None:
             raise ValueError(f"config.word_count_targets[{idx}] must be a positive integer")
 
 
+def _validate_sexual_scene_tag_groups(config: dict[str, Any]) -> None:
+    groups = config["sexual_scene_tag_groups"]
+    if not isinstance(groups, dict) or not groups:
+        raise ValueError("config.sexual_scene_tag_groups must be a non-empty object")
+    if len(groups) < 2:
+        raise ValueError("config.sexual_scene_tag_groups must contain at least 2 groups")
+    if len(groups) > 5:
+        raise ValueError("config.sexual_scene_tag_groups must contain at most 5 groups")
+
+    for group_name, tags in groups.items():
+        if not isinstance(group_name, str) or not group_name.strip():
+            raise ValueError("config.sexual_scene_tag_groups keys must be non-empty strings")
+        _validate_string_list("config", f"sexual_scene_tag_groups.{group_name}", tags)
+        _validate_no_duplicate_strings(
+            "config", f"sexual_scene_tag_groups.{group_name}", tags
+        )
+
+
 def _validate_ordered_keys(config: dict[str, Any]) -> None:
     ordered_keys = config["ordered_keys"]
     if not isinstance(ordered_keys, list) or not ordered_keys:
@@ -359,6 +384,7 @@ def validate_story_data(
             "date_end",
             "sexual_content_options",
             "sexual_content_weights",
+            "sexual_scene_tag_groups",
             "word_count_targets",
             "ordered_keys",
             "writing_preamble",
@@ -368,6 +394,7 @@ def validate_story_data(
     start, end = _parse_and_validate_config_dates(config)
     _validate_config_date_overlap(character_rows, setting_rows, start, end)
     _validate_sexual_content_weights(config)
+    _validate_sexual_scene_tag_groups(config)
     _validate_word_count_targets(config)
     _validate_ordered_keys(config)
     _validate_writing_preamble(config)
@@ -400,6 +427,10 @@ def load_story_data() -> dict[str, Any]:
         "date_end": validated.date_end,
         "sexual_content_options": [str(v) for v in config["sexual_content_options"]],
         "sexual_content_weights": [float(v) for v in config["sexual_content_weights"]],
+        "sexual_scene_tag_groups": {
+            str(group_name): [str(tag) for tag in tags]
+            for group_name, tags in config["sexual_scene_tag_groups"].items()
+        },
         "word_count_targets": [int(v) for v in config["word_count_targets"]],
         "ordered_keys": [str(v) for v in config["ordered_keys"]],
         "writing_preamble": str(config["writing_preamble"]),
@@ -427,6 +458,7 @@ _COMPAT_ALIASES: dict[str, str] = {
     "DATE_END": "date_end",
     "SEXUAL_CONTENT_OPTIONS": "sexual_content_options",
     "SEXUAL_CONTENT_WEIGHTS": "sexual_content_weights",
+    "SEXUAL_SCENE_TAG_GROUPS": "sexual_scene_tag_groups",
     "WORD_COUNT_TARGETS": "word_count_targets",
     "ORDERED_KEYS": "ordered_keys",
     "WRITING_PREAMBLE": "writing_preamble",
@@ -747,7 +779,7 @@ def _emit_lint_report(report: DatasetLintReport) -> None:
 
 def pick_story_fields(
     rng: random.Random | secrets.SystemRandom, selected_date: date | None = None
-) -> dict[str, str | int]:
+) -> dict[str, str | int | list[str]]:
     data = get_data()
     if selected_date is None:
         selected_date = random_date_in_range(rng, data["date_start"], data["date_end"])
@@ -783,6 +815,23 @@ def pick_story_fields(
     secondary_character = rng.choice(eligible_secondary)
     setting = rng.choice(settings_for_date)
     title_template = rng.choice(data["titles"])
+    tag_group_names = list(data["sexual_scene_tag_groups"])
+    tag_count_options = [
+        count for count in SEXUAL_SCENE_TAG_COUNT_OPTIONS if count <= len(tag_group_names)
+    ]
+    tag_count_weights = list(SEXUAL_SCENE_TAG_COUNT_WEIGHTS[: len(tag_count_options)])
+    selected_tag_count = int(
+        weighted_choice(
+            rng,
+            [str(value) for value in tag_count_options],
+            tag_count_weights,
+        )
+    )
+    selected_tag_groups = rng.sample(tag_group_names, selected_tag_count)
+    sexual_scene_tags = [
+        rng.choice(data["sexual_scene_tag_groups"][group_name])
+        for group_name in selected_tag_groups
+    ]
 
     return {
         "title": render_title(
@@ -807,6 +856,7 @@ def pick_story_fields(
         "sexual_content_level": weighted_choice(
             rng, data["sexual_content_options"], data["sexual_content_weights"]
         ),
+        "sexual_scene_tags": sexual_scene_tags,
         "word_count_target": rng.choice(data["word_count_targets"]),
     }
 

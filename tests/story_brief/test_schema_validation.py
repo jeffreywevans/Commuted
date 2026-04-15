@@ -120,6 +120,15 @@ def test_schema_validation_allows_disjoint_availability_windows_for_same_name() 
     validate_story_data(titles, entities, prompts, config)
 
 
+def test_schema_validation_rejects_single_sexual_scene_tag_group() -> None:
+    titles, entities, prompts, config = load_all()
+    config = deepcopy(config)
+    config["sexual_scene_tag_groups"] = {"tone": ["tender", "passionate"]}
+
+    with pytest.raises(ValueError, match="at least 2 groups"):
+        validate_story_data(titles, entities, prompts, config)
+
+
 def test_strict_validation_accepts_well_formed_small_range() -> None:
     data = load_story_data()
     start = data["date_start"]
