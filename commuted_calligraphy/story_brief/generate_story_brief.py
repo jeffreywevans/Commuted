@@ -897,7 +897,10 @@ def main() -> None:
         rng = random.Random(args.seed)
 
     if args.lint_dataset:
-        report = lint_story_data(get_data())
+        try:
+            report = lint_story_data(get_data())
+        except ValueError as exc:
+            raise SystemExit(str(exc)) from exc
         _emit_lint_report(report)
         if report.has_errors:
             raise SystemExit(1)

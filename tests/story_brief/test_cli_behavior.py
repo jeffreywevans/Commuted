@@ -155,3 +155,30 @@ def test_cli_lint_dataset_takes_precedence_over_validate_strict(tmp_path: Path) 
     assert "Dataset lint: errors" in combined
     assert "Coverage gap: fewer than two distinct characters" in combined
     assert "Strict validation failed" not in combined
+
+
+def test_cli_lint_dataset_handles_invalid_dataset_without_traceback(tmp_path: Path) -> None:
+    data_dir = tmp_path / "invalid-data"
+    data_dir.mkdir()
+    source_data_dir = REPO_ROOT / "commuted_calligraphy" / "story_brief" / "data"
+    for filename in ("titles.json", "entities.json", "prompts.json", "config.json"):
+        payload = json.loads((source_data_dir / filename).read_text(encoding="utf-8"))
+        (data_dir / filename).write_text(
+            json.dumps(payload, indent=2),
+            encoding="utf-8",
+        )
+
+    prompts_path = data_dir / "prompts.json"
+    prompts = json.loads(prompts_path.read_text(encoding="utf-8"))
+    prompts.pop("weather")
+    prompts_path.write_text(json.dumps(prompts, indent=2), encoding="utf-8")
+
+    result = run_cli(
+        "--lint-dataset",
+        cwd=tmp_path,
+        env_overrides={"COMMUTED_STORY_BRIEF_DATA_DIR": str(data_dir)},
+    )
+    assert result.returncode != 0
+    combined = result.stdout + result.stderr
+    assert "missing required keys" in combined
+    assert "Traceback" not in combined
