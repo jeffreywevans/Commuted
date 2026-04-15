@@ -81,3 +81,23 @@ def test_weather_value_is_from_allowed_pool() -> None:
     for seed in range(25):
         fields = pick_story_fields(random.Random(seed))
         assert fields["weather"] in allowed
+
+
+def test_sexual_scene_tags_follow_count_and_group_rules() -> None:
+    tag_groups = get_data()["sexual_scene_tag_groups"]
+    tag_to_group = {
+        tag: group_name
+        for group_name, tags in tag_groups.items()
+        for tag in tags
+    }
+
+    for seed in range(200):
+        fields = pick_story_fields(random.Random(seed))
+        selected_tags = fields["sexual_scene_tags"]
+
+        assert isinstance(selected_tags, list)
+        assert 2 <= len(selected_tags) <= 5
+        assert len(selected_tags) == len(set(selected_tags))
+
+        selected_groups = {tag_to_group[tag] for tag in selected_tags}
+        assert len(selected_groups) == len(selected_tags)
