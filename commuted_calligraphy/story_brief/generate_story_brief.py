@@ -89,8 +89,7 @@ def _data_file(filename: str) -> Any:
 
     Resolution order:
       1) COMMUTED_STORY_BRIEF_DATA_DIR env var (custom/system deployments).
-      2) Repo-relative data directory adjacent to this script
-         (source checkout execution and direct script invocation).
+      2) Direct-script source checkout fallback (repo-relative `data/`).
       3) Installed package resources under
          commuted_calligraphy.story_brief.data (packaged installs).
 
@@ -105,7 +104,7 @@ def _data_file(filename: str) -> Any:
         return override / filename
 
     repo_relative = Path(__file__).resolve().parent / "data" / filename
-    if repo_relative.exists():
+    if __package__ in (None, "") and repo_relative.exists():
         return repo_relative
 
     try:
