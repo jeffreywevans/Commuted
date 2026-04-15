@@ -862,7 +862,7 @@ def pick_story_fields(
         "style_guidance": rng.choice(data["style_guidance"]),
     }
     result["sexual_content_level"] = sexual_content_level
-    result["sexual_scene_tags"] = [] if sexual_content_level == "none" else sexual_scene_tags
+    result["sexual_scene_tags"] = sexual_scene_tags
     result["word_count_target"] = rng.choice(data["word_count_targets"])
     return result
 
