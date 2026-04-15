@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import json
+import os
 import re
 import subprocess
 import sys
@@ -11,10 +13,16 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 SCRIPT = REPO_ROOT / "commuted_calligraphy" / "story_brief" / "generate_story_brief.py"
 
 
-def run_cli(*args: str, cwd: Path) -> subprocess.CompletedProcess[str]:
+def run_cli(
+    *args: str, cwd: Path, env_overrides: dict[str, str] | None = None
+) -> subprocess.CompletedProcess[str]:
+    env = os.environ.copy()
+    if env_overrides:
+        env.update(env_overrides)
     return subprocess.run(
         [sys.executable, str(SCRIPT), *args],
         cwd=cwd,
+        env=env,
         capture_output=True,
         text=True,
         check=False,
@@ -111,3 +119,39 @@ def test_cli_lint_dataset_flag_reports_results_and_exits_cleanly(tmp_path: Path)
     combined = result.stdout + result.stderr
     assert "Dataset lint:" in combined
     assert "Traceback" not in combined
+
+
+def test_cli_lint_dataset_takes_precedence_over_validate_strict(tmp_path: Path) -> None:
+    data_dir = tmp_path / "lint-data"
+    data_dir.mkdir()
+    source_data_dir = REPO_ROOT / "commuted_calligraphy" / "story_brief" / "data"
+    for filename in ("titles.json", "entities.json", "prompts.json", "config.json"):
+        payload = json.loads((source_data_dir / filename).read_text(encoding="utf-8"))
+        (data_dir / filename).write_text(
+            json.dumps(payload, indent=2),
+            encoding="utf-8",
+        )
+
+    config_path = data_dir / "config.json"
+    config = json.loads(config_path.read_text(encoding="utf-8"))
+    config["date_start"] = "2000-01-01"
+    config["date_end"] = "2000-01-01"
+    config_path.write_text(json.dumps(config, indent=2), encoding="utf-8")
+
+    entities_path = data_dir / "entities.json"
+    entities = json.loads(entities_path.read_text(encoding="utf-8"))
+    entities["character_availability"] = [["Only One", "2000-01-01", "2000-01-01"]]
+    entities["setting_availability"] = [["Only Place", "2000-01-01", "2000-01-01"]]
+    entities_path.write_text(json.dumps(entities, indent=2), encoding="utf-8")
+
+    result = run_cli(
+        "--validate-strict",
+        "--lint-dataset",
+        cwd=tmp_path,
+        env_overrides={"COMMUTED_STORY_BRIEF_DATA_DIR": str(data_dir)},
+    )
+    assert result.returncode == 1
+    combined = result.stdout + result.stderr
+    assert "Dataset lint: errors" in combined
+    assert "Coverage gap: fewer than two distinct characters" in combined
+    assert "Strict validation failed" not in combined

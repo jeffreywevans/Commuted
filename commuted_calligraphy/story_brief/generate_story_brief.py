@@ -601,25 +601,6 @@ def validate_story_data_strict(data: dict[str, Any]) -> None:
             )
 
 
-def _coalesce_dates_to_ranges(dates: list[date]) -> list[tuple[date, date]]:
-    if not dates:
-        return []
-    sorted_unique = sorted(set(dates))
-    ranges: list[tuple[date, date]] = []
-    range_start = sorted_unique[0]
-    range_end = sorted_unique[0]
-    one_day = timedelta(days=1)
-    for current in sorted_unique[1:]:
-        if current == range_end + one_day:
-            range_end = current
-            continue
-        ranges.append((range_start, range_end))
-        range_start = current
-        range_end = current
-    ranges.append((range_start, range_end))
-    return ranges
-
-
 def _format_date_ranges(ranges: list[tuple[date, date]]) -> str:
     if not ranges:
         return "none"
@@ -632,65 +613,93 @@ def _format_date_ranges(ranges: list[tuple[date, date]]) -> str:
     return ", ".join(rendered)
 
 
+def _coalesce_ranges(ranges: list[tuple[date, date]]) -> list[tuple[date, date]]:
+    if not ranges:
+        return []
+    sorted_ranges = sorted(ranges, key=lambda item: item[0])
+    merged: list[tuple[date, date]] = [sorted_ranges[0]]
+    one_day = timedelta(days=1)
+    for current_start, current_end in sorted_ranges[1:]:
+        last_start, last_end = merged[-1]
+        if current_start <= last_end + one_day:
+            merged[-1] = (last_start, max(last_end, current_end))
+            continue
+        merged.append((current_start, current_end))
+    return merged
+
+
 def lint_story_data(data: dict[str, Any]) -> DatasetLintReport:
     """Report actionable dataset diagnostics and coverage gaps."""
     range_start = data["date_start"]
     range_end = data["date_end"]
-    day_count = (range_end - range_start).days + 1
 
-    missing_character_dates: list[date] = []
-    thin_character_dates: list[date] = []
-    missing_setting_dates: list[date] = []
-    thin_setting_dates: list[date] = []
+    one_day = timedelta(days=1)
+    checkpoints: set[date] = {range_start}
+    if range_end < date.max:
+        checkpoints.add(range_end + one_day)
+    else:
+        checkpoints.add(range_end)
+    for source in (data[CHARACTER_AVAILABILITY_KEY], data[SETTING_AVAILABILITY_KEY]):
+        for _, row_start, row_end in source:
+            clipped_start = max(range_start, row_start)
+            clipped_end = min(range_end, row_end)
+            if clipped_start <= clipped_end:
+                checkpoints.add(clipped_start)
+                if clipped_end < range_end:
+                    checkpoints.add(clipped_end + one_day)
 
-    for day_offset in range(day_count):
-        selected_date = range_start + timedelta(days=day_offset)
-        characters = unique_preserving_order(
-            [
-                name
-                for name, start_date, end_date in data[CHARACTER_AVAILABILITY_KEY]
-                if start_date <= selected_date <= end_date
-            ]
-        )
-        settings = unique_preserving_order(
-            [
-                name
-                for name, start_date, end_date in data[SETTING_AVAILABILITY_KEY]
-                if start_date <= selected_date <= end_date
-            ]
-        )
+    missing_character_ranges: list[tuple[date, date]] = []
+    thin_character_ranges: list[tuple[date, date]] = []
+    missing_setting_ranges: list[tuple[date, date]] = []
+    thin_setting_ranges: list[tuple[date, date]] = []
+
+    sorted_checkpoints = sorted(checkpoints)
+    for current_start, next_start in zip(sorted_checkpoints, sorted_checkpoints[1:]):
+        interval_end = min(range_end, next_start - one_day)
+        if interval_end < current_start:
+            continue
+        characters = [
+            name
+            for name, start_date, end_date in data[CHARACTER_AVAILABILITY_KEY]
+            if start_date <= current_start <= end_date
+        ]
+        settings = [
+            name
+            for name, start_date, end_date in data[SETTING_AVAILABILITY_KEY]
+            if start_date <= current_start <= end_date
+        ]
         if len(characters) < 2:
-            missing_character_dates.append(selected_date)
+            missing_character_ranges.append((current_start, interval_end))
         elif len(characters) == 2:
-            thin_character_dates.append(selected_date)
+            thin_character_ranges.append((current_start, interval_end))
 
         if not settings:
-            missing_setting_dates.append(selected_date)
+            missing_setting_ranges.append((current_start, interval_end))
         elif len(settings) == 1:
-            thin_setting_dates.append(selected_date)
+            thin_setting_ranges.append((current_start, interval_end))
 
     errors: list[str] = []
-    if missing_character_dates:
+    if missing_character_ranges:
         errors.append(
             "Coverage gap: fewer than two distinct characters on "
-            f"{_format_date_ranges(_coalesce_dates_to_ranges(missing_character_dates))}."
+            f"{_format_date_ranges(_coalesce_ranges(missing_character_ranges))}."
         )
-    if missing_setting_dates:
+    if missing_setting_ranges:
         errors.append(
             "Coverage gap: no available settings on "
-            f"{_format_date_ranges(_coalesce_dates_to_ranges(missing_setting_dates))}."
+            f"{_format_date_ranges(_coalesce_ranges(missing_setting_ranges))}."
         )
 
     warnings: list[str] = []
-    if thin_character_dates:
+    if thin_character_ranges:
         warnings.append(
             "Fragile coverage: exactly two characters available on "
-            f"{_format_date_ranges(_coalesce_dates_to_ranges(thin_character_dates))}."
+            f"{_format_date_ranges(_coalesce_ranges(thin_character_ranges))}."
         )
-    if thin_setting_dates:
+    if thin_setting_ranges:
         warnings.append(
             "Fragile coverage: exactly one setting available on "
-            f"{_format_date_ranges(_coalesce_dates_to_ranges(thin_setting_dates))}."
+            f"{_format_date_ranges(_coalesce_ranges(thin_setting_ranges))}."
         )
 
     tokens_seen: set[str] = set()
@@ -887,17 +896,17 @@ def main() -> None:
     else:
         rng = random.Random(args.seed)
 
-    if args.validate_strict:
-        try:
-            validate_story_data_strict(get_data())
-        except ValueError as exc:
-            raise SystemExit(str(exc)) from exc
     if args.lint_dataset:
         report = lint_story_data(get_data())
         _emit_lint_report(report)
         if report.has_errors:
             raise SystemExit(1)
         return
+    if args.validate_strict:
+        try:
+            validate_story_data_strict(get_data())
+        except ValueError as exc:
+            raise SystemExit(str(exc)) from exc
 
     selected_date: date | None = None
     if args.date:
