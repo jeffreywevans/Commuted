@@ -324,6 +324,8 @@ def _validate_sexual_scene_tag_groups(config: dict[str, Any]) -> None:
     groups = config["sexual_scene_tag_groups"]
     if not isinstance(groups, dict) or not groups:
         raise ValueError("config.sexual_scene_tag_groups must be a non-empty object")
+    if len(groups) < 2:
+        raise ValueError("config.sexual_scene_tag_groups must contain at least 2 groups")
     if len(groups) > 5:
         raise ValueError("config.sexual_scene_tag_groups must contain at most 5 groups")
 
