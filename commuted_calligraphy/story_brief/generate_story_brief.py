@@ -815,23 +815,30 @@ def pick_story_fields(
     secondary_character = rng.choice(eligible_secondary)
     setting = rng.choice(settings_for_date)
     title_template = rng.choice(data["titles"])
-    tag_group_names = list(data["sexual_scene_tag_groups"])
-    tag_count_options = [
-        count for count in SEXUAL_SCENE_TAG_COUNT_OPTIONS if count <= len(tag_group_names)
-    ]
-    tag_count_weights = list(SEXUAL_SCENE_TAG_COUNT_WEIGHTS[: len(tag_count_options)])
-    selected_tag_count = int(
-        weighted_choice(
-            rng,
-            [str(value) for value in tag_count_options],
-            tag_count_weights,
-        )
+    sexual_content_level = weighted_choice(
+        rng, data["sexual_content_options"], data["sexual_content_weights"]
     )
-    selected_tag_groups = rng.sample(tag_group_names, selected_tag_count)
-    sexual_scene_tags = [
-        rng.choice(data["sexual_scene_tag_groups"][group_name])
-        for group_name in selected_tag_groups
-    ]
+    sexual_scene_tags: list[str] = []
+    if sexual_content_level != "none":
+        tag_group_names = list(data["sexual_scene_tag_groups"])
+        tag_count_options = [
+            count
+            for count in SEXUAL_SCENE_TAG_COUNT_OPTIONS
+            if count <= len(tag_group_names)
+        ]
+        tag_count_weights = list(SEXUAL_SCENE_TAG_COUNT_WEIGHTS[: len(tag_count_options)])
+        selected_tag_count = int(
+            weighted_choice(
+                rng,
+                [str(value) for value in tag_count_options],
+                tag_count_weights,
+            )
+        )
+        selected_tag_groups = rng.sample(tag_group_names, selected_tag_count)
+        sexual_scene_tags = [
+            rng.choice(data["sexual_scene_tag_groups"][group_name])
+            for group_name in selected_tag_groups
+        ]
 
     return {
         "title": render_title(
@@ -853,9 +860,7 @@ def pick_story_fields(
         "inciting_pressure": rng.choice(data["inciting_pressures"]),
         "ending_type": rng.choice(data["ending_types"]),
         "style_guidance": rng.choice(data["style_guidance"]),
-        "sexual_content_level": weighted_choice(
-            rng, data["sexual_content_options"], data["sexual_content_weights"]
-        ),
+        "sexual_content_level": sexual_content_level,
         "sexual_scene_tags": sexual_scene_tags,
         "word_count_target": rng.choice(data["word_count_targets"]),
     }
