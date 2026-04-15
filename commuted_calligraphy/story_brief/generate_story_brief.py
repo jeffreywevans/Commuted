@@ -860,10 +860,10 @@ def pick_story_fields(
         "inciting_pressure": rng.choice(data["inciting_pressures"]),
         "ending_type": rng.choice(data["ending_types"]),
         "style_guidance": rng.choice(data["style_guidance"]),
+        "sexual_content_level": sexual_content_level,
+        "sexual_scene_tags": sexual_scene_tags,
+        "word_count_target": rng.choice(data["word_count_targets"]),
     }
-    result["sexual_content_level"] = sexual_content_level
-    result["sexual_scene_tags"] = sexual_scene_tags
-    result["word_count_target"] = rng.choice(data["word_count_targets"])
     return result
 
 
