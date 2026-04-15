@@ -93,9 +93,14 @@ def test_sexual_scene_tags_follow_count_and_group_rules() -> None:
 
     for seed in range(200):
         fields = pick_story_fields(random.Random(seed))
+        sexual_content_level = fields["sexual_content_level"]
         selected_tags = fields["sexual_scene_tags"]
 
         assert isinstance(selected_tags, list)
+        if sexual_content_level == "none":
+            assert selected_tags == []
+            continue
+
         assert 2 <= len(selected_tags) <= 5
         assert len(selected_tags) == len(set(selected_tags))
 
