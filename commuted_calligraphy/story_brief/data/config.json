@@ -19,22 +19,14 @@
   ],
   "sexual_scene_tag_groups": {
     "tone": [
-      "tender",
-      "passionate",
-      "rough",
-      "filthy",
-      "loving",
-      "desperate",
-      "playful",
       "guilty",
-      "joyful",
       "detached",
+      "dominating",
       "worshipful",
+      "playful",
+      "power-exchange",
       "teasing",
-      "dominant",
-      "submissive",
-      "equal",
-      "power-exchange"
+      "taunting"
     ],
     "partner": [
       "married",
@@ -51,34 +43,29 @@
       "tour-bus",
       "hotel-room",
       "green-room",
-      "venue",
-      "stadium",
       "no-tell-motel",
       "semi-public",
-      "public-risk",
-      "quickie",
-      "marathon"
+      "shower"
     ],
     "pacing": [
+      "quickie",
+      "marathon",
       "slow-burn",
       "rushed",
-      "afternoon",
       "post-show",
       "morning-after",
-      "midnight"
+      "interrupted",
+      "languid"
     ],
     "type": [
-      "explicit",
-      "graphic",
-      "sensual",
       "raw",
       "awkward",
       "clumsy",
-      "choreographed",
-      "oral-focused",
-      "penetrative",
-      "manual",
-      "body-worship"
+      "fun",
+      "mutual masturbation",
+      "oral only",
+      "anal",
+      "non-penetrative"
     ]
   },
   "word_count_targets": [
