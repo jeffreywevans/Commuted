@@ -525,12 +525,7 @@ def available_characters(selected_date: date) -> list[str]:
     ]
 
 
-def unique_preserving_order(values: list[str]) -> list[str]:
-    """Return unique items in first-seen order."""
-    return list(dict.fromkeys(values))
-
-
-def stable_sorted_pool(values: list[str] | tuple[str, ...]) -> list[str]:
+def stable_sorted_pool(values: list[Any] | tuple[Any, ...]) -> list[Any]:
     """Return a consistently sorted copy for seed-stable random selection."""
     return sorted(values)
 
@@ -796,9 +791,7 @@ def pick_story_fields(
         )
     time_period = selected_date.isoformat()
 
-    characters_for_date = stable_sorted_pool(
-        unique_preserving_order(available_characters(selected_date))
-    )
+    characters_for_date = stable_sorted_pool(available_characters(selected_date))
     if len(characters_for_date) < 2:
         raise ValueError(
             "Need at least two distinct available characters for year "
@@ -869,7 +862,7 @@ def pick_story_fields(
         "style_guidance": rng.choice(stable_sorted_pool(data["style_guidance"])),
         "sexual_content_level": sexual_content_level,
         "sexual_scene_tags": sexual_scene_tags,
-        "word_count_target": rng.choice(sorted(data["word_count_targets"])),
+        "word_count_target": rng.choice(stable_sorted_pool(data["word_count_targets"])),
     }
     return result
 
