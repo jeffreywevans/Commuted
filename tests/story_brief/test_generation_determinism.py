@@ -1,4 +1,5 @@
 import random
+from copy import deepcopy
 from datetime import date
 
 import pytest
@@ -106,3 +107,40 @@ def test_sexual_scene_tags_follow_count_and_group_rules() -> None:
 
         selected_groups = {tag_to_group[tag] for tag in selected_tags}
         assert len(selected_groups) == len(selected_tags)
+
+
+def test_seed_output_is_stable_when_option_pool_order_changes(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from commuted_calligraphy.story_brief import generate_story_brief as story_brief
+
+    baseline_data = deepcopy(story_brief.get_data())
+    shuffled_data = deepcopy(baseline_data)
+
+    shuffled_data["setting_availability"] = list(reversed(shuffled_data["setting_availability"]))
+    shuffled_data["titles"] = list(reversed(shuffled_data["titles"]))
+    shuffled_data["central_conflicts"] = list(reversed(shuffled_data["central_conflicts"]))
+    shuffled_data["inciting_pressures"] = list(reversed(shuffled_data["inciting_pressures"]))
+    shuffled_data["ending_types"] = list(reversed(shuffled_data["ending_types"]))
+    shuffled_data["style_guidance"] = list(reversed(shuffled_data["style_guidance"]))
+    shuffled_data["word_count_targets"] = list(reversed(shuffled_data["word_count_targets"]))
+    shuffled_data["sexual_scene_tag_groups"] = {
+        group_name: list(reversed(tags))
+        for group_name, tags in reversed(
+            list(shuffled_data["sexual_scene_tag_groups"].items())
+        )
+    }
+
+    seed = 8675309
+    selected_date = date(2026, 1, 1)
+    monkeypatch.setattr(story_brief, "get_data", lambda: baseline_data)
+    baseline_fields = story_brief.pick_story_fields(
+        random.Random(seed), selected_date=selected_date
+    )
+
+    monkeypatch.setattr(story_brief, "get_data", lambda: shuffled_data)
+    shuffled_fields = story_brief.pick_story_fields(
+        random.Random(seed), selected_date=selected_date
+    )
+
+    assert shuffled_fields == baseline_fields
