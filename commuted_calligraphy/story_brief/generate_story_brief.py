@@ -14,7 +14,7 @@ from datetime import date, datetime, timedelta
 from functools import lru_cache
 from importlib.resources import files
 from pathlib import Path
-from typing import AbstractSet, Any, NamedTuple, TypeVar
+from typing import AbstractSet, Any, Iterable, NamedTuple, TypeVar
 
 import yaml
 
@@ -527,7 +527,7 @@ def available_characters(selected_date: date) -> list[str]:
     ]
 
 
-def stable_sorted_pool(values: list[PoolValue] | tuple[PoolValue, ...]) -> list[PoolValue]:
+def stable_sorted_pool(values: Iterable[PoolValue]) -> list[PoolValue]:
     """Return a consistently sorted copy for seed-stable random selection."""
     return sorted(values)
 
