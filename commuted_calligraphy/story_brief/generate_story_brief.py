@@ -14,9 +14,11 @@ from datetime import date, datetime, timedelta
 from functools import lru_cache
 from importlib.resources import files
 from pathlib import Path
-from typing import AbstractSet, Any, NamedTuple
+from typing import AbstractSet, Any, NamedTuple, TypeVar
 
 import yaml
+
+PoolValue = TypeVar("PoolValue", str, int)
 
 TITLE_TOKEN_PATTERN = re.compile(r"@(?P<key>protagonist|setting|time_period)\b")
 ANY_TITLE_TOKEN_PATTERN = re.compile(r"@(?P<key>[A-Za-z_]\w*)\b")
@@ -525,7 +527,7 @@ def available_characters(selected_date: date) -> list[str]:
     ]
 
 
-def stable_sorted_pool(values: list[Any] | tuple[Any, ...]) -> list[Any]:
+def stable_sorted_pool(values: list[PoolValue] | tuple[PoolValue, ...]) -> list[PoolValue]:
     """Return a consistently sorted copy for seed-stable random selection."""
     return sorted(values)
 
