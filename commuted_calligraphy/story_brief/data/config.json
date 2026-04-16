@@ -18,54 +18,54 @@
     0.1
   ],
   "sexual_scene_tag_groups": {
-    "tone": [
-      "guilty",
-      "detached",
-      "dominating",
-      "worshipful",
-      "playful",
-      "power-exchange",
-      "teasing",
-      "taunting"
-    ],
-    "partner": [
-      "married",
-      "groupie",
-      "roadie",
-      "fan",
-      "ex",
-      "band-mate",
-      "voyeuristic",
-      "mutual"
-    ],
     "location": [
       "backstage",
-      "tour-bus",
-      "hotel-room",
       "green-room",
+      "hotel-room",
       "no-tell-motel",
       "semi-public",
-      "shower"
+      "shower",
+      "tour-bus"
     ],
     "pacing": [
-      "quickie",
-      "marathon",
-      "slow-burn",
-      "rushed",
-      "post-show",
-      "morning-after",
       "interrupted",
-      "languid"
+      "languid",
+      "marathon",
+      "morning-after",
+      "post-show",
+      "quickie",
+      "rushed",
+      "slow-burn"
+    ],
+    "partner": [
+      "band-mate",
+      "ex",
+      "fan",
+      "groupie",
+      "married",
+      "mutual",
+      "roadie",
+      "voyeuristic"
+    ],
+    "tone": [
+      "detached",
+      "dominating",
+      "guilty",
+      "playful",
+      "power-exchange",
+      "taunting",
+      "teasing",
+      "worshipful"
     ],
     "type": [
-      "raw",
+      "anal",
       "awkward",
       "clumsy",
       "fun",
       "mutual-masturbation",
+      "non-penetrative",
       "oral-only",
-      "anal",
-      "non-penetrative"
+      "raw"
     ]
   },
   "word_count_targets": [
