@@ -530,6 +530,11 @@ def unique_preserving_order(values: list[str]) -> list[str]:
     return list(dict.fromkeys(values))
 
 
+def stable_sorted_pool(values: list[str] | tuple[str, ...]) -> list[str]:
+    """Return a consistently sorted copy for seed-stable random selection."""
+    return sorted(values)
+
+
 def available_settings(selected_date: date) -> list[str]:
     """Return settings available for the selected date."""
     return [
@@ -791,14 +796,16 @@ def pick_story_fields(
         )
     time_period = selected_date.isoformat()
 
-    characters_for_date = unique_preserving_order(available_characters(selected_date))
+    characters_for_date = stable_sorted_pool(
+        unique_preserving_order(available_characters(selected_date))
+    )
     if len(characters_for_date) < 2:
         raise ValueError(
             "Need at least two distinct available characters for year "
             f"{selected_date.year}."
         )
 
-    settings_for_date = available_settings(selected_date)
+    settings_for_date = stable_sorted_pool(available_settings(selected_date))
     if not settings_for_date:
         raise ValueError(
             f"No settings are available for year {selected_date.year}. "
@@ -814,13 +821,13 @@ def pick_story_fields(
         )
     secondary_character = rng.choice(eligible_secondary)
     setting = rng.choice(settings_for_date)
-    title_template = rng.choice(data["titles"])
+    title_template = rng.choice(stable_sorted_pool(data["titles"]))
     sexual_content_level = weighted_choice(
         rng, data["sexual_content_options"], data["sexual_content_weights"]
     )
     sexual_scene_tags: list[str] = []
     if sexual_content_level != "none":
-        tag_group_names = list(data["sexual_scene_tag_groups"])
+        tag_group_names = stable_sorted_pool(list(data["sexual_scene_tag_groups"]))
         tag_count_options = [
             count
             for count in SEXUAL_SCENE_TAG_COUNT_OPTIONS
@@ -836,7 +843,7 @@ def pick_story_fields(
         )
         selected_tag_groups = rng.sample(tag_group_names, selected_tag_count)
         sexual_scene_tags = [
-            rng.choice(data["sexual_scene_tag_groups"][group_name])
+            rng.choice(stable_sorted_pool(data["sexual_scene_tag_groups"][group_name]))
             for group_name in selected_tag_groups
         ]
 
@@ -856,13 +863,13 @@ def pick_story_fields(
             data["weather"],
             symmetric_peak_weights(len(data["weather"])),
         ),
-        "central_conflict": rng.choice(data["central_conflicts"]),
-        "inciting_pressure": rng.choice(data["inciting_pressures"]),
-        "ending_type": rng.choice(data["ending_types"]),
-        "style_guidance": rng.choice(data["style_guidance"]),
+        "central_conflict": rng.choice(stable_sorted_pool(data["central_conflicts"])),
+        "inciting_pressure": rng.choice(stable_sorted_pool(data["inciting_pressures"])),
+        "ending_type": rng.choice(stable_sorted_pool(data["ending_types"])),
+        "style_guidance": rng.choice(stable_sorted_pool(data["style_guidance"])),
         "sexual_content_level": sexual_content_level,
         "sexual_scene_tags": sexual_scene_tags,
-        "word_count_target": rng.choice(data["word_count_targets"]),
+        "word_count_target": rng.choice(sorted(data["word_count_targets"])),
     }
     return result
 
