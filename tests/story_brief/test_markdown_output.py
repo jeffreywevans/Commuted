@@ -1,5 +1,5 @@
 from commuted_calligraphy.story_brief.generate_story_brief import (
-    ORDERED_KEYS,
+    get_data,
     render_title,
     to_markdown,
 )
@@ -91,7 +91,7 @@ def test_yaml_keys_appear_in_configured_order() -> None:
     text = to_markdown(fields)
     yaml_block = text.split("---\n", 2)[1]
 
-    positions = [yaml_block.find(f"{key}:") for key in ORDERED_KEYS]
+    positions = [yaml_block.find(f"{key}:") for key in get_data()["ordered_keys"]]
     assert all(pos >= 0 for pos in positions)
     assert positions == sorted(positions)
 
