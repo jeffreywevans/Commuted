@@ -471,6 +471,7 @@ def _validate_partner_distributions(
             if not isinstance(partners, list):
                 raise ValueError(f"{era_section}.partners must be a list")
             parsed_partners: list[tuple[str, float]] = []
+            seen_partners: dict[str, int] = {}
             for partner_idx, partner_item in enumerate(partners):
                 partner_section = f"{era_section}.partners[{partner_idx}]"
                 if not isinstance(partner_item, dict):
@@ -480,6 +481,15 @@ def _validate_partner_distributions(
                 weight = partner_item["weight"]
                 if not partner_name:
                     raise ValueError(f"{partner_section}.partner must be a non-empty string")
+                partner_key = partner_name.casefold()
+                if partner_key in seen_partners:
+                    first_idx = seen_partners[partner_key]
+                    raise ValueError(
+                        f"{era_section}.partners contains duplicate partner "
+                        f"'{partner_name}' at index {partner_idx} "
+                        f"(first seen at index {first_idx})"
+                    )
+                seen_partners[partner_key] = partner_idx
                 if isinstance(weight, bool) or not isinstance(weight, (int, float)):
                     raise ValueError(f"{partner_section}.weight must be a real number")
                 if not math.isfinite(weight) or weight < 0:
@@ -994,16 +1004,12 @@ def pick_story_fields(
         for era in data[PARTNER_DISTRIBUTIONS_KEY][protagonist]:
             if era["date_start"] <= selected_date <= era["date_end"]:
                 if era["partners"]:
-                    partner_options = stable_sorted_pool(
-                        [partner for partner, _ in era["partners"]]
-                    )
-                    option_to_weight = {
-                        partner: weight for partner, weight in era["partners"]
-                    }
+                    sorted_partner_pairs = stable_sorted_pool(era["partners"])
+                    partner_options = [partner for partner, _ in sorted_partner_pairs]
                     sexual_partner = weighted_choice(
                         rng,
                         partner_options,
-                        [option_to_weight[partner] for partner in partner_options],
+                        [weight for _, weight in sorted_partner_pairs],
                     )
                 break
 
