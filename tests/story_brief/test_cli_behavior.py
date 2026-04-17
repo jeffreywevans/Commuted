@@ -125,7 +125,13 @@ def test_cli_lint_dataset_takes_precedence_over_validate_strict(tmp_path: Path) 
     data_dir = tmp_path / "lint-data"
     data_dir.mkdir()
     source_data_dir = REPO_ROOT / "commuted_calligraphy" / "story_brief" / "data"
-    for filename in ("titles.json", "entities.json", "prompts.json", "config.json"):
+    for filename in (
+        "titles.json",
+        "entities.json",
+        "prompts.json",
+        "config.json",
+        "partner_distributions.json",
+    ):
         payload = json.loads((source_data_dir / filename).read_text(encoding="utf-8"))
         (data_dir / filename).write_text(
             json.dumps(payload, indent=2),
@@ -143,6 +149,25 @@ def test_cli_lint_dataset_takes_precedence_over_validate_strict(tmp_path: Path) 
     entities["character_availability"] = [["Only One", "2000-01-01", "2000-01-01"]]
     entities["setting_availability"] = [["Only Place", "2000-01-01", "2000-01-01"]]
     entities_path.write_text(json.dumps(entities, indent=2), encoding="utf-8")
+    partner_distributions_path = data_dir / "partner_distributions.json"
+    partner_distributions = json.loads(partner_distributions_path.read_text(encoding="utf-8"))
+    partner_distributions["partner_distributions"] = [
+        {
+            "character": "Only One",
+            "date_start": "2000-01-01",
+            "date_end": "2000-01-01",
+            "eras": [
+                {
+                    "date_start": "2000-01-01",
+                    "date_end": "2000-01-01",
+                    "partners": [{"partner": "Nobody", "weight": 1.0}],
+                }
+            ],
+        }
+    ]
+    partner_distributions_path.write_text(
+        json.dumps(partner_distributions, indent=2), encoding="utf-8"
+    )
 
     result = run_cli(
         "--validate-strict",
@@ -161,7 +186,13 @@ def test_cli_lint_dataset_handles_invalid_dataset_without_traceback(tmp_path: Pa
     data_dir = tmp_path / "invalid-data"
     data_dir.mkdir()
     source_data_dir = REPO_ROOT / "commuted_calligraphy" / "story_brief" / "data"
-    for filename in ("titles.json", "entities.json", "prompts.json", "config.json"):
+    for filename in (
+        "titles.json",
+        "entities.json",
+        "prompts.json",
+        "config.json",
+        "partner_distributions.json",
+    ):
         payload = json.loads((source_data_dir / filename).read_text(encoding="utf-8"))
         (data_dir / filename).write_text(
             json.dumps(payload, indent=2),

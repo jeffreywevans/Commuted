@@ -52,7 +52,7 @@ Treat it accordingly.
 The story brief generator (`commuted_calligraphy/story_brief/generate_story_brief.py`) supports one environment override:
 
 - `COMMUTED_STORY_BRIEF_DATA_DIR`  
-  Optional path to a directory containing `titles.json`, `entities.json`, `prompts.json`, and `config.json`.
+  Optional path to a directory containing `titles.json`, `entities.json`, `prompts.json`, `config.json`, and `partner_distributions.json`.
 
 ### Data file resolution order
 

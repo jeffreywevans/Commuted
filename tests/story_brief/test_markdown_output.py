@@ -18,6 +18,7 @@ def test_markdown_front_matter_delimiters_present() -> None:
         "ending_type": "ending",
         "style_guidance": "style",
         "sexual_content_level": "none",
+        "sexual_partner": None,
         "sexual_scene_tags": ["tender", "backstage"],
         "word_count_target": 1500,
     }
@@ -42,6 +43,7 @@ def test_markdown_heading_escapes_special_chars() -> None:
         "ending_type": "ending",
         "style_guidance": "style",
         "sexual_content_level": "none",
+        "sexual_partner": None,
         "sexual_scene_tags": ["tender", "backstage"],
         "word_count_target": 1500,
     }
@@ -63,6 +65,7 @@ def test_markdown_heading_escapes_single_backslash() -> None:
         "ending_type": "ending",
         "style_guidance": "style",
         "sexual_content_level": "none",
+        "sexual_partner": None,
         "sexual_scene_tags": ["tender", "backstage"],
         "word_count_target": 1500,
     }
@@ -84,6 +87,7 @@ def test_yaml_keys_appear_in_configured_order() -> None:
         "ending_type": "ending",
         "style_guidance": "style",
         "sexual_content_level": "none",
+        "sexual_partner": None,
         "sexual_scene_tags": ["tender", "backstage"],
         "word_count_target": 1500,
     }
