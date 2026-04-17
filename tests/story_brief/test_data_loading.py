@@ -52,6 +52,41 @@ def _write_minimal_dataset(data_dir: Path) -> None:
             "writing_preamble": "Write.",
         },
     )
+    _write_payload(
+        data_dir / "partner_distributions.json",
+        {
+            "schema_version": 1,
+            "dataset_version": "test",
+            "date_start": "2000-01-01",
+            "date_end": "2005-12-31",
+            "partner_distributions": [
+                {
+                    "character": "Alex",
+                    "date_start": "2000-01-01",
+                    "date_end": "2005-12-31",
+                    "eras": [
+                        {
+                            "date_start": "2000-01-01",
+                            "date_end": "2005-12-31",
+                            "partners": [{"partner": "Jordan", "weight": 1.0}],
+                        }
+                    ],
+                },
+                {
+                    "character": "Jordan",
+                    "date_start": "2000-01-01",
+                    "date_end": "2005-12-31",
+                    "eras": [
+                        {
+                            "date_start": "2000-01-01",
+                            "date_end": "2005-12-31",
+                            "partners": [{"partner": "Alex", "weight": 1.0}],
+                        }
+                    ],
+                },
+            ],
+        },
+    )
 
 
 def test_env_override_loads_dataset_from_custom_directory(

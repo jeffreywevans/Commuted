@@ -34,6 +34,7 @@ EXPECTED_GENERATED_FIELD_KEYS = {
     "ending_type",
     "style_guidance",
     "sexual_content_level",
+    "sexual_partner",
     "sexual_scene_tags",
     "word_count_target",
 }
@@ -49,6 +50,7 @@ PROMPT_LIST_KEYS = (
 PROMPT_LIST_KEYS_SET = frozenset(PROMPT_LIST_KEYS)
 CHARACTER_AVAILABILITY_KEY = "character_availability"
 SETTING_AVAILABILITY_KEY = "setting_availability"
+PARTNER_DISTRIBUTIONS_KEY = "partner_distributions"
 ENTITY_AVAILABILITY_KEYS = frozenset(
     {
         CHARACTER_AVAILABILITY_KEY,
@@ -70,6 +72,7 @@ class ValidatedStoryData(NamedTuple):
     setting_availability: list[tuple[str, date, date]]
     date_start: date
     date_end: date
+    partner_distributions: dict[str, list[dict[str, Any]]]
 
 
 class DatasetLintReport(NamedTuple):
@@ -365,11 +368,145 @@ def _validate_writing_preamble(config: dict[str, Any]) -> None:
         raise ValueError("config.writing_preamble must be a non-empty string")
 
 
+def _validate_partner_distributions(
+    partner_payload: dict[str, Any],
+    *,
+    config_start: date,
+    config_end: date,
+    character_rows: list[tuple[str, date, date]],
+) -> dict[str, list[dict[str, Any]]]:
+    _require_keys(
+        "partner_distributions",
+        partner_payload,
+        {
+            "schema_version",
+            "dataset_version",
+            "date_start",
+            "date_end",
+            PARTNER_DISTRIBUTIONS_KEY,
+        },
+    )
+    if (
+        not isinstance(partner_payload["schema_version"], int)
+        or partner_payload["schema_version"] < 1
+    ):
+        raise ValueError("partner_distributions.schema_version must be an integer >= 1")
+    if (
+        not isinstance(partner_payload["dataset_version"], str)
+        or not partner_payload["dataset_version"].strip()
+    ):
+        raise ValueError("partner_distributions.dataset_version must be a non-empty string")
+
+    try:
+        payload_start = date.fromisoformat(str(partner_payload["date_start"]))
+        payload_end = date.fromisoformat(str(partner_payload["date_end"]))
+    except ValueError as exc:
+        raise ValueError(
+            "partner_distributions date_start/date_end must be ISO dates (YYYY-MM-DD)"
+        ) from exc
+    if payload_start > payload_end:
+        raise ValueError("partner_distributions.date_start must be <= date_end")
+    if payload_end < config_start or payload_start > config_end:
+        raise ValueError(
+            "partner_distributions date range must overlap config.date_start/date_end"
+        )
+
+    entries = partner_payload[PARTNER_DISTRIBUTIONS_KEY]
+    if not isinstance(entries, list) or not entries:
+        raise ValueError("partner_distributions.partner_distributions must be a non-empty list")
+
+    known_characters = {name for name, _, _ in character_rows}
+    seen_characters: set[str] = set()
+    index: dict[str, list[dict[str, Any]]] = {}
+    for idx, character_entry in enumerate(entries):
+        section = f"partner_distributions.partner_distributions[{idx}]"
+        if not isinstance(character_entry, dict):
+            raise ValueError(f"{section} must be an object")
+        _require_keys(section, character_entry, {"character", "date_start", "date_end", "eras"})
+        character = str(character_entry["character"]).strip()
+        if not character:
+            raise ValueError(f"{section}.character must be a non-empty string")
+        if character not in known_characters:
+            raise ValueError(f"partner_distributions includes unknown character '{character}'")
+        if character in seen_characters:
+            raise ValueError(f"partner_distributions includes duplicate character '{character}'")
+        seen_characters.add(character)
+
+        try:
+            char_start = date.fromisoformat(str(character_entry["date_start"]))
+            char_end = date.fromisoformat(str(character_entry["date_end"]))
+        except ValueError as exc:
+            raise ValueError(
+                f"{section} date_start/date_end must be ISO dates (YYYY-MM-DD)"
+            ) from exc
+        if char_start > char_end:
+            raise ValueError(f"{section} date_start must be <= date_end")
+
+        eras = character_entry["eras"]
+        if not isinstance(eras, list) or not eras:
+            raise ValueError(f"{section}.eras must be a non-empty list")
+        parsed_eras: list[dict[str, Any]] = []
+        last_era_end: date | None = None
+        for era_idx, era in enumerate(eras):
+            era_section = f"{section}.eras[{era_idx}]"
+            if not isinstance(era, dict):
+                raise ValueError(f"{era_section} must be an object")
+            _require_keys(era_section, era, {"date_start", "date_end", "partners"})
+            try:
+                era_start = date.fromisoformat(str(era["date_start"]))
+                era_end = date.fromisoformat(str(era["date_end"]))
+            except ValueError as exc:
+                raise ValueError(
+                    f"{era_section} date_start/date_end must be ISO dates (YYYY-MM-DD)"
+                ) from exc
+            if era_start > era_end:
+                raise ValueError(f"{era_section} date_start must be <= date_end")
+            if era_start < char_start or era_end > char_end:
+                raise ValueError(f"{era_section} must be within parent character date range")
+            if last_era_end is not None and era_start <= last_era_end:
+                raise ValueError(f"{section}.eras has overlapping or unsorted ranges")
+            last_era_end = era_end
+
+            partners = era["partners"]
+            if not isinstance(partners, list):
+                raise ValueError(f"{era_section}.partners must be a list")
+            parsed_partners: list[tuple[str, float]] = []
+            for partner_idx, partner_item in enumerate(partners):
+                partner_section = f"{era_section}.partners[{partner_idx}]"
+                if not isinstance(partner_item, dict):
+                    raise ValueError(f"{partner_section} must be an object")
+                _require_keys(partner_section, partner_item, {"partner", "weight"})
+                partner_name = str(partner_item["partner"]).strip()
+                weight = partner_item["weight"]
+                if not partner_name:
+                    raise ValueError(f"{partner_section}.partner must be a non-empty string")
+                if isinstance(weight, bool) or not isinstance(weight, (int, float)):
+                    raise ValueError(f"{partner_section}.weight must be a real number")
+                if not math.isfinite(weight) or weight < 0:
+                    raise ValueError(f"{partner_section}.weight must be finite and non-negative")
+                parsed_partners.append((partner_name, float(weight)))
+            if parsed_partners and sum(weight for _, weight in parsed_partners) <= 0:
+                raise ValueError(f"{era_section}.partners must sum to > 0")
+            parsed_eras.append(
+                {"date_start": era_start, "date_end": era_end, "partners": parsed_partners}
+            )
+
+        index[character] = parsed_eras
+
+    missing_characters = sorted(known_characters - seen_characters)
+    if missing_characters:
+        raise ValueError(
+            "partner_distributions is missing characters: " + ", ".join(missing_characters)
+        )
+    return index
+
+
 def validate_story_data(
     titles: dict[str, Any],
     entities: dict[str, Any],
     prompts: dict[str, Any],
     config: dict[str, Any],
+    partner_distributions: dict[str, Any],
 ) -> ValidatedStoryData:
     _validate_titles(titles)
     character_rows, setting_rows = _validate_entities(entities)
@@ -400,12 +537,19 @@ def validate_story_data(
     _validate_word_count_targets(config)
     _validate_ordered_keys(config)
     _validate_writing_preamble(config)
+    partner_distribution_index = _validate_partner_distributions(
+        partner_distributions,
+        config_start=start,
+        config_end=end,
+        character_rows=character_rows,
+    )
 
     return ValidatedStoryData(
         character_availability=character_rows,
         setting_availability=setting_rows,
         date_start=start,
         date_end=end,
+        partner_distributions=partner_distribution_index,
     )
 
 
@@ -414,7 +558,8 @@ def load_story_data() -> dict[str, Any]:
     entities = _load_json(_data_file("entities.json"))
     prompts = _load_json(_data_file("prompts.json"))
     config = _load_json(_data_file("config.json"))
-    validated = validate_story_data(titles, entities, prompts, config)
+    partner_distributions = _load_json(_data_file("partner_distributions.json"))
+    validated = validate_story_data(titles, entities, prompts, config, partner_distributions)
     prompt_lists = {
         key: [str(value) for value in prompts[key]]
         for key in PROMPT_LIST_KEYS
@@ -437,6 +582,7 @@ def load_story_data() -> dict[str, Any]:
         "ordered_keys": [str(v) for v in config["ordered_keys"]],
         "writing_preamble": str(config["writing_preamble"]),
         "dataset_version": str(config["dataset_version"]),
+        PARTNER_DISTRIBUTIONS_KEY: validated.partner_distributions,
     }
 
 
@@ -465,6 +611,7 @@ _COMPAT_ALIASES: dict[str, str] = {
     "ORDERED_KEYS": "ordered_keys",
     "WRITING_PREAMBLE": "writing_preamble",
     "DATASET_VERSION": "dataset_version",
+    "PARTNER_DISTRIBUTIONS": PARTNER_DISTRIBUTIONS_KEY,
 }
 
 
@@ -781,7 +928,7 @@ def _emit_lint_report(report: DatasetLintReport) -> None:
 
 def pick_story_fields(
     rng: random.Random | secrets.SystemRandom, selected_date: date | None = None
-) -> dict[str, str | int | list[str]]:
+) -> dict[str, str | int | list[str] | None]:
     data = get_data()
     if selected_date is None:
         selected_date = random_date_in_range(rng, data["date_start"], data["date_end"])
@@ -842,7 +989,25 @@ def pick_story_fields(
             for group_name in selected_tag_groups
         ]
 
-    result: dict[str, str | int | list[str]] = {
+    sexual_partner: str | None = None
+    if sexual_content_level != "none":
+        for era in data[PARTNER_DISTRIBUTIONS_KEY][protagonist]:
+            if era["date_start"] <= selected_date <= era["date_end"]:
+                if era["partners"]:
+                    partner_options = stable_sorted_pool(
+                        [partner for partner, _ in era["partners"]]
+                    )
+                    option_to_weight = {
+                        partner: weight for partner, weight in era["partners"]
+                    }
+                    sexual_partner = weighted_choice(
+                        rng,
+                        partner_options,
+                        [option_to_weight[partner] for partner in partner_options],
+                    )
+                break
+
+    result: dict[str, str | int | list[str] | None] = {
         "title": render_title(
             title_template,
             protagonist=protagonist,
@@ -863,6 +1028,7 @@ def pick_story_fields(
         "ending_type": rng.choice(stable_sorted_pool(data["ending_types"])),
         "style_guidance": rng.choice(stable_sorted_pool(data["style_guidance"])),
         "sexual_content_level": sexual_content_level,
+        "sexual_partner": sexual_partner,
         "sexual_scene_tags": sexual_scene_tags,
         "word_count_target": rng.choice(stable_sorted_pool(data["word_count_targets"])),
     }

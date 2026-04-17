@@ -100,6 +100,7 @@ def test_sexual_scene_tags_follow_count_and_group_rules() -> None:
         assert isinstance(selected_tags, list)
         if sexual_content_level == "none":
             assert selected_tags == []
+            assert fields["sexual_partner"] is None
             continue
 
         assert 2 <= len(selected_tags) <= 5
@@ -107,6 +108,7 @@ def test_sexual_scene_tags_follow_count_and_group_rules() -> None:
 
         selected_groups = {tag_to_group[tag] for tag in selected_tags}
         assert len(selected_groups) == len(selected_tags)
+        assert fields["sexual_partner"] is None or isinstance(fields["sexual_partner"], str)
 
 
 def test_seed_output_is_stable_when_option_pool_order_changes(

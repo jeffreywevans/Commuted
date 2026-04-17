@@ -17,12 +17,15 @@ def load_all():
     entities = json.loads(story_brief._data_file("entities.json").read_text(encoding="utf-8"))
     prompts = json.loads(story_brief._data_file("prompts.json").read_text(encoding="utf-8"))
     config = json.loads(story_brief._data_file("config.json").read_text(encoding="utf-8"))
-    return titles, entities, prompts, config
+    partner_distributions = json.loads(
+        story_brief._data_file("partner_distributions.json").read_text(encoding="utf-8")
+    )
+    return titles, entities, prompts, config, partner_distributions
 
 
 def test_schema_validation_accepts_current_data() -> None:
-    titles, entities, prompts, config = load_all()
-    validate_story_data(titles, entities, prompts, config)
+    titles, entities, prompts, config, partner_distributions = load_all()
+    validate_story_data(titles, entities, prompts, config, partner_distributions)
 
 
 @pytest.mark.parametrize(
@@ -96,7 +99,7 @@ def test_schema_validation_accepts_current_data() -> None:
     ],
 )
 def test_schema_validation_rejects_bad_data(mutator, expected_msg: str) -> None:
-    titles, entities, prompts, config = load_all()
+    titles, entities, prompts, config, partner_distributions = load_all()
     titles = deepcopy(titles)
     entities = deepcopy(entities)
     prompts = deepcopy(prompts)
@@ -105,28 +108,55 @@ def test_schema_validation_rejects_bad_data(mutator, expected_msg: str) -> None:
     mutator(titles, entities, prompts, config)
 
     with pytest.raises(ValueError, match=expected_msg):
-        validate_story_data(titles, entities, prompts, config)
+        validate_story_data(titles, entities, prompts, config, partner_distributions)
 
 
 def test_schema_validation_allows_disjoint_availability_windows_for_same_name() -> None:
-    titles, entities, prompts, config = load_all()
+    titles, entities, prompts, config, partner_distributions = load_all()
     entities = deepcopy(entities)
+    partner_distributions = deepcopy(partner_distributions)
     entities["character_availability"] = [
         ["Alex", "2000-01-01", "2000-01-31"],
         ["Alex", "2000-03-01", "2000-03-31"],
         ["Jordan", "2000-01-01", "2000-12-31"],
     ]
+    partner_distributions["partner_distributions"] = [
+        {
+            "character": "Alex",
+            "date_start": "2000-01-01",
+            "date_end": "2000-12-31",
+            "eras": [
+                {
+                    "date_start": "2000-01-01",
+                    "date_end": "2000-12-31",
+                    "partners": [{"partner": "Jordan", "weight": 1.0}],
+                }
+            ],
+        },
+        {
+            "character": "Jordan",
+            "date_start": "2000-01-01",
+            "date_end": "2000-12-31",
+            "eras": [
+                {
+                    "date_start": "2000-01-01",
+                    "date_end": "2000-12-31",
+                    "partners": [{"partner": "Alex", "weight": 1.0}],
+                }
+            ],
+        },
+    ]
 
-    validate_story_data(titles, entities, prompts, config)
+    validate_story_data(titles, entities, prompts, config, partner_distributions)
 
 
 def test_schema_validation_rejects_single_sexual_scene_tag_group() -> None:
-    titles, entities, prompts, config = load_all()
+    titles, entities, prompts, config, partner_distributions = load_all()
     config = deepcopy(config)
     config["sexual_scene_tag_groups"] = {"tone": ["tender", "passionate"]}
 
     with pytest.raises(ValueError, match="at least 2 groups"):
-        validate_story_data(titles, entities, prompts, config)
+        validate_story_data(titles, entities, prompts, config, partner_distributions)
 
 
 def test_strict_validation_accepts_well_formed_small_range() -> None:
