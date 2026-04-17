@@ -159,6 +159,18 @@ def test_schema_validation_rejects_single_sexual_scene_tag_group() -> None:
         validate_story_data(titles, entities, prompts, config, partner_distributions)
 
 
+def test_schema_validation_rejects_duplicate_partners_in_single_era() -> None:
+    titles, entities, prompts, config, partner_distributions = load_all()
+    partner_distributions = deepcopy(partner_distributions)
+    partner_distributions["partner_distributions"][0]["eras"][0]["partners"] = [
+        {"partner": "Jordan", "weight": 0.7},
+        {"partner": "jordan", "weight": 0.3},
+    ]
+
+    with pytest.raises(ValueError, match="contains duplicate partner"):
+        validate_story_data(titles, entities, prompts, config, partner_distributions)
+
+
 def test_strict_validation_accepts_well_formed_small_range() -> None:
     data = load_story_data()
     start = data["date_start"]
