@@ -1005,11 +1005,11 @@ def pick_story_fields(
             if era["date_start"] <= selected_date <= era["date_end"]:
                 if era["partners"]:
                     sorted_partner_pairs = stable_sorted_pool(era["partners"])
-                    partner_options = [partner for partner, _ in sorted_partner_pairs]
+                    partner_options, partner_weights = map(list, zip(*sorted_partner_pairs))
                     sexual_partner = weighted_choice(
                         rng,
                         partner_options,
-                        [weight for _, weight in sorted_partner_pairs],
+                        partner_weights,
                     )
                 break
 
