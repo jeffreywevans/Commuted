@@ -769,7 +769,6 @@ def validate_story_data_strict(data: dict[str, Any]) -> None:
                 checkpoints.add(clipped_start)
                 if clipped_end < range_end:
                     checkpoints.add(clipped_end + one_day)
-
     for selected_date in sorted(checkpoints):
         characters = [
             name
@@ -834,6 +833,14 @@ def lint_story_data(data: dict[str, Any]) -> DatasetLintReport:
         for _, row_start, row_end in source:
             clipped_start = max(range_start, row_start)
             clipped_end = min(range_end, row_end)
+            if clipped_start <= clipped_end:
+                checkpoints.add(clipped_start)
+                if clipped_end < range_end:
+                    checkpoints.add(clipped_end + one_day)
+    for eras in data[PARTNER_DISTRIBUTIONS_KEY].values():
+        for era in eras:
+            clipped_start = max(range_start, era["date_start"])
+            clipped_end = min(range_end, era["date_end"])
             if clipped_start <= clipped_end:
                 checkpoints.add(clipped_start)
                 if clipped_end < range_end:
