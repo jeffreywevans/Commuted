@@ -111,6 +111,37 @@ def test_sexual_scene_tags_follow_count_and_group_rules() -> None:
         assert fields["sexual_partner"] is None or isinstance(fields["sexual_partner"], str)
 
 
+def test_non_none_sexual_content_with_positive_partner_weight_requires_partner_string(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from commuted_calligraphy.story_brief import generate_story_brief as story_brief
+
+    data = deepcopy(story_brief.get_data())
+    selected_date = date(2000, 1, 1)
+    protagonist = "Alex"
+
+    data["character_availability"] = [
+        (protagonist, selected_date, selected_date),
+        ("Jordan", selected_date, selected_date),
+    ]
+    data["setting_availability"] = [("Seattle", selected_date, selected_date)]
+    data["sexual_content_options"] = ["none", "suggestive"]
+    data["sexual_content_weights"] = [0.0, 1.0]
+    data["partner_distributions"][protagonist] = [
+        {
+            "date_start": selected_date,
+            "date_end": selected_date,
+            "partners": [("Jordan", 1.0)],
+        }
+    ]
+
+    monkeypatch.setattr(story_brief, "get_data", lambda: data)
+    fields = story_brief.pick_story_fields(random.Random(123), selected_date=selected_date)
+
+    assert fields["sexual_content_level"] != "none"
+    assert isinstance(fields["sexual_partner"], str)
+
+
 def test_seed_output_is_stable_when_option_pool_order_changes(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
