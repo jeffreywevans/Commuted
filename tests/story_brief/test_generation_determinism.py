@@ -127,7 +127,7 @@ def test_non_none_sexual_content_with_positive_partner_weight_requires_partner_s
     data["setting_availability"] = [("Seattle", selected_date, selected_date)]
     data["sexual_content_options"] = ["none", "suggestive"]
     data["sexual_content_weights"] = [0.0, 1.0]
-    data["partner_distributions"][protagonist] = [
+    data[story_brief.PARTNER_DISTRIBUTIONS_KEY][protagonist] = [
         {
             "date_start": selected_date,
             "date_end": selected_date,
@@ -139,7 +139,7 @@ def test_non_none_sexual_content_with_positive_partner_weight_requires_partner_s
     fields = story_brief.pick_story_fields(random.Random(123), selected_date=selected_date)
 
     assert fields["sexual_content_level"] != "none"
-    assert isinstance(fields["sexual_partner"], str)
+    assert fields["sexual_partner"] == "Jordan"
 
 
 def test_seed_output_is_stable_when_option_pool_order_changes(
