@@ -134,12 +134,21 @@ def test_non_none_sexual_content_with_positive_partner_weight_requires_partner_s
             "partners": [("Jordan", 1.0)],
         }
     ]
+    data[story_brief.PARTNER_DISTRIBUTIONS_KEY]["Jordan"] = [
+        {
+            "date_start": selected_date,
+            "date_end": selected_date,
+            "partners": [(protagonist, 1.0)],
+        }
+    ]
 
     monkeypatch.setattr(story_brief, "get_data", lambda: data)
     fields = story_brief.pick_story_fields(random.Random(123), selected_date=selected_date)
 
     assert fields["sexual_content_level"] != "none"
-    assert fields["sexual_partner"] == "Jordan"
+    assert fields["sexual_partner"] == (
+        "Jordan" if fields["protagonist"] == protagonist else protagonist
+    )
 
 
 def test_seed_output_is_stable_when_option_pool_order_changes(
