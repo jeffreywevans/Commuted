@@ -56,7 +56,7 @@ The story brief generator (`commuted_calligraphy/story_brief/generate_story_brie
 
 `partner_distributions.json` semantics note for downstream consumers:
 - an era with `[]` for partner options is intentional content meaning **celibacy** for that era/date window;
-- a missing value (`null`/`None` or omitted era data) means **absence of data**, not celibacy.
+- omitted era data (a date window not covered by any era) means **absence of data**, not celibacy.
 
 ### Data file resolution order
 

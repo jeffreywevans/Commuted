@@ -273,7 +273,7 @@ def test_dataset_lint_reports_non_blocking_warnings() -> None:
     assert any("weather has only 1 option(s)" in msg for msg in report.warnings)
 
 
-def test_dataset_lint_reports_partner_coverage_gaps_by_protagonist() -> None:
+def test_dataset_lint_reports_partner_data_coverage_gaps_by_protagonist() -> None:
     data = load_story_data()
     day = data["date_start"]
     data["date_end"] = day
@@ -295,7 +295,7 @@ def test_dataset_lint_reports_partner_coverage_gaps_by_protagonist() -> None:
 
     assert not report.has_errors
     assert any(
-        "Partner coverage gap: protagonist 'Jordan' has no weighted partners available on "
+        "Partner data coverage gap: protagonist 'Jordan' has no partner era data available on "
         in msg
         and day.isoformat() in msg
         for msg in report.warnings
@@ -327,8 +327,34 @@ def test_dataset_lint_uses_partner_era_boundaries_for_gap_detection() -> None:
 
     assert not report.has_errors
     assert any(
-        "Partner coverage gap: protagonist 'Alex' has no weighted partners available on "
+        "Partner data coverage gap: protagonist 'Alex' has no partner era data available on "
         in msg
         and next_day.isoformat() in msg
         for msg in report.warnings
     )
+
+
+def test_dataset_lint_treats_empty_partner_eras_as_intentional_celibacy() -> None:
+    data = load_story_data()
+    day = data["date_start"]
+    data["date_end"] = day
+    data["character_availability"] = [
+        ("Alex", day, day),
+        ("Jordan", day, day),
+    ]
+    data["setting_availability"] = [
+        ("Seattle", day, day),
+    ]
+    data["partner_distributions"] = {
+        "Alex": [
+            {"date_start": day, "date_end": day, "partners": [("Jordan", 1.0)]},
+        ],
+        "Jordan": [
+            {"date_start": day, "date_end": day, "partners": []},
+        ],
+    }
+
+    report = lint_story_data(data)
+
+    assert not report.has_errors
+    assert not any("Partner data coverage gap: protagonist 'Jordan'" in msg for msg in report.warnings)

@@ -10,7 +10,7 @@ Use a **small set of domain-based JSON files** (not one giant file, and not one 
 - `commuted_calligraphy/story_brief/data/entities.json` (characters, settings, availability windows)
 - `commuted_calligraphy/story_brief/data/prompts.json` (conflicts, pressures, endings, style)
 - `commuted_calligraphy/story_brief/data/config.json` (ordered keys, weights, date range, word-count targets)
-- `commuted_calligraphy/story_brief/data/partner_distributions.json` (date-aware weighted `sexual_partner` pools; `[]` indicates celibacy, while `null`/missing indicates absent data)
+- `commuted_calligraphy/story_brief/data/partner_distributions.json` (date-aware weighted `sexual_partner` pools; `[]` indicates celibacy, while omitted era data (a date window not covered by any era) indicates absent data)
 
 ## Why this approach
 

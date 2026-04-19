@@ -862,7 +862,7 @@ def lint_story_data(data: dict[str, Any]) -> DatasetLintReport:
     thin_character_ranges: list[tuple[date, date]] = []
     missing_setting_ranges: list[tuple[date, date]] = []
     thin_setting_ranges: list[tuple[date, date]] = []
-    partner_gap_ranges_by_protagonist: dict[str, list[tuple[date, date]]] = {}
+    partner_data_gap_ranges_by_protagonist: dict[str, list[tuple[date, date]]] = {}
 
     sorted_checkpoints = sorted(checkpoints)
     for current_start, next_start in zip(sorted_checkpoints, sorted_checkpoints[1:]):
@@ -891,12 +891,11 @@ def lint_story_data(data: dict[str, Any]) -> DatasetLintReport:
 
         for protagonist in characters:
             eras = data[PARTNER_DISTRIBUTIONS_KEY].get(protagonist, [])
-            has_weighted_partners = any(
-                era["date_start"] <= current_start <= era["date_end"] and era["partners"]
-                for era in eras
+            has_era_data = any(
+                era["date_start"] <= current_start <= era["date_end"] for era in eras
             )
-            if not has_weighted_partners:
-                partner_gap_ranges_by_protagonist.setdefault(protagonist, []).append(
+            if not has_era_data:
+                partner_data_gap_ranges_by_protagonist.setdefault(protagonist, []).append(
                     (current_start, interval_end)
                 )
 
@@ -923,11 +922,11 @@ def lint_story_data(data: dict[str, Any]) -> DatasetLintReport:
             "Fragile coverage: exactly one setting available on "
             f"{_format_date_ranges(_coalesce_ranges(thin_setting_ranges))}."
         )
-    for protagonist in sorted(partner_gap_ranges_by_protagonist):
+    for protagonist in sorted(partner_data_gap_ranges_by_protagonist):
         warnings.append(
-            "Partner coverage gap: protagonist "
-            f"'{protagonist}' has no weighted partners available on "
-            f"{_format_date_ranges(_coalesce_ranges(partner_gap_ranges_by_protagonist[protagonist]))}."
+            "Partner data coverage gap: protagonist "
+            f"'{protagonist}' has no partner era data available on "
+            f"{_format_date_ranges(_coalesce_ranges(partner_data_gap_ranges_by_protagonist[protagonist]))}."
         )
 
     tokens_seen: set[str] = set()
