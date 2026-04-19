@@ -54,6 +54,10 @@ The story brief generator (`commuted_calligraphy/story_brief/generate_story_brie
 - `COMMUTED_STORY_BRIEF_DATA_DIR`  
   Optional path to a directory containing `titles.json`, `entities.json`, `prompts.json`, `config.json`, and `partner_distributions.json`.
 
+`partner_distributions.json` semantics note for downstream consumers:
+- an era with `[]` for partner options is intentional content meaning **celibacy** for that era/date window;
+- a missing value (`null`/`None` or omitted era data) means **absence of data**, not celibacy.
+
 ### Data file resolution order
 
 When generating a brief, data files are resolved in this order:
