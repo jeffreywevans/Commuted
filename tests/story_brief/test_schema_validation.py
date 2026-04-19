@@ -270,3 +270,32 @@ def test_dataset_lint_reports_non_blocking_warnings() -> None:
     assert any("exactly one setting" in msg for msg in report.warnings)
     assert any("token(s) never used" in msg for msg in report.warnings)
     assert any("weather has only 1 option(s)" in msg for msg in report.warnings)
+
+
+def test_dataset_lint_reports_partner_coverage_gaps_by_protagonist() -> None:
+    data = load_story_data()
+    day = data["date_start"]
+    data["date_end"] = day
+    data["character_availability"] = [
+        ("Alex", day, day),
+        ("Jordan", day, day),
+    ]
+    data["setting_availability"] = [
+        ("Seattle", day, day),
+    ]
+    data["partner_distributions"] = {
+        "Alex": [
+            {"date_start": day, "date_end": day, "partners": [("Jordan", 1.0)]},
+        ],
+        "Jordan": [],
+    }
+
+    report = lint_story_data(data)
+
+    assert not report.has_errors
+    assert any(
+        "Partner coverage gap: protagonist 'Jordan' has no weighted partners available on "
+        in msg
+        and day.isoformat() in msg
+        for msg in report.warnings
+    )
