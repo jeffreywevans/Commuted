@@ -106,7 +106,7 @@
           "date_end": "1992-12-31",
           "partners": [
             {
-              "partner": "third_party_male",
+              "partner": "third_party_female",
               "weight": 0.7
             },
             {
@@ -120,7 +120,7 @@
           "date_end": "2000-12-31",
           "partners": [
             {
-              "partner": "third_party_male",
+              "partner": "third_party_female",
               "weight": 0.6
             },
             {
@@ -142,7 +142,7 @@
           "date_end": "2012-12-31",
           "partners": [
             {
-              "partner": "third_party_male",
+              "partner": "third_party_female",
               "weight": 0.6
             },
             {
@@ -160,7 +160,7 @@
           "date_end": "2019-12-01",
           "partners": [
             {
-              "partner": "third_party_male",
+              "partner": "third_party_female",
               "weight": 0.5
             },
             {
@@ -189,7 +189,7 @@
               "weight": 0.5
             },
             {
-              "partner": "third_party_male",
+              "partner": "third_party_female",
               "weight": 0.5
             }
           ]
@@ -207,7 +207,7 @@
               "weight": 0.2
             },
             {
-              "partner": "third_party_male",
+              "partner": "third_party_female",
               "weight": 0.2
             },
             {
@@ -229,7 +229,7 @@
               "weight": 0.4
             },
             {
-              "partner": "third_party_male",
+              "partner": "third_party_female",
               "weight": 0.2
             }
           ]
@@ -243,7 +243,7 @@
               "weight": 0.8
             },
             {
-              "partner": "third_party_male",
+              "partner": "third_party_female",
               "weight": 0.1
             },
             {
@@ -309,7 +309,7 @@
           "date_end": "2020-12-31",
           "partners": [
             {
-              "partner": "third_party_male",
+              "partner": "third_party_female",
               "weight": 0.5
             },
             {
@@ -327,7 +327,7 @@
           "date_end": "2024-12-31",
           "partners": [
             {
-              "partner": "third_party_male",
+              "partner": "third_party_female",
               "weight": 0.8
             },
             {
@@ -345,7 +345,7 @@
           "date_end": "2026-12-31",
           "partners": [
             {
-              "partner": "third_party_male",
+              "partner": "third_party_female",
               "weight": 0.4
             },
             {
@@ -367,7 +367,7 @@
           "date_end": "2032-07-23",
           "partners": [
             {
-              "partner": "third_party_male",
+              "partner": "third_party_female",
               "weight": 0.5
             },
             {
@@ -401,7 +401,7 @@
               "weight": 0.7
             },
             {
-              "partner": "third_party_male",
+              "partner": "third_party_female",
               "weight": 0.3
             }
           ]
@@ -411,7 +411,7 @@
           "date_end": "1996-12-31",
           "partners": [
             {
-              "partner": "third_party_male",
+              "partner": "third_party_female",
               "weight": 1.0
             }
           ]
@@ -425,7 +425,7 @@
               "weight": 0.85
             },
             {
-              "partner": "third_party_male",
+              "partner": "third_party_female",
               "weight": 0.15
             }
           ]
@@ -435,7 +435,7 @@
           "date_end": "2032-07-23",
           "partners": [
             {
-              "partner": "third_party_male",
+              "partner": "third_party_female",
               "weight": 1.0
             }
           ]
@@ -452,7 +452,7 @@
           "date_end": "1997-12-31",
           "partners": [
             {
-              "partner": "third_party_male",
+              "partner": "third_party_female",
               "weight": 1.0
             }
           ]
@@ -466,7 +466,7 @@
               "weight": 0.85
             },
             {
-              "partner": "third_party_male",
+              "partner": "third_party_female",
               "weight": 0.15
             }
           ]
