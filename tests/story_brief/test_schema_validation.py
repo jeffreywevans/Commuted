@@ -1,5 +1,6 @@
 import json
 from copy import deepcopy
+from datetime import timedelta
 
 import pytest
 
@@ -297,5 +298,37 @@ def test_dataset_lint_reports_partner_coverage_gaps_by_protagonist() -> None:
         "Partner coverage gap: protagonist 'Jordan' has no weighted partners available on "
         in msg
         and day.isoformat() in msg
+        for msg in report.warnings
+    )
+
+
+def test_dataset_lint_uses_partner_era_boundaries_for_gap_detection() -> None:
+    data = load_story_data()
+    day = data["date_start"]
+    next_day = day + timedelta(days=1)
+    data["date_end"] = next_day
+    data["character_availability"] = [
+        ("Alex", day, next_day),
+        ("Jordan", day, next_day),
+    ]
+    data["setting_availability"] = [
+        ("Seattle", day, next_day),
+    ]
+    data["partner_distributions"] = {
+        "Alex": [
+            {"date_start": day, "date_end": day, "partners": [("Jordan", 1.0)]},
+        ],
+        "Jordan": [
+            {"date_start": day, "date_end": next_day, "partners": [("Alex", 1.0)]},
+        ],
+    }
+
+    report = lint_story_data(data)
+
+    assert not report.has_errors
+    assert any(
+        "Partner coverage gap: protagonist 'Alex' has no weighted partners available on "
+        in msg
+        and next_day.isoformat() in msg
         for msg in report.warnings
     )

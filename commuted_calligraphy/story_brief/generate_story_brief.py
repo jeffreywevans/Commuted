@@ -754,22 +754,35 @@ def render_title(
     return TITLE_TOKEN_PATTERN.sub(lambda match: values[match.group("key")], template)
 
 
+def _add_clipped_range_checkpoints(
+    *,
+    checkpoints: set[date],
+    ranges: Iterable[tuple[date, date]],
+    range_start: date,
+    range_end: date,
+) -> None:
+    one_day = timedelta(days=1)
+    for row_start, row_end in ranges:
+        clipped_start = max(range_start, row_start)
+        clipped_end = min(range_end, row_end)
+        if clipped_start <= clipped_end:
+            checkpoints.add(clipped_start)
+            if clipped_end < range_end:
+                checkpoints.add(clipped_end + one_day)
+
+
 def validate_story_data_strict(data: dict[str, Any]) -> None:
     """Validate per-date generation preconditions across the configured date range."""
     range_start = data["date_start"]
     range_end = data["date_end"]
-    one_day = timedelta(days=1)
-
     checkpoints: set[date] = {range_start, range_end}
     for source in (data[CHARACTER_AVAILABILITY_KEY], data[SETTING_AVAILABILITY_KEY]):
-        for _, row_start, row_end in source:
-            clipped_start = max(range_start, row_start)
-            clipped_end = min(range_end, row_end)
-            if clipped_start <= clipped_end:
-                checkpoints.add(clipped_start)
-                if clipped_end < range_end:
-                    checkpoints.add(clipped_end + one_day)
-
+        _add_clipped_range_checkpoints(
+            checkpoints=checkpoints,
+            ranges=((row_start, row_end) for _, row_start, row_end in source),
+            range_start=range_start,
+            range_end=range_end,
+        )
     for selected_date in sorted(checkpoints):
         characters = [
             name
@@ -831,13 +844,19 @@ def lint_story_data(data: dict[str, Any]) -> DatasetLintReport:
     else:
         checkpoints.add(range_end)
     for source in (data[CHARACTER_AVAILABILITY_KEY], data[SETTING_AVAILABILITY_KEY]):
-        for _, row_start, row_end in source:
-            clipped_start = max(range_start, row_start)
-            clipped_end = min(range_end, row_end)
-            if clipped_start <= clipped_end:
-                checkpoints.add(clipped_start)
-                if clipped_end < range_end:
-                    checkpoints.add(clipped_end + one_day)
+        _add_clipped_range_checkpoints(
+            checkpoints=checkpoints,
+            ranges=((row_start, row_end) for _, row_start, row_end in source),
+            range_start=range_start,
+            range_end=range_end,
+        )
+    for eras in data[PARTNER_DISTRIBUTIONS_KEY].values():
+        _add_clipped_range_checkpoints(
+            checkpoints=checkpoints,
+            ranges=((era["date_start"], era["date_end"]) for era in eras),
+            range_start=range_start,
+            range_end=range_end,
+        )
 
     missing_character_ranges: list[tuple[date, date]] = []
     thin_character_ranges: list[tuple[date, date]] = []
